@@ -22,8 +22,10 @@ if __name__ == "__main__":
 
 ano_prob = 2014 # Ano referência para cálculo das probabilidades
 tags_populacao_ibge = ['PopIbgeH','PopIbgeM'] 
-tags_populacao_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH','PopUrbPnadM',
-                       'PeaUrbPnadH','PeaUrbPnadM'] 
+tags_populacao_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH',
+                       'PopUrbPnadM','PopRurPnadH','PopRurPnadM',
+                       'PeaUrbPnadH','PeaUrbPnadM','PeaRurPnadH',
+                       'PeaRurPnadM'] 
 
 # Arquivo com os dados da Fazenda
 arquivo = '../datasets/FAZENDA/dados_fazenda.xlsx'
@@ -39,10 +41,15 @@ populacao = get_tabelas(tags_populacao_ibge, dados)
 populacao_pnad = get_tabelas(tags_populacao_pnad, dados)  
 
 # Inícia Calculos
+# Calcula as probabilidades de entrada em benefício e morte
 prob = modelos.fazenda.probabilidades.calc_probabilidades(populacao)
-taxas= modelos.fazenda.demografia.calc_tx_urb(populacao_pnad)
-temp = modelos.fazenda.demografia.calc_pop_urb_rur(populacao,taxas)
 
+# Calcula taxas de urbanização, participação e ocupação
+taxas= modelos.fazenda.demografia.calc_taxas(populacao_pnad)
+
+# Calcula ....
+pop_clientelas = modelos.fazenda.demografia.calc_pop_urb_rur(populacao,taxas)
+#temp = modelos.fazenda.demografia.calc_tx_part(populacao_pnad)
 
 '''
 # Anotações
