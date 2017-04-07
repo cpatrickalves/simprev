@@ -3,7 +3,7 @@
 @author: Patrick Alves
 """
 
-from util.carrega_dados import get_beneficios
+from util.carrega_dados import get_id_beneficios
 import pandas as pd
 
 def calc_probabilidades(populacao):
@@ -24,7 +24,7 @@ def calc_prob_apos(estoques, concessoes, segurados, populacao, periodo):
     tag_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
         
     # Calcula probabilidades de entrada em aposentadorias
-    for beneficio in get_beneficios(tag_apos):
+    for beneficio in get_id_beneficios(tag_apos):
         # Verifica se o possui os dados de estoque e concessões do benefício
         if beneficio in estoques.keys() and beneficio in concessoes.keys():
             prob[beneficio] = pd.DataFrame(concessoes[beneficio][ano_prob] / 
@@ -33,7 +33,7 @@ def calc_prob_apos(estoques, concessoes, segurados, populacao, periodo):
             prob[beneficio][ano_prob].fillna(0, inplace = True)  # Substitui os NaN (not a number) por zeros
 
     # Calcula probabilidades de entrada em auxílios reclusão e acidente    
-    for beneficio in get_beneficios(['Auxa', 'Auxr']):
+    for beneficio in get_id_beneficios(['Auxa', 'Auxr']):
         # Verifica se o possui os dados de estoque e concessões do benefício
         if beneficio in estoques.keys() and beneficio in concessoes.keys():
             prob[beneficio] = pd.DataFrame(estoques[beneficio][ano_prob] / segurados[beneficio][ano_prob]/2)
@@ -41,7 +41,7 @@ def calc_prob_apos(estoques, concessoes, segurados, populacao, periodo):
             prob[beneficio][ano_prob].fillna(0, inplace = True)
 
     # O cálculo do Auxílio doença e diferente dos demais auxílios
-    for beneficio in get_beneficios('Auxd'):
+    for beneficio in get_id_beneficios('Auxd'):
         # Verifica se o possui os dados de estoque e concessões do benefício
         if beneficio in estoques.keys() and beneficio in concessoes.keys():
             prob[beneficio] = pd.DataFrame(concessoes[beneficio][ano_prob] / (segurados[beneficio][ano_prob-1] + (concessoes[beneficio][ano_prob]/2)))

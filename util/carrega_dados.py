@@ -3,11 +3,16 @@
 @author: Patrick Alves
 """
 
-import pandas as pd
-
+# Lista de Siglas
+ids_pop_ibge = ['PopIbgeH','PopIbgeM'] 
+ids_pop_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH',
+                'PopUrbPnadM','PopRurPnadH','PopRurPnadM',
+                'PeaUrbPnadH','PeaUrbPnadM','PeaRurPnadH',
+                'PeaRurPnadM', 'PopOcupUrbPnadH', 'PopOcupUrbPnadM',
+                'PopOcupRurPnadH', 'PopOcupRurPnadM'] 
 
 # Função que retorna uma lista de benefícios de acordo como filtro
-def get_beneficios(filtros=[], info=''):
+def get_id_beneficios(filtros=[], info=''):
 
 # A tag info é usada no momento de leitura das tabelas no arquivo
 # Es = estoque
@@ -101,49 +106,57 @@ def get_tabelas(lista, xls, info=False):
         except:
             # Salva o nome das tabelas que não existem
             tabsInexistentes.append(i)
-
-    if info:
+           
+    if info:        
+        print(get_significado_sigla(lista[0][0:2]))
         print('Total de tabelas de carregadas: %s' % len(colecao_tabelas))
         print('Total de tabelas inexistentes: %s' % len(tabsInexistentes))
         print('Total de tabelas incompletas e removidas: %s \n' % len(tabsIncompletas))
 
     return colecao_tabelas
 
+    
+# Funçao que retorna o Significado de uma sigla
+def get_significado_sigla(chave):
+    
+    #Dicionário de siglas
+    siglas = {'Apos' : 'Aposentadorias',
+            'Apin' : 'Aposentadoria por Idade (Normal ou Usual)',
+            'Apid' : 'Aposentadoria por Idade da Pessoa com Deficiência',
+            'Atcn' : 'Aposentadoria por Tempo de Contribuição (Normal ou Usual)',
+            'Atce' : 'Aposentadoria por Tempo de Contribuição Especial',
+            'Atcp' : 'Aposentadoria por Tempo de Contribuição do(a) Professor(a)',
+            'Atcd' : 'Aposentadoria por Tempo de Contribuição da Pessoa com Deficiência',
+            'Ainv' : 'Aposentadoria por Invalidez',
+            'Aux' : 'Auxílios',
+            'Auxd' : 'Auxílio-Doença',
+            'Auxa' : 'Auxílio-Acidente',
+            'Auxr' : 'Auxílio-Reclusão',
+            'Ce' : 'Cessações',
+            'Co' : 'Concessões',
+            'Es' : 'Estoque',
+            'SalMat' : 'Salário-Maternidade',
+            'PensTot' : 'Pensões por Morte Totais',
+            'PensTipoA' : 'Pensões Tipo A',
+            'PensTipoB' : 'Pensões Tipo B',
+            'LoasIdo' : 'Amparo Assistencial da Lei Orgânica da Previdência Social (LOAS) ao Idoso',
+            'LoasDef' : 'Amparo Assistencial da LOAS da Pessoa com Deficiência',
+            'RmvIda' : 'Renda Mensal Vitalícia (RMV) por Idade',
+            'RmvInv' : 'Renda Mensal Vitalícia (RMV) por Invalidez',
+            'Client' : 'Clientela',
+            'Rur' : 'Clientela Rural',
+            'Urb' : 'Clientela Urbana',
+            'Piso' : 'Clientela Urbana Piso Previdenciário',
+            'Acim' : 'Clientela Urbana Acima do Piso Previdenciário',
+            'Sm' : 'Clientela Urbana Contribuinte Salário Mínimo',
+            'AcimSm' : 'Clientela Urbana Contribuinte Acima do Salário Mínimo',
+            'Seg' : 'Segurados',
+            'H' : 'Homens',
+            'M' : 'Mulheres',
+            'Pop' : 'População',
+            'Mort' : 'Mortalidade',
+            'Txmortimpl' : 'Taxa de Mortalidade Implícita da População'
 
-'''
-Lista de Siglas:
-Apos ― Aposentadorias
-Apin ― Aposentadoria por Idade (Normal ou Usual)
-Apid ― Aposentadoria por Idade da Pessoa com Deficiência
-Atcn ― Aposentadoria por Tempo de Contribuição (Normal ou Usual)
-Atce ― Aposentadoria por Tempo de Contribuição Especial
-Atcp ― Aposentadoria por Tempo de Contribuição do(a) Professor(a)
-Atcd ― Aposentadoria por Tempo de Contribuição da Pessoa com Deficiência
-Ainv ― Aposentadoria por Invalidez
-Aux ― Auxílios
-Auxd ― Auxílio-Doença
-Auxa ― Auxílio-Acidente
-Auxr ― Auxílio-Reclusão
-SalMat ― Salário-Maternidade
-PensTot – Pensões por Morte Totais (Tipo A + Tipo B)
-PensTipoA – Pensões Tipo A (anteriores à Lei nº 13.135/2015)
-PensTipoB – Pensões Tipo B (a partir da Lei nº 13.135/2015)
-LoasIdo ― Amparo Assistencial da Lei Orgânica da Previdência Social (LOAS) ao Idoso
-LoasDef ― Amparo Assistencial da LOAS da Pessoa com Deficiência
-RmvIda ― Renda Mensal Vitalícia (RMV) por Idade
-RmvInv ― Renda Mensal Vitalícia (RMV) por Invalidez
-Client ― Clientela
-Rur ― Clientela Rural
-Urb ― Clientela Urbana
-Piso ― Clientela Urbana Piso Previdenciário
-Acim ― Clientela Urbana Acima do Piso Previdenciário
-Sm – Clientela Urbana Contribuinte Salário Mínimo
-AcimSm – Clientela Urbana Contribuinte Acima do Salário Mínimo
-Seg ― Segurados
-H ― Homens
-M ― Mulheres
-Pop – População
-Mort – Mortalidade
-Txmortimpl ― Taxa de Mortalidade Implícita da População
-
-'''
+            }     
+            
+    return siglas[chave]

@@ -9,9 +9,11 @@ def calc_taxas(pop_pnad):
 
     txurb = calc_tx_urb(pop_pnad)
     txpart = calc_tx_part(pop_pnad)
+    txocup = calc_tx_ocup(pop_pnad)
     
     taxas.update(txurb)
     taxas.update(txpart)
+    taxas.update(txocup)
 
     return taxas
 
@@ -56,6 +58,20 @@ def calc_tx_part(pop_pnad):
         
     return txpart
 
+# Calcula taxa de Ocupação
+def calc_tx_ocup(pop_pnad):
+    
+    # Dicionario que armazena as taxas de ocupação
+    txocup = {}
+    
+    for clientela in ['Urb', 'Rur']:
+        for sexo in ['H', 'M']:
+            chave = 'txOcup'+clientela+sexo
+            pocup = pop_pnad['PopOcup'+clientela+'Pnad'+sexo]
+            pea = pop_pnad['Pea'+clientela+'Pnad'+sexo]
+            txocup[chave] = pocup/pea
+
+    return txocup
     
 def calc_pop_urb_rur(populacao, taxas):
         
