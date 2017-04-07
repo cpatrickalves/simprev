@@ -24,9 +24,9 @@ ano_prob = 2014 # Ano referência para cálculo das probabilidades
 
 
 print('--- Iniciando projeção ---')
-print('--- Lendo arquivo de dados ---')
+print('--- Lendo arquivo de dados ...')
 # Arquivo com os dados da Fazenda
-arquivo = 'dados/FAZENDA/dados_fazenda.xlsx'
+arquivo = '../datasets/FAZENDA/dados_fazenda.xlsx'
 # Abri o arquivo
 dados = pd.ExcelFile(arquivo)
 
