@@ -67,7 +67,7 @@ def get_beneficios(filtros=[], info=''):
 
 # Função que extrai as tabelas do arquivo
 # Recebe o arquivo (planilha) e a lista de tabelas a serem extraídas
-def get_tabelas(lista, arquivo, info=False):
+def get_tabelas(lista, xls, info=False):
 
     # Dicionário que salva as tabelas
     colecao_tabelas = {}

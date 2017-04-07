@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Apr  5 07:56:21 2017
-
 @author: Patrick Alves
 """
 
 from util.carrega_dados import get_beneficios, get_tabelas
-import modelos.fazenda.probabilidades 
+import modelos.fazenda.probabilidades
+import modelos.fazenda.taxas
 import pandas as pd
 
 # Não usado pode enquanto
@@ -22,7 +21,8 @@ if __name__ == "__main__":
 ###### Parâmetros de simulação
 
 ano_prob = 2014 # Ano referência para cálculo das probabilidades
-tags_populacao = ['PopIbgeH','PopIbgeM'] # tags utilizadas no modelo da Fazenda
+tags_populacao_ibge = ['PopIbgeH','PopIbgeM'] 
+tags_populacao_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH','PopUrbPnadM'] 
 
 # Arquivo com os dados da Fazenda
 arquivo = '../datasets/FAZENDA/dados_fazenda.xlsx'
@@ -30,14 +30,15 @@ arquivo = '../datasets/FAZENDA/dados_fazenda.xlsx'
 dados = pd.ExcelFile(arquivo)
 
 ######### Carregando os dados
-# Dicionários que armazenarão os estoques, concessões, etc.
+# Dicionários que armazenarão os dados de estoques, concessões, etc.
 estoques = get_tabelas(get_beneficios([], 'Es'), dados, info=True)  
 concessoes = get_tabelas(get_beneficios([], 'Co'), dados, info=True)
 cessacoes = get_tabelas(get_beneficios([], 'Ce'), dados, info=True)
-populacao = get_tabelas(tags_populacao, arquivo)  
+populacao = get_tabelas(tags_populacao_ibge, dados)  
+populacao_pnad = get_tabelas(tags_populacao_pnad, dados)  
 
 prob = modelos.fazenda.probabilidades.calc_probabilidades(populacao)
-#segurados ?
+taxas= modelos.fazenda.taxas.calc_tx_urb(populacao_pnad)
   
 
 
