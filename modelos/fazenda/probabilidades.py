@@ -5,7 +5,7 @@ Created on Wed Apr  5 08:25:44 2017
 @author: Patrick Alves
 """
 
-from modulos.carrega_dados import get_beneficios
+from util.carrega_dados import get_beneficios
 import pandas as pd
 
 def calc_probabilidades(populacao):

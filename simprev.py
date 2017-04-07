@@ -5,8 +5,9 @@ Created on Wed Apr  5 07:56:21 2017
 @author: Patrick Alves
 """
 
-from modulos.carrega_dados import get_beneficios, get_tabelas
-import modulos.probabilidades 
+from util.carrega_dados import get_beneficios, get_tabelas
+import modelos.fazenda.probabilidades 
+import pandas as pd
 
 # Não usado pode enquanto
 def main():
@@ -21,19 +22,21 @@ if __name__ == "__main__":
 ###### Parâmetros de simulação
 
 ano_prob = 2014 # Ano referência para cálculo das probabilidades
-
+tags_populacao = ['PopIbgeH','PopIbgeM'] # tags utilizadas no modelo da Fazenda
 
 # Arquivo com os dados da Fazenda
 arquivo = '../datasets/FAZENDA/dados_fazenda.xlsx'
+# Abri o arquivo
+dados = pd.ExcelFile(arquivo)
 
 ######### Carregando os dados
 # Dicionários que armazenarão os estoques, concessões, etc.
-estoques = get_tabelas(get_beneficios([], 'Es'), arquivo, info=True)  
-concessoes = get_tabelas(get_beneficios([], 'Co'), arquivo, info=True)
-cessacoes = get_tabelas(get_beneficios([], 'Ce'), arquivo, info=True)
-populacao = get_tabelas(['PopIbgeH','PopIbgeM'], arquivo)  
+estoques = get_tabelas(get_beneficios([], 'Es'), dados, info=True)  
+concessoes = get_tabelas(get_beneficios([], 'Co'), dados, info=True)
+cessacoes = get_tabelas(get_beneficios([], 'Ce'), dados, info=True)
+populacao = get_tabelas(tags_populacao, arquivo)  
 
-prob = modulos.probabilidades.calc_probabilidades(populacao)
+prob = modelos.fazenda.probabilidades.calc_probabilidades(populacao)
 #segurados ?
   
 

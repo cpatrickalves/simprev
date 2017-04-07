@@ -76,9 +76,6 @@ def get_tabelas(lista, arquivo, info=False):
     tabsIncompletas = []
     tabsInexistentes = []
 
-    # Abri o arquivo
-    xls = pd.ExcelFile(arquivo)
-
     # Lê cada uma das tabelas dentro do arquivo
     # Converte cada tabela em um DataFrame e salva no dicionário
     for i in lista:
