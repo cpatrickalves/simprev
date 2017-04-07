@@ -5,7 +5,7 @@
 
 from util.carrega_dados import get_beneficios, get_tabelas
 import modelos.fazenda.probabilidades
-import modelos.fazenda.taxas
+import modelos.fazenda.demografia
 import pandas as pd
 
 # Não usado pode enquanto
@@ -22,7 +22,8 @@ if __name__ == "__main__":
 
 ano_prob = 2014 # Ano referência para cálculo das probabilidades
 tags_populacao_ibge = ['PopIbgeH','PopIbgeM'] 
-tags_populacao_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH','PopUrbPnadM'] 
+tags_populacao_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH','PopUrbPnadM',
+                       'PeaUrbPnadH','PeaUrbPnadM'] 
 
 # Arquivo com os dados da Fazenda
 arquivo = '../datasets/FAZENDA/dados_fazenda.xlsx'
@@ -37,9 +38,10 @@ cessacoes = get_tabelas(get_beneficios([], 'Ce'), dados, info=True)
 populacao = get_tabelas(tags_populacao_ibge, dados)  
 populacao_pnad = get_tabelas(tags_populacao_pnad, dados)  
 
+# Inícia Calculos
 prob = modelos.fazenda.probabilidades.calc_probabilidades(populacao)
-taxas= modelos.fazenda.taxas.calc_tx_urb(populacao_pnad)
-  
+taxas= modelos.fazenda.demografia.calc_tx_urb(populacao_pnad)
+temp = modelos.fazenda.demografia.calc_pop_urb_rur(populacao,taxas)
 
 
 '''
