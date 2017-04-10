@@ -5,7 +5,7 @@
 
 from util.carrega_dados import get_id_beneficios, get_tabelas, ids_pop_ibge, ids_pop_pnad
 from modelos.fazenda.probabilidades import calc_probabilidades
-from modelos.fazenda.demografia import calc_taxas, calc_pop_urb_rur
+from modelos.fazenda.demografia import calc_taxas, calc_demografia
 import pandas as pd
 
 # Não usado pode enquanto
@@ -48,5 +48,6 @@ print('Calculando probabilidades ...')
 # Calcula as probabilidades de entrada em benefício e morte
 prob = calc_probabilidades(populacao)
 
-# Calcula a população Urbana e adiciona no dicionário
-populacao = calc_pop_urb_rur(populacao,taxas)
+# Calcula: Pop Urbana/Rural, PEA e Pop Ocupada e adiciona no dicionário
+populacao = calc_demografia(populacao,taxas)
+
