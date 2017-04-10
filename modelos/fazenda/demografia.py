@@ -72,7 +72,9 @@ def calc_tx_ocup(pop_pnad):
             txocup[chave] = pocup/pea
 
     return txocup
-    
+
+
+# Calcula as populações urbana e rural    
 def calc_pop_urb_rur(populacao, taxas):
         
     # Dicionário que armazena as populações urbanas e rurais
@@ -89,5 +91,8 @@ def calc_pop_urb_rur(populacao, taxas):
         # Elimina colunas com dados ausentes
         pop_urb_rur[chave_urb].dropna(axis=1, inplace=True)  
         pop_urb_rur[chave_rur].dropna(axis=1, inplace=True)  
-        
-    return pop_urb_rur
+    
+    # Adiciona as novas populações no dicionário população
+    populacao.update(pop_urb_rur)
+    
+    return populacao

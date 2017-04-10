@@ -24,14 +24,14 @@ ano_prob = 2014 # Ano referência para cálculo das probabilidades
 
 
 print('--- Iniciando projeção ---')
-print('--- Lendo arquivo de dados ...')
+print('Lendo arquivo de dados ...')
 # Arquivo com os dados da Fazenda
 arquivo = '../datasets/FAZENDA/dados_fazenda.xlsx'
 # Abri o arquivo
 dados = pd.ExcelFile(arquivo)
 
 
-print('--- Carregando tabelas ---')
+print('Carregando tabelas ...')
 # Dicionários que armazenarão os dados de estoques, concessões, etc.
 estoques = get_tabelas(get_id_beneficios([], 'Es'), dados, info=True)
 concessoes = get_tabelas(get_id_beneficios([], 'Co'), dados, info=True)
@@ -40,13 +40,13 @@ populacao = get_tabelas(ids_pop_ibge, dados)
 populacao_pnad = get_tabelas(ids_pop_pnad, dados)
 
 
-print('--- Calculando taxas ---')
+print('Calculando taxas ...')
 # Calcula taxas de urbanização, participação e ocupação
 taxas = calc_taxas(populacao_pnad)
 
-print('--- Calculando probabilidades ---')
+print('Calculando probabilidades ...')
 # Calcula as probabilidades de entrada em benefício e morte
 prob = calc_probabilidades(populacao)
 
-# Calcula 
-pop_clientelas = calc_pop_urb_rur(populacao,taxas)
+# Calcula a população Urbana e adiciona no dicionário
+populacao = calc_pop_urb_rur(populacao,taxas)
