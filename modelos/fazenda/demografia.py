@@ -101,6 +101,11 @@ def calc_tx_ocup(pop_pnad):
             # Preenche valores NaN com zero      
             txocup[chave].fillna(0, inplace=True)
 
+    # Repete o ultimo ano nos demais anos
+    for taxa in txocup:
+        for ano in range(2015,2061):
+            txocup[taxa][ano] = txocup[taxa][ano-1] 
+                
     return txocup
 
 
