@@ -106,7 +106,7 @@ def calc_Csm_Ca(pocup, taxas):
     # o SM e acima do SM
     csm_ca = {}
             
-    for clientela in ['Csm', 'Ca']:    
+    for clientela in ['CsmUrb', 'CaUrb']:    
         for sexo in ['H','M']:
             chave = clientela+sexo                    
             chave_pocup = 'OcupUrb'+sexo

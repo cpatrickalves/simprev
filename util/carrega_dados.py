@@ -11,7 +11,9 @@ ids_pop_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH',
                 'PeaRurPnadM', 'PopOcupUrbPnadH', 'PopOcupUrbPnadM',
                 'PopOcupRurPnadH', 'PopOcupRurPnadM', 'PopOcupUrbSmPnadH',
                 'PopOcupUrbAcimPnadH', 'PopOcupUrbSmPnadM',
-                'PopOcupUrbAcimPnadM'] 
+                'PopOcupUrbAcimPnadM', 'SegEspRurPnadH','ContrRurPnadH',
+                'SegPotRurPnadH', 'SegEspRurPnadM', 'ContrRurPnadM',
+                'SegPotRurPnadM'] 
 
 # Função que retorna uma lista de benefícios de acordo como filtro
 def get_id_beneficios(filtros=[], info=''):
@@ -85,17 +87,17 @@ def get_tabelas(lista, xls, info=False):
 
     # Lê cada uma das tabelas dentro do arquivo
     # Converte cada tabela em um DataFrame e salva no dicionário
-    for i in lista:
+    for sigla in lista:
                 
         # Remove os 2 primeiro caracteres para o caso de estoques, concessões
         # ou cessações (ex: 'EsApidRurH' -> 'ApidRurH')
-        if i[0:2] in ['Es', 'Co', 'Ce']:            
-            chave = i[2:]  
-        else:
-            chave = i
+        #if i[0:2] in ['Es', 'Co', 'Ce']:            
+        ##    chave = i[2:]  
+        #else:
+        chave = sigla
             
         try:
-            colecao_tabelas[chave] = xls.parse(i, index_col=0)              # Converte a tabela para um DataFrame
+            colecao_tabelas[chave] = xls.parse(sigla, index_col=0)              # Converte a tabela para um DataFrame
             colecao_tabelas[chave].drop('Total', inplace=True)              # Elimina a linha 'Total'
             colecao_tabelas[chave].dropna(how='all', axis=1, inplace=True)  # Elimina colunas com dados ausentes
             colecao_tabelas[chave].dropna(how='all', inplace=True)          # Elimina linhas completamente vazias
@@ -103,12 +105,12 @@ def get_tabelas(lista, xls, info=False):
 
             # Remove as tabelas que possuem dados ausentes
             if colecao_tabelas[chave].empty:
-                tabsIncompletas.append(i)   # Salva o nome da tabela incompleta
+                tabsIncompletas.append(sigla)   # Salva o nome da tabela incompleta
                 colecao_tabelas.pop(chave)  # Remove a tabela
 
         except:
             # Salva o nome das tabelas que não existem
-            tabsInexistentes.append(i)
+            tabsInexistentes.append(sigla)
            
     if info:        
         print(get_significado_sigla(lista[0][0:2]))

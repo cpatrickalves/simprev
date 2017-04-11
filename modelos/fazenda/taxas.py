@@ -13,11 +13,13 @@ def calc_taxas(pop_pnad):
     txpart = calc_tx_part(pop_pnad)
     txocup = calc_tx_ocup(pop_pnad)
     txCsm_Ca = calc_tx_cobertura_sm(pop_pnad)
+    txSegurados_rur = calc_tx_segurados_rur(pop_pnad)
     
     taxas.update(txurb)
     taxas.update(txpart)
     taxas.update(txocup)
     taxas.update(txCsm_Ca)
+    taxas.update(txSegurados_rur)
 
     return taxas
 
@@ -102,7 +104,7 @@ def calc_tx_cobertura_sm(pop_pnad):
     
     # taxa de Cobertura Contributiva para o SM
     for sexo in ['H', 'M']:
-       chave = 'txCsm'+sexo
+       chave = 'txCsmUrb'+sexo
        pocupSm = pop_pnad['PopOcupUrbSmPnad'+sexo]   
        pocup = pop_pnad['PopOcupUrbPnad'+sexo]
        txcober[chave] = pocupSm/pocup
@@ -113,7 +115,7 @@ def calc_tx_cobertura_sm(pop_pnad):
                
     # taxa de Cobertura Contributiva acima do SM
     for sexo in ['H', 'M']:
-       chave = 'txCa'+sexo
+       chave = 'txCaUrb'+sexo
        pocupSm = pop_pnad['PopOcupUrbAcimPnad'+sexo]   
        pocup = pop_pnad['PopOcupUrbPnad'+sexo]
        txcober[chave] = pocupSm/pocup
@@ -128,4 +130,36 @@ def calc_tx_cobertura_sm(pop_pnad):
     
             
     return txcober
+
+
+# Calcula taxa de empregados Contribuintes, Segurados Especiais
+# e Potenciais segurados especiais para clientela Rural
+def calc_tx_segurados_rur(pop_pnad):
+    
+    # Dicionario que armazena as taxas 
+    tx_seg_rur = {}
+    
+    # Padrões da chave: SegEspRurPnadH, ContrRurPnadH, SegPotRurPnadH 
+    # REVISAR: O texto diz para usar a PeaRur como denominador, mas acho
+    # que seria a SegRurPnadH.
+    
+    # taxa de Cobertura Contributiva para o SM
+    for clientela_rural in ['SegEspRur', 'ContrRur', 'SegPotRur']:
+        for sexo in ['H', 'M']:
+           chave = 'tx'+clientela_rural+sexo
+           pnad_rur = pop_pnad[clientela_rural+'Pnad'+sexo]   
+           pea_rur = pop_pnad['PeaRurPnad'+sexo]
+           tx_seg_rur[chave] = pnad_rur/pea_rur
+    
+           # Preenche valores NaN com zero      
+           tx_seg_rur[chave].fillna(0, inplace=True)
+        
+    # Repete o ultimo ano nos demais anos
+    for taxa in tx_seg_rur:
+        for ano in range(2015,2061):
+            tx_seg_rur[taxa][ano] = tx_seg_rur[taxa][ano-1] 
+    
+            
+    return tx_seg_rur
+
 
