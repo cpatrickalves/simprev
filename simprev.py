@@ -49,6 +49,7 @@ print('Calculando probabilidades ...')
 # Calcula as probabilidades de entrada em benefício e morte
 prob = calc_probabilidades(populacao)
 
+print('Calculando dados demográficos ...')
 # Calcula: Pop Urbana/Rural, PEA e Pop Ocupada e adiciona no dicionário
 populacao = calc_demografia(populacao,taxas)
 

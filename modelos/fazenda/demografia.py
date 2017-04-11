@@ -16,10 +16,14 @@ def calc_demografia(populacao, taxas):
     # Calcula Pocupada Urbana e Rural
     pocup = calc_pocup_urb_rur(pea, taxas)
     
+    # Calcula Pocupada Urbana e Rural
+    csm_ca = calc_Csm_Ca(pocup, taxas)
+        
     # Adiciona as novas populações no dicionário população
     populacao.update(pop_ur)
     populacao.update(pea)
     populacao.update(pocup)
+    populacao.update(csm_ca)
     
     return populacao    
 
@@ -93,3 +97,23 @@ def calc_pocup_urb_rur(pea, taxas):
             pocup_urb_rur[chave_pdesocup].dropna(axis=1, inplace=True)  
                         
     return pocup_urb_rur
+
+
+# Calcula as populações ocupadas urbana que recebem o SM e acima do SM    
+def calc_Csm_Ca(pocup, taxas):
+        
+    # Dicionário que armazena os Contribuintes Urbanos que recebem
+    # o SM e acima do SM
+    csm_ca = {}
+            
+    for clientela in ['Csm', 'Ca']:    
+        for sexo in ['H','M']:
+            chave = clientela+sexo                    
+            chave_pocup = 'OcupUrb'+sexo
+            chave_tx = 'tx'+clientela+sexo
+            csm_ca[chave] = pocup[chave_pocup] * taxas[chave_tx]            
+            
+            # Elimina colunas com dados ausentes
+            csm_ca[chave].dropna(axis=1, inplace=True)  
+                                         
+    return csm_ca
