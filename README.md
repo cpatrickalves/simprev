@@ -1,6 +1,11 @@
 ﻿# SimPrev
 
-Simulador que utiliza diversos modelos de projeção a longo prazo para avaliar cenários para o Regime Geral de Previdência Social Brasileiro.
+O simulador previdenciário é um sistema que permite realizar simulações e projeções de
+despesas e receitas do Regime Geral de Previdência Social Brasileiro, permitindo a configuração de um conjunto de parâmetros de valor
+único ou anual.
+
+O Simulador utiliza diversos modelos de projeção a longo prazo para avaliar 
+cenários para o Regime Geral de Previdência Social Brasileiro.
 
 ## Instalação
 

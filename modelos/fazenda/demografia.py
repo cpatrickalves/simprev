@@ -155,7 +155,7 @@ def calc_pocup_urb_rur(pea, taxas):
     # Dicionário que armazena as populações ocupadas urbanas e rurais
     pocup_urb_rur = {}
     
-    # para cada uma das clientelas e sexos calcula a pea
+    # para cada uma das clientelas e sexos calcula a Pocup
     for clientela in ['Urb','Rur']:
         for sexo in ['H','M']:
             chave_pocup = 'Ocup'+clientela+sexo            
@@ -166,4 +166,15 @@ def calc_pocup_urb_rur(pea, taxas):
             # Elimina colunas com dados ausentes
             pocup_urb_rur[chave_pocup].dropna(axis=1, inplace=True)  
               
+    # para cada uma das clientelas e sexos calcula a Pop desocupada
+    for clientela in ['Urb','Rur']:
+        for sexo in ['H','M']:
+            chave_pdesocup = 'Desocup'+clientela+sexo   
+            chave_pocup = 'Ocup'+clientela+sexo                        
+            chave_pea = 'Pea'+clientela+sexo
+            pocup_urb_rur[chave_pdesocup] = pea[chave_pea] - pocup_urb_rur[chave_pocup]            
+            
+            # Elimina colunas com dados ausentes
+            pocup_urb_rur[chave_pdesocup].dropna(axis=1, inplace=True)  
+                        
     return pocup_urb_rur
