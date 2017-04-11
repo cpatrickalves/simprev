@@ -97,8 +97,9 @@ def get_tabelas(lista, xls, info=False):
         try:
             colecao_tabelas[chave] = xls.parse(i, index_col=0)              # Converte a tabela para um DataFrame
             colecao_tabelas[chave].drop('Total', inplace=True)              # Elimina a linha 'Total'
-            colecao_tabelas[chave].dropna(thresh=89, axis=1, inplace=True)  # Elimina colunas com dados ausentes
+            colecao_tabelas[chave].dropna(how='all', axis=1, inplace=True)  # Elimina colunas com dados ausentes
             colecao_tabelas[chave].dropna(how='all', inplace=True)          # Elimina linhas completamente vazias
+            colecao_tabelas[chave].fillna(0, inplace=True)                  # Substitui os NaN por zeros
 
             # Remove as tabelas que possuem dados ausentes
             if colecao_tabelas[chave].empty:

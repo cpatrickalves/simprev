@@ -12,10 +12,12 @@ def calc_taxas(pop_pnad):
     txurb = calc_tx_urb(pop_pnad)
     txpart = calc_tx_part(pop_pnad)
     txocup = calc_tx_ocup(pop_pnad)
+    txCsm_Ca = calc_tx_cobertura_sm(pop_pnad)
     
     taxas.update(txurb)
     taxas.update(txpart)
     taxas.update(txocup)
+    taxas.update(txCsm_Ca)
 
     return taxas
 
@@ -89,4 +91,41 @@ def calc_tx_ocup(pop_pnad):
             txocup[taxa][ano] = txocup[taxa][ano-1] 
                 
     return txocup
+
+# Calcula taxa de Cobertura Contributiva por SM e acima do SM
+def calc_tx_cobertura_sm(pop_pnad):
+    
+    # Dicionario que armazena as taxas 
+    txcober = {}
+    
+    # Padrão da chave: PopOcupUrbSmPnadH # REVISAR
+    
+    # taxa de Cobertura Contributiva para o SM
+    for sexo in ['H', 'M']:
+       chave = 'txCsm'+sexo
+       pocupSm = pop_pnad['PopOcupUrbSmPnad'+sexo]   
+       pocup = pop_pnad['PopOcupUrbPnad'+sexo]
+       txcober[chave] = pocupSm/pocup
+
+       # Preenche valores NaN com zero      
+       txcober[chave].fillna(0, inplace=True)
+
+               
+    # taxa de Cobertura Contributiva acima do SM
+    for sexo in ['H', 'M']:
+       chave = 'txCa'+sexo
+       pocupSm = pop_pnad['PopOcupUrbAcimPnad'+sexo]   
+       pocup = pop_pnad['PopOcupUrbPnad'+sexo]
+       txcober[chave] = pocupSm/pocup
+
+       # Preenche valores NaN com zero      
+       txcober[chave].fillna(0, inplace=True)
+
+    # Repete o ultimo ano nos demais anos
+    for taxa in txcober:
+        for ano in range(2015,2061):
+            txcober[taxa][ano] = txcober[taxa][ano-1] 
+    
+            
+    return txcober
 
