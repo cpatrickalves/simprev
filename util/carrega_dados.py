@@ -9,7 +9,9 @@ ids_pop_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH',
                 'PopUrbPnadM','PopRurPnadH','PopRurPnadM',
                 'PeaUrbPnadH','PeaUrbPnadM','PeaRurPnadH',
                 'PeaRurPnadM', 'PopOcupUrbPnadH', 'PopOcupUrbPnadM',
-                'PopOcupRurPnadH', 'PopOcupRurPnadM'] 
+                'PopOcupRurPnadH', 'PopOcupRurPnadM', 'PopOcupUrbSmPnadH',
+                'PopOcupUrbAcimPnadH', 'PopOcupUrbSmPnadM',
+                'PopOcupUrbAcimPnadM'] 
 
 # Função que retorna uma lista de benefícios de acordo como filtro
 def get_id_beneficios(filtros=[], info=''):

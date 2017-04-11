@@ -5,7 +5,8 @@
 
 from util.carrega_dados import get_id_beneficios, get_tabelas, ids_pop_ibge, ids_pop_pnad
 from modelos.fazenda.probabilidades import calc_probabilidades
-from modelos.fazenda.demografia import calc_taxas, calc_demografia
+from modelos.fazenda.demografia import calc_demografia
+from modelos.fazenda.taxas import calc_taxas
 import pandas as pd
 
 # Não usado pode enquanto
