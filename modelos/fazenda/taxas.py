@@ -148,7 +148,7 @@ def calc_tx_segurados_rur(pop_pnad):
         for sexo in ['H', 'M']:
            chave = 'tx'+clientela_rural+sexo
            pnad_rur = pop_pnad[clientela_rural+'Pnad'+sexo]   
-           pea_rur = pop_pnad['PeaRurPnad'+sexo]
+           pea_rur = pop_pnad['SegRurPnad'+sexo]
            tx_seg_rur[chave] = pnad_rur/pea_rur
     
            # Preenche valores NaN com zero      

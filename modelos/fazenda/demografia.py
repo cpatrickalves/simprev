@@ -19,11 +19,16 @@ def calc_demografia(populacao, taxas):
     # Calcula Pocupada Urbana e Rural
     csm_ca = calc_Csm_Ca(pocup, taxas)
         
+    # Calcula os Segurados Rurais
+    segurados_rur = calc_segurados_rur(pea, taxas)
+    
+    
     # Adiciona as novas populações no dicionário população
     populacao.update(pop_ur)
     populacao.update(pea)
     populacao.update(pocup)
     populacao.update(csm_ca)
+    populacao.update(segurados_rur)
     
     return populacao    
 
@@ -117,3 +122,23 @@ def calc_Csm_Ca(pocup, taxas):
             csm_ca[chave].dropna(axis=1, inplace=True)  
                                          
     return csm_ca
+
+
+# Calcula Empregados Contribuintes, Segurados Especiais
+# e Potenciais segurados especiais para clientela Rural
+def calc_segurados_rur(pea_rur, taxas):
+        
+    # Dicionário que armazena os Segurados Rurais
+    segurados_rur = {}
+            
+    for clientela_rural in ['SegEspRur', 'ContrRur', 'SegPotRur']:
+        for sexo in ['H','M']:
+            chave = clientela_rural+sexo                    
+            chave_pea = 'PeaRur'+sexo
+            chave_tx = 'tx'+clientela_rural+sexo
+            segurados_rur[chave] = pea_rur[chave_pea] * taxas[chave_tx]            
+            
+            # Elimina colunas com dados ausentes
+            segurados_rur[chave].dropna(axis=1, inplace=True)  
+                                         
+    return segurados_rur

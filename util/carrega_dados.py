@@ -13,7 +13,7 @@ ids_pop_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH',
                 'PopOcupUrbAcimPnadH', 'PopOcupUrbSmPnadM',
                 'PopOcupUrbAcimPnadM', 'SegEspRurPnadH','ContrRurPnadH',
                 'SegPotRurPnadH', 'SegEspRurPnadM', 'ContrRurPnadM',
-                'SegPotRurPnadM'] 
+                'SegPotRurPnadM', 'SegRurPnadH', 'SegRurPnadM'] 
 
 # Função que retorna uma lista de benefícios de acordo como filtro
 def get_id_beneficios(filtros=[], info=''):
