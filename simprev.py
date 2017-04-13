@@ -40,16 +40,15 @@ cessacoes = get_tabelas(get_id_beneficios([], 'Ce'), dados, info=True)
 populacao = get_tabelas(ids_pop_ibge, dados)
 populacao_pnad = get_tabelas(ids_pop_pnad, dados)
 
-
-print('Calculando taxas ...')
 # Calcula taxas de urbanização, participação e ocupação
+print('Calculando taxas ...')
 taxas = calc_taxas(populacao_pnad)
 
-print('Calculando probabilidades ...')
-# Calcula as probabilidades de entrada em benefício e morte
-prob = calc_probabilidades(populacao)
-
-print('Calculando dados demográficos ...')
 # Calcula: Pop Urbana/Rural, PEA e Pop Ocupada e adiciona no dicionário
+print('Calculando dados demográficos ...')
 populacao = calc_demografia(populacao,taxas)
+
+# Calcula as probabilidades de entrada em benefício e morte
+print('Calculando probabilidades ...')
+prob = calc_probabilidades(populacao)
 

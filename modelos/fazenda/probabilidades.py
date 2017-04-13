@@ -7,13 +7,14 @@ from util.carrega_dados import get_id_beneficios
 import pandas as pd
 
 def calc_probabilidades(populacao):
-    prob = {}
+    probabilidades = {}
     
     # Para cada um dos sexos em população calcula a probabilidade de morte
-    for sexo in populacao.keys():            
-        prob['txMort'+sexo[-1]] = calc_prob_morte_ufpa(populacao, sexo) # REVISAR
+    prob_morte = calc_prob_morte_ufpa(populacao) # REVISAR
     
-    return prob
+    probabilidades.update(prob_morte)
+
+    return probabilidades
     
     
 # Calcula probabilidades de entrada em benefícios
@@ -77,25 +78,37 @@ Estou usando esse por enquanto, pois nao consegui calcular pelo método
 da fazenda.
 '''
 # Calcula probabilidade de morte baseado no método do LTS/UFPA
-def calc_prob_morte_ufpa(pop, sexo):
+def calc_prob_morte_ufpa(pop):
 
-    periodo = list(pop[sexo].columns)
-    txMort = pd.DataFrame(index=range(0,91), columns=periodo) 
+    # Obtem os anos da base do IBGE
+    periodo = list(pop['PopIbgeH'].columns)
+    
+    # Dicionário que armazena as probabilidades    
+    probMorte = {}
+       
+    for sexo in ['H', 'M']:    
         
-    for ano in periodo[0:-1]:
-        for idade in range(0,89):
-            pop_atual = pop[sexo][ano][idade]            
-            pop_prox_ano = pop[sexo][ano+1][idade+1]                
-            txMort[ano][idade] = 1 - (pop_prox_ano/pop_atual)
-     
-        # Calculo para a idade de 89 anos
-        txMort[ano][89] = txMort[ano][88]
+        # Cria o DataFrame que armazena as probabilidades para um sexo
+        mort = pd.DataFrame(index=range(0,91), columns=periodo) 
+        chave_pop = 'PopIbge'+sexo
+        
+        for ano in periodo[0:-1]:  # Vai do primeiro ao penúltimo ano
+            for idade in range(0,89): 
+                pop_atual = pop[chave_pop][ano][idade]            
+                pop_prox_ano = pop[chave_pop][ano+1][idade+1]                
+                mort[ano][idade] = 1 - (pop_prox_ano/pop_atual)
+         
+            # Calculo para a idade de 89 anos
+            mort[ano][89] = mort[ano][88]
+    
+            # Calculo para a idade de 90 anos
+            mort[ano][90] = 1 - (pop[chave_pop][ano+1][90] - pop[chave_pop][ano][89] \
+                            * (1 - mort[ano][89])) / pop[chave_pop][ano][90]
+         
+        # Repete a Prob do ultimo ano como valor do antepenultimo
+        mort[periodo[-1]] = mort[periodo[-2]]
+        
+        probMorte['Mort'+sexo] = mort
 
-        # Calculo para a idade de 90 anos
-        txMort[ano][90] = 1 - (pop[sexo][ano+1][90] - pop[sexo][ano][89] * (1 - txMort[ano][89])) / pop[sexo][ano][90]
-     
-    # Repete a Prob do ultimo ano como valor do antepenultimo
-    txMort[periodo[-1]] = txMort[periodo[-2]]
-
-    return txMort
+    return probMorte
     
