@@ -91,17 +91,18 @@ def get_tabelas(lista, xls, info=False):
                 
         # Remove os 2 primeiro caracteres para o caso de estoques, concessões
         # ou cessações (ex: 'EsApidRurH' -> 'ApidRurH')
-        #if i[0:2] in ['Es', 'Co', 'Ce']:            
-        ##    chave = i[2:]  
-        #else:
-        chave = sigla
+        if sigla[0:2] in ['Es', 'Co', 'Ce'] and sigla[0:5] != 'Contr':            
+            chave = sigla[2:]  
+        else:
+            chave = sigla
             
         try:
-            colecao_tabelas[chave] = xls.parse(sigla, index_col=0)              # Converte a tabela para um DataFrame
+            colecao_tabelas[chave] = xls.parse(sigla, index_col=0)          # Converte a tabela para um DataFrame
             colecao_tabelas[chave].drop('Total', inplace=True)              # Elimina a linha 'Total'
             colecao_tabelas[chave].dropna(how='all', axis=1, inplace=True)  # Elimina colunas com dados ausentes
             colecao_tabelas[chave].dropna(how='all', inplace=True)          # Elimina linhas completamente vazias
-            colecao_tabelas[chave].fillna(0, inplace=True)                  # Substitui os NaN por zeros
+            colecao_tabelas[chave].fillna(0, inplace=True)                  # Substitui os NaN por zeros       
+            colecao_tabelas[chave].index.names = ['IDADE']                  # Renomeia o índice 
 
             # Remove as tabelas que possuem dados ausentes
             if colecao_tabelas[chave].empty:
