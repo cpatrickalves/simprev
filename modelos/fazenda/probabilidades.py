@@ -10,7 +10,7 @@ def calc_probabilidades(populacao, estoques, concessoes, periodo):
     probabilidades = {}
     
     # Para cada um dos sexos em população calcula a probabilidade de morte
-    prob_morte = calc_prob_morte_ufpa(populacao) # REVISAR
+    prob_morte = calc_prob_morte(populacao) # REVISAR
     prob_entrada_apos = calc_prob_apos(populacao, estoques, concessoes, periodo)  
     
     
@@ -71,33 +71,51 @@ def calc_prob_aux(populacao, estoques, concessoes, periodo):
         
     return probabilidades
     
-# Calcula probabilidade de morte baseado no método da fazenda - REVISAR
-def calc_prob_morte(pop, sexo, periodo):
+# Calcula probabilidade de morte baseado no método da fazenda
+def calc_prob_morte(pop):
 
-    txMort = pd.DataFrame(index=range(0,91), columns=periodo) 
+    # Obtem os anos da base do IBGE
+    periodo = list(pop['PopIbgeH'].columns)
+            
+    # Dicionário que armazena as probabilidades    
+    probMorte = {}
     
-    for ano in periodo:
-        for idade in range(1,90):
-            pop_atual = pop[sexo][ano][idade]
-            pop_ano_passado = pop[sexo][ano-1][idade-1]    
-            pop_prox_ano = pop[sexo][ano+1][idade+1]
+    # Para cada sexo...
+    for sexo in ['H', 'M']:   
+        
+        # Cria o DataFrame que armazena as probabilidades para um sexo
+        mort = pd.DataFrame(index=range(0,91), columns=periodo) 
+        
+        #chave usada para acessar a base do IBGE
+        chave_pop = 'PopIbge'+sexo
+        
+        # Para cada ano...
+        for ano in periodo[1:-1]: # Vai do segundo ao penúltimo ano
+        
+            # Para cada idade...
+            for idade in range(1,90): # Vai de 1 até 89 anos 
+                pop_atual = pop[chave_pop][ano][idade]
+                pop_ano_passado = pop[chave_pop][ano-1][idade-1]    
+                pop_prox_ano = pop[chave_pop][ano+1][idade+1]
+        
+                mortalidade = (pop_ano_passado - pop_atual)/2 + (pop_atual - pop_prox_ano)/2
+                mort[ano][idade] = mortalidade/pop_atual
+         
+            # Calculo para a idade de 90 anos (Método UFPA) - REVISAR
+            mort[ano][90] = 1 - (pop[chave_pop][ano+1][90] - pop[chave_pop][ano][89] * (1 - mort[ano][89])) / pop[chave_pop][ano][90]
     
-            mortalidade = (pop_atual - pop_ano_passado)/2 + (pop_prox_ano - pop_atual)/2
-            txMort[ano][idade] = mortalidade/pop_atual
+            # Para idade 0 anos  = (pop_atual - pop_prox_ano)/ pop_atual            
+            mort[ano][0] = ( pop[chave_pop][ano][0] - pop[chave_pop][ano+1][1])/pop[chave_pop][ano][0]
+                        
+        # Repete a Prob do ultimo ano como valor do antepenultimo
+        mort[periodo[-1]] = mort[periodo[-2]]
+        
+        # Adiciona o DataFrame no dicionário com as chaves 'MortH' e 'MortM'
+        probMorte['Mort'+sexo] = mort
      
-        # Calculo para a idade de 90 anos
-        txMort[ano][90] = 1 - (pop[sexo][ano+1][90] - pop[sexo][ano][89] * (1 - txMort[ano][89])) / pop[sexo][ano][90]
+    return probMorte
 
-        # Calculo para a idade de 0 anos
-        txMort[ano][0] = 1
-     
-    return txMort
 
-'''
-(Patrick)
-Estou usando esse por enquanto, pois nao consegui calcular pelo método
-da fazenda.
-'''
 # Calcula probabilidade de morte baseado no método do LTS/UFPA
 def calc_prob_morte_ufpa(pop):
 
@@ -141,9 +159,9 @@ def busca_erros(probabilidades):
     problemas = {}
     # Verifica se existe probabilidades maiores que 1
     for p in probabilidades:
-        # Se existe algum elemento em alguma coluna maior que 1    
+        # Se existe algum elemento em alguma coluna maior que 0.99    
         if (probabilidades[p] > 0.99).any().any():
-            # Salva o benefício e uma tabela com os valores maires que 1
+            # Salva o benefício e uma tabela com os valores maires que 0.99
             problemas[p] = probabilidades[p][probabilidades[p].gt(0.99)].dropna()      
             # Salva em uma tabela
     
