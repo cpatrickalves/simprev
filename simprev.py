@@ -52,7 +52,7 @@ populacao = calc_demografia(populacao,taxas)
 
 # Calcula as probabilidades de entrada em benefício e morte
 print('Calculando probabilidades ...\n')
-probabilidades = calc_probabilidades(populacao, estoques, concessoes, periodo)
+probabilidades = calc_probabilidades(populacao, estoques, concessoes, cessacoes, periodo)
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')
