@@ -3,7 +3,7 @@
 @author: Patrick Alves
 """
 
-from util.carrega_dados import get_id_beneficios
+from util.dados import get_id_beneficios
 import pandas as pd
 
 def calc_probabilidades(populacao, estoques, concessoes, cessacoes, periodo):

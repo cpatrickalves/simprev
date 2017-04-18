@@ -121,6 +121,31 @@ def get_tabelas(lista, xls, info=False):
 
     return colecao_tabelas
 
+# Identifica idades em que o número de Concessões não bate com o Estoque 
+# do ano e idade seguintes e faz uma correção. 
+# Essas correções são utilizadas nos cálculos das probabilidades
+def corrige_erros_estoque(estoques, concessoes, cessacoes):
+    
+    count = 0
+    # Para todos os benefícios...    
+    for beneficio in concessoes:   
+        # Verifica se existe o benefício nas outras tabelas        
+        if beneficio in estoques.keys() and beneficio in cessacoes.keys():                         
+            for ano in concessoes[beneficio]:
+                for idade in range(1,90):                                
+                    con = concessoes[beneficio][ano][idade]
+                    est = estoques[beneficio][ano][idade]
+                    ces = cessacoes[beneficio][ano][idade]
+                    
+                    # Identifica idades em que o número de Concessões é maior que o Estoque do ano e idade seguinte
+                    if con - ces > est:                        
+                        #print('{} | ano = {}| id = {} | Con = {} | Ces = {} | Est = {}'.format(beneficio, ano, idade,con,ces,est))
+                        # Corrige o estoque para as idades onde o erro foi encontrado
+                        estoques[beneficio].loc[idade, ano] = round(con - ces)
+                        count+=1
+    #print(count)
+    return estoques
+    
     
 # Funçao que retorna o Significado de uma sigla
 def get_significado_sigla(chave):

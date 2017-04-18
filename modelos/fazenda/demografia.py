@@ -2,7 +2,7 @@
 """
 @author: Patrick Alves
 """
-from util.carrega_dados import ids_pop_ibge
+from util.dados import ids_pop_ibge
 
 # Calcula dados demográficos
 def calc_demografia(populacao, taxas):

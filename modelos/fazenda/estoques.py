@@ -2,7 +2,7 @@
 """
 @author: Patrick Alves
 """
-from util.carrega_dados import get_id_beneficios
+from util.dados import get_id_beneficios
 
 def calc_estoques(estoques, probabilidades, populacao):
     
