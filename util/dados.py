@@ -145,7 +145,16 @@ def corrige_erros_estoque(estoques, concessoes, cessacoes):
                         count+=1
     #print(count)
     return estoques
+
+
+# Identifica e retorna a Clientela de um benefício
+def get_clientela(beneficio):
+    for clientela in ['UrbPiso', 'UrbAcim', 'Rur']:
+        if clientela in beneficio:
+            return clientela
     
+    return 'Clientela não identificada'
+
     
 # Funçao que retorna o Significado de uma sigla
 def get_significado_sigla(chave):
