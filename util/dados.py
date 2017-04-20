@@ -104,8 +104,13 @@ def get_tabelas(lista, xls, info=False):
             colecao_tabelas[chave].fillna(0, inplace=True)                  # Substitui os NaN por zeros       
             colecao_tabelas[chave].index.names = ['IDADE']                  # Renomeia o índice 
 
-            # Remove as tabelas que possuem dados ausentes
-            if colecao_tabelas[chave].empty:
+            # Indica se todos os elementos da Tabela são zero
+            zerada = False
+            if (colecao_tabelas[chave] == 0.0).all().all():
+                zerada = True
+            
+            # Remove as tabelas que possuem dados ausentes ou todos os valores iguais a zero
+            if colecao_tabelas[chave].empty or zerada:
                 tabsIncompletas.append(sigla)   # Salva o nome da tabela incompleta
                 colecao_tabelas.pop(chave)  # Remove a tabela
 
