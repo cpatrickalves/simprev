@@ -2,11 +2,12 @@
 """
 @author: Patrick Alves
 """
-from util.dados import get_id_beneficios, get_clientela
+from util.dados import get_id_beneficios, get_id_segurados
 
 def calc_estoques(estoques, probabilidades, segurados, periodo):
     
     calc_estoq_apos(estoques, probabilidades, segurados, periodo)
+    #calc_estoq_aux(estoques, probabilidades, segurados, periodo)
 
     return estoques
 
@@ -24,15 +25,8 @@ def calc_estoq_apos(est, prob, seg, periodo):
         
             sexo = benef[-1]                # Obtém o Sexo
             id_prob_morte = 'Mort'+ sexo    # ex: MortH
-            id_fam = 'fam'+benef            # fator de ajuste de mortalidade
-            clientela = get_clientela(benef)
-            id_segurado = clientela + sexo
-            
-            # Faz o mapeamento Clientela para Segurado
-            if clientela == 'UrbPiso':
-                id_segurado =  'CsmUrb' + sexo
-            elif clientela == 'UrbAcim':
-                id_segurado = 'CaUrb' + sexo
+            id_fam = 'fam'+benef            # fator de ajuste de mortalidade            
+            id_segurado = get_id_segurados(benef)
             
             for ano in periodo:                
                 # Adiciona uma nova coluna (ano) no DataFrame com valores zero
@@ -54,6 +48,24 @@ def calc_estoq_apos(est, prob, seg, periodo):
 
     return est
     
-def calc_estoq_aux():
-    pass
+def calc_estoq_aux(est, prob, seg, periodo):
+    
+    for benef in get_id_beneficios(['Auxd', 'Auxa', 'Auxr']):
+        # Verifica se existe no Estoque
+        if benef in est:
+            
+            id_seg = get_id_segurados(benef)
+            
+            for ano in periodo:
+                # REVISAR: a Eq original usa a Pop, mas o certo seria os Segurados
+                est[benef][ano] = seg[id_seg][ano] * prob[benef] # Eq 17 da LDO 2018
+    
+    return est
+                
+            
+            
+            
+        
+    
+    
 
