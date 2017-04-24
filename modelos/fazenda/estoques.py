@@ -2,55 +2,50 @@
 """
 @author: Patrick Alves
 """
-from util.dados import get_id_beneficios
+from util.dados import get_id_beneficios, get_clientela
 
-def calc_estoques(estoques, probabilidades, populacao):
+def calc_estoques(estoques, probabilidades, segurados, periodo):
     
-    es_apos = calc_estoq_apos(estoques, probabilidades)
+    calc_estoq_apos(estoques, probabilidades, segurados, periodo)
+
+    return estoques
+
+def calc_estoq_apos(est, prob, seg, periodo):
+    
+    # Identificações das aposentadorias 
+    ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
+    
+    # Obtem as aposentadorias para todas as clientelas e sexos
+    lista_benef = get_id_beneficios(ids_apos)
         
-
-def calc_estoq_apos(est, prob, pop):
-    
-    periodo = list(range(2015,2061))
-    Reajuste = 1 # REVISAR
-    
-    #padrão dos estoques: EsAinvUrbAcimM    
-    
-    # Obtem os IDs das aposentadorias
-    lista_benef = get_id_beneficios(['Apin'])
-'''    
     for benef in lista_benef:
-        id_prob_morte = 'Mort'+benef[-1]
-        id_prob_benef = 
-        for ano in periodo:
-            for idade in range(1,91): 
-                est_ano_anterior = est[benef][ano-1][idade-1]
-                prob_sobreviver = 1-prob['Mort'+benef[-1]]*Reajuste
-                concessoes = segurados * prov[]
-                saidas = est_ano_anterior *
+        # Verifica se o beneficio existe no Estoque
+        if benef in est:
+        
+            sexo = benef[-1]                # Obtém o Sexo
+            id_prob_morte = 'Mort'+ sexo    # ex: MortH
+            id_fam = 'fam'+benef            # fator de ajuste de mortalidade
+            clientela = get_clientela(benef)
+            id_segurado = clientela + sexo
+            
+            # Faz o mapeamento Clientela para Segurado
+            if clientela == 'UrbPiso':
+                id_segurado =  'CsmUrb' + sexo
+            elif clientela == 'UrbAcim':
+                id_segurado = 'CaUrb' + sexo
+            
+            for ano in periodo:                
+                # Adiciona uma nova coluna (ano) no DataFrame com valores zero
+                est[benef][ano] = 0
                 
-'''    
+                for idade in range(1,91): 
+                    est_ano_anterior = est[benef][ano-1][idade-1]
+                    prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][idade]
+                    concessoes = seg[id_segurado][ano][idade] * prob[benef][idade]
+                    est[benef].loc[idade, ano] = est_ano_anterior * prob_sobreviver + concessoes
+
+    return est
     
 def calc_estoq_aux():
     pass
 
-
-'''
-Distribuidora Convicta comercio de produtos alimentícios
-Fernando - Criasim
-cnpj 
-
-Avenida Max Porpino 5539
-
-    for sexo in ['H', 'M']:    
-        
-        # Cria o DataFrame que armazena as probabilidades para um sexo
-        mort = pd.DataFrame(index=range(0,91), columns=periodo) 
-        chave_pop = 'PopIbge'+sexo
-        
-        for ano in periodo[0:-1]:  # Vai do primeiro ao penúltimo ano
-            for idade in range(0,89): 
-                pop_atual = pop[chave_pop][ano][idade]            
-                pop_prox_ano = pop[chave_pop][ano+1][idade+1]                
-                mort[ano][idade] = 1 - (pop_prox_ano/pop_atual)
-'''

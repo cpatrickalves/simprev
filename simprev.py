@@ -46,18 +46,20 @@ populacao_pnad = get_tabelas(ids_pop_pnad, dados)
 print('Calculando taxas ...\n')
 taxas = calc_taxas(populacao_pnad)
 
-# Calcula: Pop Urbana/Rural, PEA e Pop Ocupada e adiciona no dicionário
+# Calcula: Pop Urbana|Rural, PEA e Pop Ocupada, 
+# Contribuintes, Segurados
 print('Calculando dados demográficos ...\n')
-populacao = calc_demografia(populacao,taxas)
+segurados = calc_demografia(populacao, taxas)
 
 # Corrige inconsistências nos estoques
 corrige_erros_estoque(estoques, concessoes, cessacoes)
 
 # Calcula as probabilidades de entrada em benefício e morte
 print('Calculando probabilidades ...\n')
-probabilidades = calc_probabilidades(populacao, estoques, concessoes, cessacoes, periodo)
+probabilidades = calc_probabilidades(populacao, estoques, concessoes,
+                                     cessacoes, periodo)
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')
-#estoques = calc_estoques(estoques, probabilidades, populacao)
+estoques = calc_estoques(estoques, probabilidades, segurados, periodo)
 

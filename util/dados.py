@@ -161,6 +161,20 @@ def get_clientela(beneficio):
     return 'Clientela não identificada'
 
     
+# Identifica e retorna o Segurado de um benefício
+def get_segurados(beneficio):
+    
+    clientela = get_clientela(beneficio)
+    
+    if clientela == 'UrbPiso':
+        return 'CsmUrb'
+    elif clientela == 'UrbAcim':
+        return 'CaUrb'
+    elif clientela == 'Rur':
+        return 'Rur'
+        
+    return 'Segurado não encontrado'
+    
 # Funçao que retorna o Significado de uma sigla
 def get_significado_sigla(chave):
     

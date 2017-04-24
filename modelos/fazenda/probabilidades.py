@@ -16,7 +16,7 @@ def calc_probabilidades(populacao, estoques, concessoes, cessacoes, periodo):
 
     probabilidades.update(prob_morte)
     probabilidades.update(prob_entrada_apos)
-    #probabilidades.update(fat_ajuste_mort)
+    probabilidades.update(fat_ajuste_mort)
 
     # Busca por probabilidades erradas (ex: > 1)
     busca_erros(probabilidades)
@@ -29,7 +29,7 @@ def calc_prob_apos(populacao, estoques, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
     ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
-    tag_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
+    ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
 
     # Dicionário que armazena o Estoque acumulado
     est_acumulado = {}
@@ -50,19 +50,21 @@ def calc_prob_apos(populacao, estoques, concessoes, periodo):
                 est_acumulado[clientela] += estoques[beneficio]
 
     # Calcula probabilidades de entrada em aposentadorias
-    for beneficio in get_id_beneficios(tag_apos):
+    for beneficio in get_id_beneficios(ids_apos):
         # Verifica se o possui os dados de estoque e concessões do benefício 
         if beneficio in estoques.keys() and beneficio in concessoes.keys():
 
             clientela = get_clientela(beneficio)
+            
             # Calcula a probabilidade de entrada
+            # Nesse caso prob_entrada é do tipo Series e não DataFrame, pois
+            # Possui somente uma dimensão (não possui colunas)
             prob_entrada = concessoes[beneficio][ano_prob] / (est_acumulado[clientela][ano_prob-1] + (concessoes[beneficio][ano_prob]/2))
-            # Converte "prob_entrada" para um DataFrame e adiciona no dicionário
-            probabilidades[beneficio] = pd.DataFrame(prob_entrada)
-            # nome da coluna no Dataframe
-            probabilidades[beneficio].columns = [ano_prob]
-             # Substitui os NaN (not a number) por zeros
-            probabilidades[beneficio][ano_prob].fillna(0, inplace = True)
+                        
+            # Adiciona no dicionário
+            probabilidades[beneficio] = prob_entrada            
+            # Substitui os NaN (not a number) por zeros
+            probabilidades[beneficio].fillna(0, inplace = True)
 
     return probabilidades
 
@@ -213,6 +215,11 @@ def busca_erros(probabilidades):
     problemas = {}
     # Verifica se existe probabilidades maiores que 1
     for p in probabilidades:
+        
+        # Pula os fatores de ajuste de mortalidade
+        if p[:3] == 'fam':
+            continue
+        
         # Se existe algum elemento em alguma coluna maior que 0.99
         if (probabilidades[p] > 0.99).any().any():
             # Salva o benefício e uma tabela com os valores maires que 0.99

@@ -7,6 +7,10 @@ from util.dados import ids_pop_ibge
 # Calcula dados demográficos
 def calc_demografia(populacao, taxas):
     
+    
+    # Dicionário que armazena os segurados rurais e contribuintes urbanos
+    segurados = {}
+    
     # Calcula Pop Urbana e Rural    
     pop_ur = calc_pop_urb_rur(populacao, taxas)
     
@@ -27,10 +31,12 @@ def calc_demografia(populacao, taxas):
     populacao.update(pop_ur)
     populacao.update(pea)
     populacao.update(pocup)
-    populacao.update(csm_ca)
-    populacao.update(segurados_rur)
     
-    return populacao    
+    # Adiciona contribuintes e segurados no dicionário segurados
+    segurados.update(csm_ca)
+    segurados.update(segurados_rur)
+    
+    return segurados    
 
 
 # Calcula as populações urbana e rural    
@@ -140,5 +146,12 @@ def calc_segurados_rur(pea_rur, taxas):
             
             # Elimina colunas com dados ausentes
             segurados_rur[chave].dropna(axis=1, inplace=True)  
+
+    # Soma dos Segurados Rurais, pois no cálculo dos estoques usa-se o valor
+    # agregado para a clientela Rural
+    for sexo in ['H','M']:
+        segurados_rur['Rur'+sexo] = (segurados_rur['SegEspRur'+sexo] +
+                                     segurados_rur['ContrRur'+sexo] + 
+                                     segurados_rur['SegPotRur'+sexo])
                                          
     return segurados_rur
