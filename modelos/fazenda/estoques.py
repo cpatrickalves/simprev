@@ -38,11 +38,19 @@ def calc_estoq_apos(est, prob, seg, periodo):
                 # Adiciona uma nova coluna (ano) no DataFrame com valores zero
                 est[benef][ano] = 0
                 
+                # 1 a 90 anos                
                 for idade in range(1,91): 
                     est_ano_anterior = est[benef][ano-1][idade-1]
                     prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][idade]
-                    concessoes = seg[id_segurado][ano][idade] * prob[benef][idade]
-                    est[benef].loc[idade, ano] = est_ano_anterior * prob_sobreviver + concessoes
+                    entradas = seg[id_segurado][ano][idade] * prob[benef][idade]
+                    est[benef].loc[idade, ano] = est_ano_anterior * prob_sobreviver + entradas
+                
+                # Calculo para a idade zero
+                est[benef].loc[0, ano] = seg[id_segurado][ano][0] * prob[benef][0]
+                
+                # Ajuste para a idade de 90+ anos (modelo UFPA) - REVISAR
+                #est[benef].loc[90, ano] = est[benef].loc[90, ano] + est[benef].loc[90, ano - 1]
+                
 
     return est
     

@@ -3,20 +3,24 @@
 @author: Patrick Alves
 """
 
-from util.dados import get_id_beneficios, get_clientela
+from util.dados import get_id_beneficios, get_clientela, get_id_segurados
 import pandas as pd
 
-def calc_probabilidades(populacao, estoques, concessoes, cessacoes, periodo):
+def calc_probabilidades(populacao, segurados, estoques, concessoes, cessacoes, periodo):
+    
+    # Dicionário que armazena as probabilidades
     probabilidades = {}
-
-    # Para cada um dos sexos em população calcula a probabilidade de morte
-    prob_morte = calc_prob_morte(populacao) # REVISAR
-    prob_entrada_apos = calc_prob_apos(populacao, estoques, concessoes, periodo)
+    
+    prob_morte = calc_prob_morte(populacao) 
     fat_ajuste_mort = calc_fat_ajuste_mort(estoques, cessacoes, prob_morte, periodo)
+    
+    prob_entrada_apos = calc_prob_apos(estoques, concessoes, periodo)      
+    prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
 
     probabilidades.update(prob_morte)
-    probabilidades.update(prob_entrada_apos)
     probabilidades.update(fat_ajuste_mort)
+    probabilidades.update(prob_entrada_apos)
+    probabilidades.update(prob_entrada_aux)    
 
     # Busca por probabilidades erradas (ex: > 1)
     busca_erros(probabilidades)
@@ -25,7 +29,7 @@ def calc_probabilidades(populacao, estoques, concessoes, cessacoes, periodo):
 
 
 # Calcula probabilidades de entrada em benefícios
-def calc_prob_apos(populacao, estoques, concessoes, periodo):
+def calc_prob_apos(estoques, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
     ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
@@ -69,27 +73,36 @@ def calc_prob_apos(populacao, estoques, concessoes, periodo):
     return probabilidades
 
 # Calcula probabilidades de entrada em auxílios
-def calc_prob_aux(populacao, estoques, concessoes, periodo):
+def calc_prob_aux(segurados, estoques, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
     ano_prob = periodo[0]-1   # ano utilizado para cálculo
 
+    # O cálculo do Auxílio doença e diferente dos demais auxílios
+    for beneficio in get_id_beneficios(['Auxd']):            
+                
+        # Verifica se o possui os dados de estoque e concessões do benefício
+        if beneficio in estoques.keys() and beneficio in concessoes.keys():
+            conc = concessoes[beneficio][ano_prob]
+            id_seg = get_id_segurados(beneficio)
+            seg_ano_ant = segurados[id_seg][ano_prob-1]
+            prob_auxd = conc / (seg_ano_ant + (conc/2))     # Eq 18 da LDO2018
+            probabilidades[beneficio] = prob_auxd            
+            probabilidades[beneficio].fillna(0, inplace = True)
+
     # Calcula probabilidades de entrada em auxílios reclusão e acidente
     for beneficio in get_id_beneficios(['Auxa', 'Auxr']):
         # Verifica se o possui os dados de estoque e concessões do benefício
-        if beneficio in estoques.keys() and beneficio in concessoes.keys():
-            probabilidades[beneficio] = pd.DataFrame(estoques[beneficio][ano_prob] / segurados[beneficio][ano_prob]/2)
-            probabilidades[beneficio].columns = [ano_prob]
-            probabilidades[beneficio][ano_prob].fillna(0, inplace = True)
+        if beneficio in estoques.keys():
+            est = estoques[beneficio][ano_prob]
+            id_seg = get_id_segurados(beneficio)
+            seg = segurados[id_seg][ano_prob]
+            # REVISAR, para o caso do Auxr tem-se muitas divisões por zero, gerando inf
+            prob_aux_ar = est / seg                        # Eq 19 da LDO 2018
+            probabilidades[beneficio] = prob_aux_ar
+            probabilidades[beneficio].fillna(0, inplace = True)
 
-    # O cálculo do Auxílio doença e diferente dos demais auxílios
-    for beneficio in get_id_beneficios('Auxd'):
-        # Verifica se o possui os dados de estoque e concessões do benefício
-        if beneficio in estoques.keys() and beneficio in concessoes.keys():
-            probabilidades[beneficio] = pd.DataFrame(concessoes[beneficio][ano_prob] / (segurados[beneficio][ano_prob-1] + (concessoes[beneficio][ano_prob]/2)))
-            probabilidades[beneficio].columns = [ano_prob]
-            probabilidades[beneficio][ano_prob].fillna(0, inplace = True)
-
+    
     return probabilidades
 
 # Calcula probabilidade de morte baseado no método da fazenda

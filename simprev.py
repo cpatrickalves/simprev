@@ -56,8 +56,8 @@ corrige_erros_estoque(estoques, concessoes, cessacoes)
 
 # Calcula as probabilidades de entrada em benefício e morte
 print('Calculando probabilidades ...\n')
-probabilidades = calc_probabilidades(populacao, estoques, concessoes,
-                                     cessacoes, periodo)
+probabilidades = calc_probabilidades(populacao, segurados, estoques, 
+                                     concessoes, cessacoes, periodo)
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')

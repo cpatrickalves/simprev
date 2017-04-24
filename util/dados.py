@@ -59,6 +59,12 @@ def get_id_beneficios(filtros=[], info=''):
     # lista que será retornada
     lista_final = []
     
+    # Caso o usuário passe uma String ao invés de uma lista como Parâmetro
+    if type(filtros) == str:
+        temp = []
+        temp.append(filtros)
+        filtros = temp
+    
     # Verifica se a lista está vazia, nesse caso retorna todos os benefícios
     if len(filtros) == 0:   
         for l in beneficios:
@@ -162,16 +168,17 @@ def get_clientela(beneficio):
 
     
 # Identifica e retorna o Segurado de um benefício
-def get_segurados(beneficio):
+def get_id_segurados(beneficio):
     
+    sexo = beneficio[-1]            
     clientela = get_clientela(beneficio)
     
     if clientela == 'UrbPiso':
-        return 'CsmUrb'
+        return 'CsmUrb'+ sexo
     elif clientela == 'UrbAcim':
-        return 'CaUrb'
+        return 'CaUrb'+ sexo
     elif clientela == 'Rur':
-        return 'Rur'
+        return 'Rur'+ sexo
         
     return 'Segurado não encontrado'
     
