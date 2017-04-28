@@ -61,5 +61,5 @@ probabilidades = calc_probabilidades(populacao, segurados, estoques,
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')
-estoques = calc_estoques(estoques, probabilidades, segurados, periodo)
+estoques = calc_estoques(estoques, probabilidades, populacao, segurados, periodo)
 

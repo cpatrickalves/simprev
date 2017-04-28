@@ -3,11 +3,13 @@
 @author: Patrick Alves
 """
 from util.dados import get_id_beneficios, get_id_segurados
+import pandas as pd
 
-def calc_estoques(estoques, probabilidades, segurados, periodo):
+def calc_estoques(estoques, probabilidades, populacao, segurados, periodo):
     
     calc_estoq_apos(estoques, probabilidades, segurados, periodo)
     #calc_estoq_aux(estoques, probabilidades, segurados, periodo)
+    calc_estoq_salMat(estoques, populacao , segurados, periodo)
 
     return estoques
 
@@ -47,10 +49,11 @@ def calc_estoq_apos(est, prob, seg, periodo):
                 
 
     return est
-    
+
+# Projeta estoques para Auxílios Doença, Reclusão e Acidente
 def calc_estoq_aux(est, prob, seg, periodo):
     
-    for benef in get_id_beneficios(['Auxd', 'Auxa', 'Auxr']):
+    for benef in get_id_beneficios(['Auxd', 'Auxa']):#'Auxr']): # REVISAR
         # Verifica se existe no Estoque
         if benef in est:
             
@@ -63,9 +66,39 @@ def calc_estoq_aux(est, prob, seg, periodo):
     return est
                 
             
+# Projeta estoques para Salário-Maternidade - REVISAR
+def calc_estoq_salMat(est, pop, seg, periodo):    
+    
+    for benef in get_id_beneficios('SalMat'):
             
+        if benef in est:
+
+            # Armazena valores do ano 
+            est_acumulado = pd.Series(index=est[benef].columns)
+                      
+            id_seg = get_id_segurados(benef)
             
-        
+            # Acumula mulheres de 16 a 45 anos para o estoque existente
+            for ano in est[benef]:    
+                est_acumulado[ano] = est[benef][ano].sum()
+                    
+            # Realiza projeção    
+            for ano in periodo:
+                est_acumulado[ano] = 0         # Cria um novo ano com valores zeros
+                nascimentos = pop['PopIbgeM'][ano][0] + pop['PopIbgeH'][ano][0]
+                
+                # Acumula mulheres de 16 a 45 anos
+                seg_16_46 = 0
+                pop_16_46 = 0                                
+                for idade in range(16,46):
+                    seg_16_46 += seg[id_seg][ano][idade]
+                    pop_16_46 += pop['PopIbgeM'][ano][idade]
+                  
+                est_acumulado[ano] = (seg_16_46/pop_16_46) * nascimentos
+                
+            est[benef] = est_acumulado
+            
+    return est
     
     
 

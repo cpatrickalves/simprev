@@ -14,7 +14,7 @@ def calc_probabilidades(populacao, segurados, estoques, concessoes, cessacoes, p
     prob_morte = calc_prob_morte(populacao) 
     fat_ajuste_mort = calc_fat_ajuste_mort(estoques, cessacoes, prob_morte, periodo)
     
-    prob_entrada_apos = calc_prob_apos(estoques, concessoes, periodo)      
+    prob_entrada_apos = calc_prob_apos(segurados, concessoes, periodo)      
     prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
 
     probabilidades.update(prob_morte)
@@ -28,6 +28,37 @@ def calc_probabilidades(populacao, segurados, estoques, concessoes, cessacoes, p
     return probabilidades
 
 
+
+# Calcula probabilidades de entrada em benefícios
+def calc_prob_apos(segurados, concessoes, periodo):
+
+    probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
+    ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
+    ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
+    
+    # Calcula probabilidades de entrada em aposentadorias
+    for beneficio in get_id_beneficios(ids_apos):
+        # Verifica se o possui os dados de concessões do benefício 
+        if beneficio in concessoes.keys():
+
+            id_segurado = get_id_segurados(beneficio)
+            
+            # Calcula a probabilidade de entrada
+            # Nesse caso prob_entrada é do tipo Series e não DataFrame, pois
+            # Possui somente uma dimensão (não possui colunas)
+            # A versão da LDO trabalha com estoques, porém o correto seriam os segurados
+            prob_entrada = concessoes[beneficio][ano_prob] / (segurados[id_segurado][ano_prob-1] + (concessoes[beneficio][ano_prob]/2))
+                        
+            # Adiciona no dicionário
+            probabilidades[beneficio] = prob_entrada            
+            # Substitui os NaN (not a number) por zeros
+            probabilidades[beneficio].fillna(0, inplace = True)
+
+    return probabilidades
+
+
+'''
+# VERSAO ORIGINAL
 # Calcula probabilidades de entrada em benefícios
 def calc_prob_apos(estoques, concessoes, periodo):
 
@@ -71,6 +102,7 @@ def calc_prob_apos(estoques, concessoes, periodo):
             probabilidades[beneficio].fillna(0, inplace = True)
 
     return probabilidades
+'''
 
 # Calcula probabilidades de entrada em auxílios
 def calc_prob_aux(segurados, estoques, concessoes, periodo):
@@ -91,7 +123,7 @@ def calc_prob_aux(segurados, estoques, concessoes, periodo):
             probabilidades[beneficio].fillna(0, inplace = True)
 
     # Calcula probabilidades de entrada em auxílios reclusão e acidente
-    for beneficio in get_id_beneficios(['Auxa', 'Auxr']):
+    for beneficio in get_id_beneficios(['Auxa' ]):#, 'Auxr']):
         # Verifica se o possui os dados de estoque e concessões do benefício
         if beneficio in estoques.keys():
             est = estoques[beneficio][ano_prob]
