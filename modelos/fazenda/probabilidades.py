@@ -6,21 +6,26 @@
 from util.dados import get_id_beneficios, get_clientela, get_id_segurados
 import pandas as pd
 
-def calc_probabilidades(populacao, segurados, estoques, concessoes, cessacoes, periodo):
+def calc_probabilidades(populacao, segurados, estoques, 
+                        concessoes, cessacoes, periodo):
     
     # Dicionário que armazena as probabilidades
     probabilidades = {}
     
     prob_morte = calc_prob_morte(populacao) 
-    fat_ajuste_mort = calc_fat_ajuste_mort(estoques, cessacoes, prob_morte, periodo)
+    fat_ajuste_mort = calc_fat_ajuste_mort(estoques, cessacoes, 
+                                           prob_morte, periodo)
     
     prob_entrada_apos = calc_prob_apos(segurados, concessoes, periodo)      
-    prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
+    #prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
+    #prob_entrada_pens = calc_prob_pensao(concessoes, prob_morte, 
+     #                                    fat_ajuste_mort, periodo)
 
     probabilidades.update(prob_morte)
     probabilidades.update(fat_ajuste_mort)
     probabilidades.update(prob_entrada_apos)
-    probabilidades.update(prob_entrada_aux)    
+    #probabilidades.update(prob_entrada_aux) 
+    #probabilidades.update(prob_entrada_pens) 
 
     # Busca por probabilidades erradas (ex: > 1)
     busca_erros(probabilidades)
@@ -192,10 +197,10 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
     # Dicionário que armazena as probabilidades
     fat_ajuste = {}
 
-    tag_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
+    tags = ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd', 'Pens']
 
     # Calcula o fator de ajuste para cada tipo de aposentadoria
-    for beneficio in get_id_beneficios(tag_apos):
+    for beneficio in get_id_beneficios(tags):
 
         # Verifica se existem dados de estoque e cessações do benefício
         if beneficio in estoques.keys() and beneficio in cessacoes.keys():
@@ -215,6 +220,66 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
 
     return fat_ajuste
 
+
+# Calcula probabilidades para pensões
+def calc_prob_pensao(concessoes, prob_mort, fam, periodo):
+    
+    # ano utilizado para cálculo
+    #ano_prob = periodo[0]-1   #2014
+
+    # Dicionário que armazena as probabilidades
+    prob_pensao = {}
+    
+    # ???
+    def get_ji(idade):
+        
+        if idade <= 23:
+            return 3
+        elif idade >=27 and idade <=32:
+            return 6
+        elif idade >=37 and idade <=39:
+            return 10
+        elif idade >=45 and idade <=55:
+            return 15
+        elif idade >=61 and idade <=63:
+            return 20
+        else:
+            return 0
+
+     # Calcula a probabilidade para cada tipo de pensão
+    for beneficio in get_id_beneficios(['Pens']):
+        
+        sexo = beneficio[-1]
+        
+        # Verifica se existe dados de estoque
+        if beneficio in concessoes.keys():
+            for ano in periodo:
+                # começo a partir de 3 pois o Ji pode ser 3.
+                for idade in range(3,91):
+                    ji = get_ji(idade)
+                    conc = concessoes[beneficio][ano-ji][idade-ji]
+                    ''' 
+                    produtorio = 1
+                    k = idade-ji
+                    for i in range(k,idade):                        
+                        pmorte = prob_mort['Mort'+sexo][ano-(i-k)][k]
+                        fator = fam['fam'+beneficio][ano-(i-k)][k]
+                        produtorio *= 1 - pmorte * fator
+                        
+                    prob_pensao[beneficio][ano] = conc * produtorio
+                    '''  
+                                
+            
+        
+        
+        
+    
+        
+        
+        
+        
+    
+    
 
 
 # Calcula probabilidade de morte baseado no método do LTS/UFPA
