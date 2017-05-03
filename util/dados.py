@@ -18,9 +18,7 @@ ids_pop_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH',
                 'SegPotRurPnadM', 'SegRurPnadH', 'SegRurPnadM'] 
 
 ids_salarios = ['SalMedPopOcupRurPnadH', 'SalMedPopOcupRurPnadM',
-                'SalMedPopOcupUrbSmPnadH', 'SalMedPopOcupUrbSmPnadM',
-                'SalMedPopOcupUrbAcimPnadH', 'SalMedPopOcupUrbAcimPnadM',
-                'SalMedSegUrbSmPnadH', 'SalMedSegUrbSmPnadM',
+                'SalMedPopOcupUrbPnadH', 'SalMedPopOcupUrbPnadM',                                
                 'SalMedSegUrbAcimPnadH', 'SalMedSegUrbAcimPnadM']
 
 # Função que retorna uma lista de benefícios de acordo como filtro
