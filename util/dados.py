@@ -3,6 +3,8 @@
 @author: Patrick Alves
 """
 
+import pandas as pd
+
 # Lista de Siglas
 ids_pop_ibge = ['PopIbgeH','PopIbgeM'] 
 ids_pop_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH',
@@ -14,6 +16,12 @@ ids_pop_pnad = ['PopPnadH','PopPnadM', 'PopUrbPnadH',
                 'PopOcupUrbAcimPnadM', 'SegEspRurPnadH','ContrRurPnadH',
                 'SegPotRurPnadH', 'SegEspRurPnadM', 'ContrRurPnadM',
                 'SegPotRurPnadM', 'SegRurPnadH', 'SegRurPnadM'] 
+
+ids_salarios = ['SalMedPopOcupRurPnadH', 'SalMedPopOcupRurPnadM',
+                'SalMedPopOcupUrbSmPnadH', 'SalMedPopOcupUrbSmPnadM',
+                'SalMedPopOcupUrbAcimPnadH', 'SalMedPopOcupUrbAcimPnadM',
+                'SalMedSegUrbSmPnadH', 'SalMedSegUrbSmPnadM',
+                'SalMedSegUrbAcimPnadH', 'SalMedSegUrbAcimPnadM']
 
 # Função que retorna uma lista de benefícios de acordo como filtro
 def get_id_beneficios(filtros=[], info=''):
@@ -106,8 +114,10 @@ def get_tabelas(lista, xls, info=False):
             colecao_tabelas[chave] = xls.parse(sigla, index_col=0)          # Converte a tabela para um DataFrame
             colecao_tabelas[chave].drop('Total', inplace=True)              # Elimina a linha 'Total'
             colecao_tabelas[chave].dropna(how='all', axis=1, inplace=True)  # Elimina colunas com dados ausentes
-            colecao_tabelas[chave].dropna(how='all', inplace=True)          # Elimina linhas completamente vazias
-            colecao_tabelas[chave].fillna(0, inplace=True)                  # Substitui os NaN por zeros       
+            colecao_tabelas[chave].fillna(0, inplace=True)                  # Substitui os NaN por zeros 
+                
+            indices =  pd.notnull(colecao_tabelas[chave].index)             # índices não nulos
+            colecao_tabelas[chave] = colecao_tabelas[chave][indices]        # Elimina índices com NaN
             colecao_tabelas[chave].index.names = ['IDADE']                  # Renomeia o índice 
 
             # Indica se todos os elementos da Tabela são zero

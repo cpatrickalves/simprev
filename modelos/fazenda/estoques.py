@@ -9,7 +9,7 @@ def calc_estoques(estoques, probabilidades, populacao, segurados, periodo):
     
     calc_estoq_apos(estoques, probabilidades, segurados, periodo)
     #calc_estoq_aux(estoques, probabilidades, segurados, periodo)
-    calc_estoq_salMat(estoques, populacao , segurados, periodo)
+    #calc_estoq_salMat(estoques, populacao , segurados, periodo)
 
     return estoques
 
@@ -100,5 +100,7 @@ def calc_estoq_salMat(est, pop, seg, periodo):
             
     return est
     
-    
+
+def calc_estoq_pensoes():
+    pass
 

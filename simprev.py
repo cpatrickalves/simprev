@@ -3,7 +3,7 @@
 @author: Patrick Alves
 """
 
-from util.dados import get_id_beneficios, get_tabelas, ids_pop_ibge, ids_pop_pnad, corrige_erros_estoque
+from util.dados import get_id_beneficios, get_tabelas, ids_pop_ibge, ids_pop_pnad, ids_salarios, corrige_erros_estoque
 from modelos.fazenda.probabilidades import calc_probabilidades
 from modelos.fazenda.demografia import calc_demografia
 from modelos.fazenda.taxas import calc_taxas
@@ -41,6 +41,7 @@ concessoes = get_tabelas(get_id_beneficios([], 'Co'), dados, info=True)
 cessacoes = get_tabelas(get_id_beneficios([], 'Ce'), dados, info=True)
 populacao = get_tabelas(ids_pop_ibge, dados)
 populacao_pnad = get_tabelas(ids_pop_pnad, dados)
+salarios = get_tabelas(ids_salarios, dados)
 
 # Calcula taxas de urbanização, participação e ocupação
 print('Calculando taxas ...\n')
@@ -63,3 +64,5 @@ probabilidades = calc_probabilidades(populacao, segurados, estoques,
 print('Projetando Estoques ...\n')
 estoques = calc_estoques(estoques, probabilidades, populacao, segurados, periodo)
 
+
+# Comparar os segurados calculados com os segurados das planilhas
