@@ -9,14 +9,15 @@ import pandas as pd
 class LerTabelas():
     ''' Classe que possui diversos métodos úteis para trabalhar com os dados das planilhas '''
 
-    def __init__(self, arquivo):
+    def __init__(self, arquivo=''):
         '''
         Abre o arquivo e define lista de IDs padrão
         :param arquivo: arquivo XLS 
         '''
+        if arquivo != '':
+            # Abre arquivo
+            self.dados = pd.ExcelFile(arquivo)
 
-        # Abre arquivo
-        self.dados = pd.ExcelFile(arquivo)
         # Ids utilizados para as tabelas do IBGE
         self.ids_pop_ibge = ['PopIbgeH','PopIbgeM']
         # Ids utilizados para as tabelas da PNAD

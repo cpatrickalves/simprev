@@ -3,7 +3,7 @@
 @author: Patrick Alves
 """
 
-from util.dados import get_id_beneficios, get_clientela, get_id_segurados
+from util.ler_tabelas import LerTabelas
 import pandas as pd
 
 def calc_probabilidades(populacao, segurados, estoques, 
@@ -40,13 +40,16 @@ def calc_prob_apos(segurados, concessoes, periodo):
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
     ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
     ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
-    
+
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
     # Calcula probabilidades de entrada em aposentadorias
-    for beneficio in get_id_beneficios(ids_apos):
+    for beneficio in dados.get_id_beneficios(ids_apos):
         # Verifica se o possui os dados de concessões do benefício 
         if beneficio in concessoes.keys():
 
-            id_segurado = get_id_segurados(beneficio)
+            id_segurado = dados.get_id_segurados(beneficio)
             
             # Calcula a probabilidade de entrada
             # Nesse caso prob_entrada é do tipo Series e não DataFrame, pois
@@ -115,24 +118,27 @@ def calc_prob_aux(segurados, estoques, concessoes, periodo):
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
     ano_prob = periodo[0]-1   # ano utilizado para cálculo
 
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
     # O cálculo do Auxílio doença e diferente dos demais auxílios
-    for beneficio in get_id_beneficios(['Auxd']):            
+    for beneficio in dados.get_id_beneficios(['Auxd']):
                 
         # Verifica se o possui os dados de estoque e concessões do benefício
         if beneficio in estoques.keys() and beneficio in concessoes.keys():
             conc = concessoes[beneficio][ano_prob]
-            id_seg = get_id_segurados(beneficio)
+            id_seg = dados.get_id_segurados(beneficio)
             seg_ano_ant = segurados[id_seg][ano_prob-1]
             prob_auxd = conc / (seg_ano_ant + (conc/2))     # Eq 18 da LDO2018
             probabilidades[beneficio] = prob_auxd            
             probabilidades[beneficio].fillna(0, inplace = True)
 
     # Calcula probabilidades de entrada em auxílios reclusão e acidente
-    for beneficio in get_id_beneficios(['Auxa' ]):#, 'Auxr']):
+    for beneficio in dados.get_id_beneficios(['Auxa' ]):#, 'Auxr']):
         # Verifica se o possui os dados de estoque e concessões do benefício
         if beneficio in estoques.keys():
             est = estoques[beneficio][ano_prob]
-            id_seg = get_id_segurados(beneficio)
+            id_seg = dados.get_id_segurados(beneficio)
             seg = segurados[id_seg][ano_prob]
             # REVISAR, para o caso do Auxr tem-se muitas divisões por zero, gerando inf
             prob_aux_ar = est / seg                        # Eq 19 da LDO 2018
@@ -199,8 +205,11 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
 
     tags = ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd', 'Pens']
 
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
     # Calcula o fator de ajuste para cada tipo de aposentadoria
-    for beneficio in get_id_beneficios(tags):
+    for beneficio in dados.get_id_beneficios(tags):
 
         # Verifica se existem dados de estoque e cessações do benefício
         if beneficio in estoques.keys() and beneficio in cessacoes.keys():
@@ -229,7 +238,10 @@ def calc_prob_pensao(concessoes, prob_mort, fam, periodo):
 
     # Dicionário que armazena as probabilidades
     prob_pensao = {}
-    
+
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
     # ???
     def get_ji(idade):
         
@@ -247,7 +259,7 @@ def calc_prob_pensao(concessoes, prob_mort, fam, periodo):
             return 0
 
      # Calcula a probabilidade para cada tipo de pensão
-    for beneficio in get_id_beneficios(['Pens']):
+    for beneficio in dados.get_id_beneficios(['Pens']):
         
         sexo = beneficio[-1]
         
@@ -268,18 +280,6 @@ def calc_prob_pensao(concessoes, prob_mort, fam, periodo):
                         
                     prob_pensao[beneficio][ano] = conc * produtorio
                     '''  
-                                
-            
-        
-        
-        
-    
-        
-        
-        
-        
-    
-    
 
 
 # Calcula probabilidade de morte baseado no método do LTS/UFPA

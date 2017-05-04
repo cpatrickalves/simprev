@@ -2,7 +2,7 @@
 """
 @author: Patrick Alves
 """
-from util.dados import get_id_beneficios, get_id_segurados
+from util.ler_tabelas import LerTabelas
 import pandas as pd
 
 def calc_estoques(estoques, probabilidades, populacao, segurados, periodo):
@@ -17,9 +17,12 @@ def calc_estoq_apos(est, prob, seg, periodo):
     
     # Identificações das aposentadorias 
     ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
-    
+
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
     # Obtem as aposentadorias para todas as clientelas e sexos
-    lista_benef = get_id_beneficios(ids_apos)
+    lista_benef = dados.get_id_beneficios(ids_apos)
         
     for benef in lista_benef:
         # Verifica se o beneficio existe no Estoque
@@ -28,7 +31,7 @@ def calc_estoq_apos(est, prob, seg, periodo):
             sexo = benef[-1]                # Obtém o Sexo
             id_prob_morte = 'Mort'+ sexo    # ex: MortH
             id_fam = 'fam'+benef            # fator de ajuste de mortalidade            
-            id_segurado = get_id_segurados(benef)
+            id_segurado = dados.get_id_segurados(benef)
             
             for ano in periodo:                
                 # Adiciona uma nova coluna (ano) no DataFrame com valores zero
@@ -52,12 +55,15 @@ def calc_estoq_apos(est, prob, seg, periodo):
 
 # Projeta estoques para Auxílios Doença, Reclusão e Acidente
 def calc_estoq_aux(est, prob, seg, periodo):
-    
-    for benef in get_id_beneficios(['Auxd', 'Auxa']):#'Auxr']): # REVISAR
+
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
+    for benef in dados.get_id_beneficios(['Auxd', 'Auxa']):#'Auxr']): # REVISAR
         # Verifica se existe no Estoque
         if benef in est:
             
-            id_seg = get_id_segurados(benef)
+            id_seg = dados.get_id_segurados(benef)
             
             for ano in periodo:
                 # REVISAR: a Eq original usa a Pop, mas o certo seria os Segurados
@@ -67,16 +73,19 @@ def calc_estoq_aux(est, prob, seg, periodo):
                 
             
 # Projeta estoques para Salário-Maternidade - REVISAR
-def calc_estoq_salMat(est, pop, seg, periodo):    
-    
-    for benef in get_id_beneficios('SalMat'):
+def calc_estoq_salMat(est, pop, seg, periodo):
+
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
+    for benef in dados.get_id_beneficios('SalMat'):
             
         if benef in est:
 
             # Armazena valores do ano 
             est_acumulado = pd.Series(index=est[benef].columns)
                       
-            id_seg = get_id_segurados(benef)
+            id_seg = dados.get_id_segurados(benef)
             
             # Acumula mulheres de 16 a 45 anos para o estoque existente
             for ano in est[benef]:    

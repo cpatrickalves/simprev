@@ -2,7 +2,7 @@
 """
 @author: Patrick Alves
 """
-from util.dados import ids_pop_ibge
+from util.ler_tabelas import LerTabelas
 
 # Calcula dados demográficos
 def calc_demografia(populacao, taxas):
@@ -44,9 +44,12 @@ def calc_pop_urb_rur(populacao, taxas):
         
     # Dicionário que armazena as populações urbanas e rurais
     pop_urb_rur = {}
-    
-    # para cada um dos sexos calcula as clientelas
-    for pop in ids_pop_ibge:
+
+    # Cria o objeto dados que possui os IDs das tabelas de populações
+    dados = LerTabelas()
+
+    # Para cada um dos sexos calcula as clientelas
+    for pop in dados.ids_pop_ibge:
         chave_urb = pop.replace('Ibge', 'Urb')
         chave_rur = pop.replace('Ibge', 'Rur')
         chave_tx = pop.replace('PopIbge', 'txUrb')
