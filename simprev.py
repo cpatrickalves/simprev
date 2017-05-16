@@ -10,6 +10,7 @@ from modelos.fazenda.estoques import calc_estoques
 from modelos.fazenda.salarios import calc_salarios
 from util.ler_tabelas import LerTabelas
 from util.dados import DadosLDO
+import modelos.fazenda.receitas as rc
 
 # Não usado pode enquanto
 def main():
@@ -21,10 +22,14 @@ def main():
 if __name__ == "__main__":
     main()
 
-###### Parâmetros de simulação
+###################### Parâmetros de simulação ###############################
 
-# Período de projeção
-periodo = list(range(2015, 2061))
+# Período de projeção 
+ano_inicial = 2015
+ano_final = 2060
+
+# Ano de referência para cálculo das probabilidades
+ano_probabilidade = 2014
 
 # Taxa de crescimento de Produtividade em %
 produtividade = 1.7  # Pag 45 LDO 2018
@@ -32,13 +37,25 @@ produtividade = 1.7  # Pag 45 LDO 2018
 # Salário Mínimo de 2014 a 2017
 salMin = [724.00, 788.00, 880.00, 937.00]
 
+# Alíquota efetiva média
+aliquota = 0.31
+
+# PIB 2014
+pib_inicial = 5521256074049.36
+
+##### DADOS DA LDO ######
 # Objeto que armazena dados da LDO de 2018
 ldo2018 = DadosLDO()
 
 # Taxa de Crescimento do Salário Mínimo em % (Tabela 6.1)
-txCrescimentoSalMin = ldo2018.TxCrescimentoSalMin
+txCresSalMin = ldo2018.TxCrescimentoSalMin
 
-##############################
+
+
+#############################################################################
+
+# Cria uma lista com os anos a serem projetados
+periodo = list(range(ano_inicial, ano_final+1))
 
 print('--- Iniciando projeção --- \n')
 print('Lendo arquivo de dados ... \n')
@@ -86,9 +103,12 @@ estoques = calc_estoques(estoques, probabilidades, populacao, segurados, periodo
 # Projeta Salarios
 print('Projetando Salários ...\n')
 salarios = calc_salarios(salarios, populacao, segurados,
-                         produtividade, salMin, txCrescimentoSalMin,
+                         produtividade, salMin, txCresSalMin,
                          periodo)
 
-
+# Projeta receita
+print('Projetando Receita e PIB ...\n')
+receita = rc.receitas.calc_receitas(salarios, aliquota, periodo)
+resultados = rc.receitas.calc_pib(salarios, pib_inicial, periodo)
 
 # Comparar os segurados calculados com os segurados das planilhas
