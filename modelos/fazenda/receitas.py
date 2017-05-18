@@ -4,7 +4,8 @@
 """
 import pandas as pd
 
-class receitas():
+
+class Receitas():
     ''' Classe que implementa o cálculo da receita de acordo com a LDO de 2018'''
     
     #def __init__(self, salarios, aliquota, periodo):

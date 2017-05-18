@@ -3,7 +3,7 @@
 @author: Patrick Alves
 """
 
-from util.ler_tabelas import LerTabelas
+from util.tabelas import LerTabelas
 import pandas as pd
 
 def calc_probabilidades(populacao, segurados, estoques, 

@@ -8,9 +8,10 @@ from modelos.fazenda.demografia import calc_demografia
 from modelos.fazenda.taxas import calc_taxas
 from modelos.fazenda.estoques import calc_estoques
 from modelos.fazenda.salarios import calc_salarios
-from util.ler_tabelas import LerTabelas
+from util.tabelas import LerTabelas
 from util.dados import DadosLDO
 import modelos.fazenda.receitas as rc
+import modelos.fazenda.depesas as desp
 
 # Não usado pode enquanto
 def main():
@@ -23,6 +24,9 @@ if __name__ == "__main__":
     main()
 
 ###################### Parâmetros de simulação ###############################
+
+# dicionário que armazena os parâmetros (incompleto) - REVISAR
+parametros = {}
 
 # Período de projeção 
 ano_inicial = 2015
@@ -37,6 +41,9 @@ produtividade = 1.7  # Pag 45 LDO 2018
 # Salário Mínimo de 2014 a 2017
 salMin = [724.00, 788.00, 880.00, 937.00]
 
+# Teto do RGPS de 2014 a 2017
+tetoRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
+
 # Alíquota efetiva média
 aliquota = 0.31
 
@@ -49,7 +56,6 @@ ldo2018 = DadosLDO()
 
 # Taxa de Crescimento do Salário Mínimo em % (Tabela 6.1)
 txCresSalMin = ldo2018.TxCrescimentoSalMin
-
 
 
 #############################################################################
@@ -108,7 +114,9 @@ salarios = calc_salarios(salarios, populacao, segurados,
 
 # Projeta receita
 print('Projetando Receita e PIB ...\n')
-receita = rc.receitas.calc_receitas(salarios, aliquota, periodo)
-resultados = rc.receitas.calc_pib(salarios, pib_inicial, periodo)
+receitas = rc.Receitas.calc_receitas(salarios, aliquota, periodo)
+resultados = rc.Receitas.calc_pib(salarios, pib_inicial, periodo)
+despesas = desp.Despesas.calc_despesas(estoques, salarios, periodo)
+
 
 # Comparar os segurados calculados com os segurados das planilhas

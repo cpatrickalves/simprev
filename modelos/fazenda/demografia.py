@@ -2,7 +2,7 @@
 """
 @author: Patrick Alves
 """
-from util.ler_tabelas import LerTabelas
+from util.tabelas import LerTabelas
 
 # Calcula dados demográficos
 def calc_demografia(populacao, taxas):
