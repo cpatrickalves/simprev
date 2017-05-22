@@ -11,7 +11,8 @@ from modelos.fazenda.salarios import calc_salarios
 from util.tabelas import LerTabelas
 from util.dados import DadosLDO
 import modelos.fazenda.receitas as rc
-import modelos.fazenda.depesas as desp
+import modelos.fazenda.depesas as dp
+
 
 # Não usado pode enquanto
 def main():
@@ -76,11 +77,13 @@ print('Carregando tabelas ...\n')
 ids_estoques = dados.get_id_beneficios([], 'Es')
 ids_concessoes = dados.get_id_beneficios([], 'Co')
 ids_cessacoes = dados.get_id_beneficios([], 'Ce')
+ids_despesas = dados.get_id_beneficios([], 'ValEs')
 
 # Obtem as tabelas e armazena nos dicionários correspondentes
 estoques = dados.get_tabelas(ids_estoques, info=True)
 concessoes = dados.get_tabelas(ids_concessoes, info=True)
 cessacoes = dados.get_tabelas(ids_cessacoes, info=True)
+despesas = dados.get_tabelas(ids_despesas)
 populacao = dados.get_tabelas(dados.ids_pop_ibge)
 populacao_pnad = dados.get_tabelas(dados.ids_pop_pnad)
 salarios = dados.get_tabelas(dados.ids_salarios)
@@ -116,7 +119,9 @@ salarios = calc_salarios(salarios, populacao, segurados,
 print('Projetando Receita e PIB ...\n')
 receitas = rc.Receitas.calc_receitas(salarios, aliquota, periodo)
 resultados = rc.Receitas.calc_pib(salarios, pib_inicial, periodo)
-despesas = desp.Despesas.calc_despesas(estoques, salarios, periodo)
+
+print('Projetando Despesas ...\n')
+despesas = dp.Despesas.calc_despesas(despesas, estoques, salarios, periodo)
 
 
 # Comparar os segurados calculados com os segurados das planilhas

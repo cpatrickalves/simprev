@@ -132,9 +132,12 @@ class LerTabelas():
         for sigla in lista:
 
             # Remove os 2 primeiro caracteres para o caso de estoques, concessões
-            # ou cessações (ex: 'EsApidRurH' -> 'ApidRurH')
+            # ou cessações (ex: 'EsApidRurH' -> 'ApidRurH') e os 5 primeiros caracteres
+            # no caso dos estoques de despesa ("ValEs")
             if sigla[0:2] in ['Es', 'Co', 'Ce'] and sigla[0:5] != 'Contr':
                 chave = sigla[2:]
+            elif sigla[0:5] in ['ValEs']:
+                chave = sigla[5:]
             else:
                 chave = sigla
 
