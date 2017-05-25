@@ -7,22 +7,21 @@ import pandas as pd
 
 # Calcula rendimento médio
 def calc_salarios(salarios, populacao, segurados, produtividade, 
-                  salMinInicial, txCresSalMin, periodo):
+                  salMinInicial, dadosLDO, periodo):
         
     # último ano do estoque (2014)
     ano_inicial = periodo[0]-1
     # Objeto do tipo Serie que armazena o Salario Minimo
     salarioMinimo =  pd.Series(index=[ano_inicial])
-    # Inicializa com os valores conhecidos
-    for valor in salMinInicial:
-        salarioMinimo[ano_inicial] = valor
-        ano_inicial += 1
+
+    # Inicializa com o valor conhecido
+    salarioMinimo[ano_inicial] = salMinInicial
     
     # Projeta crescimento do Salário Mínimo (Eq 36)
-    for txCres in txCresSalMin:
-        salarioMinimo[ano_inicial] = salarioMinimo[ano_inicial-1] * (1 + txCres/100) #REVISAR
+    for txCres in dadosLDO['TxCrescimentoSalMin']:
         ano_inicial += 1
-    
+        salarioMinimo[ano_inicial] = salarioMinimo[ano_inicial-1] * (1 + txCres/100) #REVISAR
+
     # Salva a Serie no dicionário
     salarios['salarioMinimo']  = salarioMinimo  
     

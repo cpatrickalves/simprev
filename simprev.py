@@ -39,8 +39,8 @@ ano_probabilidade = 2014
 # Taxa de crescimento de Produtividade em %
 produtividade = 1.7  # Pag 45 LDO 2018
 
-# Salário Mínimo de 2014 a 2017
-salMin = [724.00, 788.00, 880.00, 937.00]
+# Salário Mínimo de 2014
+salMin = 724.00
 
 # Teto do RGPS de 2014 a 2017
 tetoRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
@@ -51,13 +51,8 @@ aliquota = 0.31
 # PIB 2014
 pib_inicial = 5521256074049.36
 
-##### DADOS DA LDO ######
 # Objeto que armazena dados da LDO de 2018
-ldo2018 = DadosLDO()
-
-# Taxa de Crescimento do Salário Mínimo em % (Tabela 6.1)
-txCresSalMin = ldo2018.TxCrescimentoSalMin
-
+dadosLDO2018 = DadosLDO.get_tabelas()
 
 #############################################################################
 
@@ -78,6 +73,7 @@ ids_estoques = dados.get_id_beneficios([], 'Es')
 ids_concessoes = dados.get_id_beneficios([], 'Co')
 ids_cessacoes = dados.get_id_beneficios([], 'Ce')
 ids_despesas = dados.get_id_beneficios([], 'ValEs')
+#ids_valMedBen = dados.get_id_beneficios([], 'ValEs')
 
 # Obtem as tabelas e armazena nos dicionários correspondentes
 estoques = dados.get_tabelas(ids_estoques, info=True)
@@ -87,6 +83,7 @@ despesas = dados.get_tabelas(ids_despesas)
 populacao = dados.get_tabelas(dados.ids_pop_ibge)
 populacao_pnad = dados.get_tabelas(dados.ids_pop_pnad)
 salarios = dados.get_tabelas(dados.ids_salarios)
+#valMedBen = dados.get_tabelas(ids_valMedBen)
 
 # Calcula taxas de urbanização, participação e ocupação
 print('Calculando taxas ...\n')
@@ -112,8 +109,12 @@ estoques = calc_estoques(estoques, probabilidades, populacao, segurados, periodo
 # Projeta Salarios
 print('Projetando Salários ...\n')
 salarios = calc_salarios(salarios, populacao, segurados,
-                         produtividade, salMin, txCresSalMin,
+                         produtividade, salMin, dadosLDO2018,
                          periodo)
+
+# Projeta Salarios
+print('Projetando Valores dos benefícios ...\n')
+valMedBenef = dp.Despesas.calc_valMedBenef(estoques, despesas, dadosLDO2018, periodo)
 
 # Projeta receita
 print('Projetando Receita e PIB ...\n')
@@ -121,7 +122,8 @@ receitas = rc.Receitas.calc_receitas(salarios, aliquota, periodo)
 resultados = rc.Receitas.calc_pib(salarios, pib_inicial, periodo)
 
 print('Projetando Despesas ...\n')
-despesas = dp.Despesas.calc_despesas(despesas, estoques, salarios, periodo)
+#despesas = dp.Despesas.calc_despesas(despesas, estoques, salarios, periodo)
 
 
 # Comparar os segurados calculados com os segurados das planilhas
+# Nos estoques aparecem aposentadorias com menos de 45 anos (corrigir)

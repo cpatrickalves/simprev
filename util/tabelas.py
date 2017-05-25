@@ -136,7 +136,7 @@ class LerTabelas():
             # no caso dos estoques de despesa ("ValEs")
             if sigla[0:2] in ['Es', 'Co', 'Ce'] and sigla[0:5] != 'Contr':
                 chave = sigla[2:]
-            elif sigla[0:5] in ['ValEs']:
+            elif sigla[0:5] in ['ValEs', 'ValCo']:
                 chave = sigla[5:]
             else:
                 chave = sigla
