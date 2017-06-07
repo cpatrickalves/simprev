@@ -20,9 +20,17 @@ class DadosLDO():
         
         # Reajustes retirados das LDOs de 2017 e 2018
         reajuste_2015_2018 = [6.23, 11.28, 7.5, 4.62]
+
         # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 
         ValoresTxReajusteBeneficios = reajuste_2015_2018 + ([4.5] * 42)   
-                
+        
+        # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 
+        TxCresMassaSalContribuintes = [7.52, 7.36, 7.42, 7.35, 7.28, 7.24, 7.17, 7.09, 7.01, 6.93, 6.85,
+                                       6.78, 6.70, 6.62, 6.53, 6.45, 6.37, 6.29, 6.21, 6.14, 6.06, 5.98, 
+                                       5.91, 5.83, 5.77, 5.70, 5.64, 5.59, 5.55, 5.50, 5.46, 5.42, 5.39, 
+                                       5.37, 5.34, 5.32, 5.30, 5.27, 5.25, 5.22, 5.20, 5.18, 5.15]
+        
+        
          # Tabela 6.1 da LDO de 2018
         dados['TxCrescimentoSalMin'] = pd.Series(ValoresTxCrescimentoSalMin, index=periodo)
         dados['TxReajusteBeneficios'] = pd.Series(ValoresTxReajusteBeneficios, index=periodo)

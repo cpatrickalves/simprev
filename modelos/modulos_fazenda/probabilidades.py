@@ -227,7 +227,7 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
             # Substitui os NaN por zero
             fat_ajuste['fam'+beneficio].fillna(0, inplace=True)
 
-    return fat_ajuste
+    return fat_ajuste # REVISAR - Confirmar se é fixa para todos os anos
 
 
 # Calcula probabilidades para pensões

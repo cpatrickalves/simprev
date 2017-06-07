@@ -6,8 +6,7 @@ from util.tabelas import LerTabelas
 
 # Calcula dados demográficos
 def calc_demografia(populacao, taxas):
-    
-    
+
     # Dicionário que armazena os segurados rurais e contribuintes urbanos
     segurados = {}
     

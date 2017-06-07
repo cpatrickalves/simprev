@@ -5,15 +5,15 @@
 from util.tabelas import LerTabelas
 import pandas as pd
 
-def calc_estoques(estoques, probabilidades, populacao, segurados, periodo):
+def calc_estoques(estoques, concessoes, probabilidades, populacao, segurados, periodo):
     
-    calc_estoq_apos(estoques, probabilidades, segurados, periodo)
+    calc_estoq_apos(estoques, concessoes, probabilidades, segurados, periodo)
     #calc_estoq_aux(estoques, probabilidades, segurados, periodo)
     #calc_estoq_salMat(estoques, populacao , segurados, periodo)
 
     return estoques
 
-def calc_estoq_apos(est, prob, seg, periodo):
+def calc_estoq_apos(est, conc, prob, seg, periodo):
     
     # Identificações das aposentadorias 
     ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
@@ -43,9 +43,13 @@ def calc_estoq_apos(est, prob, seg, periodo):
                     prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][idade]
                     entradas = seg[id_segurado][ano][idade] * prob[benef][idade]
                     est[benef].loc[idade, ano] = est_ano_anterior * prob_sobreviver + entradas
+                    
+                    # Salva a quantidade de concessões
+                    conc[benef].loc[idade,ano] = entradas
                 
                 # Calculo para a idade zero
                 est[benef].loc[0, ano] = seg[id_segurado][ano][0] * prob[benef][0]
+                conc[benef].loc[0, ano] = est[benef].loc[0, ano]
                 
                 # Ajuste para a idade de 90+ anos (modelo UFPA) - REVISAR
                 #est[benef].loc[90, ano] = est[benef].loc[90, ano] + est[benef].loc[90, ano - 1]

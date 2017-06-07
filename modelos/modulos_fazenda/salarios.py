@@ -25,13 +25,20 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
     # Salva a Serie no dicionário
     salarios['salarioMinimo']  = salarioMinimo  
     
-    # Projeta crescimento dos salários da Pop. Ocupada a partir da produtividade (Eq 32)
+    # Projeta crescimento dos salários da Pop. Ocupada a partir da produtividade (Eq 32) - REVISAR - Acho que não é necessário
     for clientela in ['Urb', 'Rur']:
         for sexo in ['H', 'M']:
             for ano in periodo:
                 id_sal = 'SalMedPopOcup' + clientela + 'Pnad' + sexo
                 salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100)               
-                    
+    
+    # Projeta crescimento dos salários da Pop. Ocupada a partir da produtividade (Eq 32) - REVISAR 
+    for sexo in ['H', 'M']:
+        for ano in periodo:
+            id_sal = 'SalMedPopOcupUrbAcimPnad' + sexo
+            salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100)               
+    
+                
     # Projeta crescimento dos salários dos Segurados acima do SM apartir da produtividade (Eq 37)
     for sexo in ['H', 'M']:
         for ano in periodo:

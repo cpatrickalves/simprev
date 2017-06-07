@@ -33,7 +33,8 @@ class LerTabelas():
         # Ids utilizados para as tabelas de salários
         self.ids_salarios = ['SalMedPopOcupRurPnadH', 'SalMedPopOcupRurPnadM',
                         'SalMedPopOcupUrbPnadH', 'SalMedPopOcupUrbPnadM',
-                        'SalMedSegUrbAcimPnadH', 'SalMedSegUrbAcimPnadM']
+                        'SalMedSegUrbAcimPnadH', 'SalMedSegUrbAcimPnadM',
+                        'SalMedPopOcupUrbAcimPnadH', 'SalMedPopOcupUrbAcimPnadM']
 
 
     def get_id_beneficios(self, filtros=[], info=''):

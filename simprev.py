@@ -3,15 +3,9 @@
 @author: Patrick Alves
 """
 
-from modelos.fazenda.probabilidades import calc_probabilidades
-from modelos.fazenda.demografia import calc_demografia
-from modelos.fazenda.taxas import calc_taxas
-from modelos.fazenda.estoques import calc_estoques
-from modelos.fazenda.salarios import calc_salarios
 from util.tabelas import LerTabelas
 from util.dados import DadosLDO
-import modelos.fazenda.receitas as rc
-import modelos.fazenda.depesas as dp
+import modelos.fazenda as fz
 
 
 # Não usado pode enquanto
@@ -59,6 +53,11 @@ dadosLDO2018 = DadosLDO.get_tabelas()
 # Cria uma lista com os anos a serem projetados
 periodo = list(range(ano_inicial, ano_final+1))
 
+resultados = {}
+
+
+#############################################################################
+
 print('--- Iniciando projeção --- \n')
 print('Lendo arquivo de dados ... \n')
 # Arquivo com os dados da Fazenda
@@ -87,43 +86,46 @@ salarios = dados.get_tabelas(dados.ids_salarios)
 
 # Calcula taxas de urbanização, participação e ocupação
 print('Calculando taxas ...\n')
-taxas = calc_taxas(populacao_pnad)
+taxas = fz.calc_taxas(populacao_pnad)
 
 # Calcula: Pop Urbana|Rural, PEA e Pop Ocupada,
 # Contribuintes, Segurados
 print('Calculando dados demográficos ...\n')
-segurados = calc_demografia(populacao, taxas)
+segurados = fz.calc_demografia(populacao, taxas)
 
 # Corrige inconsistências nos estoques
 dados.corrige_erros_estoque(estoques, concessoes, cessacoes)
 
 # Calcula as probabilidades de entrada em benefício e morte
 print('Calculando probabilidades ...\n')
-probabilidades = calc_probabilidades(populacao, segurados, estoques,
+probabilidades = fz.calc_probabilidades(populacao, segurados, estoques,
                                      concessoes, cessacoes, periodo)
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')
-estoques = calc_estoques(estoques, probabilidades, populacao, segurados, periodo)
+estoques = fz.calc_estoques(estoques, concessoes, probabilidades,
+                         populacao, segurados, periodo)
 
 # Projeta Salarios
 print('Projetando Salários ...\n')
-salarios = calc_salarios(salarios, populacao, segurados,
+salarios = fz.calc_salarios(salarios, populacao, segurados,
                          produtividade, salMin, dadosLDO2018,
                          periodo)
 
-# Projeta Salarios
+# Projeta Valoers médios dos benefícios
 print('Projetando Valores dos benefícios ...\n')
-valMedBenef = dp.Despesas.calc_valMedBenef(estoques, despesas, dadosLDO2018, periodo)
+valMedBenef = fz.calc_valMedBenef(estoques, despesas, dadosLDO2018, periodo)
 
-# Projeta receita
+# Projeta receitas e respesas
 print('Projetando Receita e PIB ...\n')
-receitas = rc.Receitas.calc_receitas(salarios, aliquota, periodo)
-resultados = rc.Receitas.calc_pib(salarios, pib_inicial, periodo)
+resultados['receitas'] = fz.calc_receitas(salarios, aliquota, periodo)
+resultados = fz.calc_pib(resultados, salarios, pib_inicial, periodo)
 
 print('Projetando Despesas ...\n')
-#despesas = dp.Despesas.calc_despesas(despesas, estoques, salarios, periodo)
-
+resultados['despesas'] = fz.calc_despesas(despesas, estoques, concessoes, salarios,
+                            valMedBenef, probabilidades, dadosLDO2018, periodo)
 
 # Comparar os segurados calculados com os segurados das planilhas
 # Nos estoques aparecem aposentadorias com menos de 45 anos (corrigir)
+# Alterar as porcentagens 
+# Calcular taxa de crescimento da massa salarial de contribuintes
