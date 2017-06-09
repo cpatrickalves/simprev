@@ -1,31 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-
 @author: Patrick Alves
 """
 
-# Calcula todas as taxas
-def calc_taxas(pop_pnad):
-    
-    taxas = {}
-
-    txurb = calc_tx_urb(pop_pnad)
-    txpart = calc_tx_part(pop_pnad)
-    txocup = calc_tx_ocup(pop_pnad)
-    txCsm_Ca = calc_tx_cobertura_sm(pop_pnad)
-    txSegurados_rur = calc_tx_segurados_rur(pop_pnad)
-    
-    taxas.update(txurb)
-    taxas.update(txpart)
-    taxas.update(txocup)
-    taxas.update(txCsm_Ca)
-    taxas.update(txSegurados_rur)
-
-    return taxas
-
-
-# Calcula taxa de urbanizacao
-def calc_tx_urb(pop_pnad):
+# Calcula taxa de urbanizacao conforme Equação 3 e 
+# lógica descrita na item 4.6 da LDO
+def calc_tx_urb(pop_pnad, periodo):
     
     # Dicionário que armazena as taxas de urbanização
     txurb = {}
@@ -41,42 +21,44 @@ def calc_tx_urb(pop_pnad):
         
     # Crescimento a partir de 2015
     for taxa in txurb:
-        for ano in range(2015,2061):
+        for ano in periodo:
             txurb[taxa][ano] = txurb[taxa][ano-1] * (1 + tx_crescimento_urb ) 
         
     return txurb
 
 # Calcula taxa de participação    
-def calc_tx_part(pop_pnad):
+def calc_tx_part(pop_pnad, periodo):
     
     # Dicionário que armazena as taxas de urbanização
     txpart = {}
     tx_crescimento_part = 0 # REVISAR
     limite_crescimento = 0 # REVISAR
     
+    # Calculo feito de acordo com a Seção 4.6 da LDO    
     for clientela in ['Urb', 'Rur']:
         for sexo in ['H','M']:
             chave = 'txPart'+clientela+sexo         
             pea = pop_pnad['Pea'+clientela+'Pnad'+sexo]
-            pia = pop_pnad['Pop'+clientela+'Pnad'+sexo]
-            txpart[chave] = pea/pia
+            pop = pop_pnad['Pop'+clientela+'Pnad'+sexo]
+            txpart[chave] = pea/pop
                   
             # Preenche valores NaN com zero      
             txpart[chave].fillna(0, inplace=True)
 
     # Crescimento da taxa a partir de 2015
     for taxa in txpart:
-        for ano in range(2015,2061):
+        for ano in periodo:
             txpart[taxa][ano] = txpart[taxa][ano-1] * (1 + tx_crescimento_part) 
         
     return txpart
 
 # Calcula taxa de Ocupação
-def calc_tx_ocup(pop_pnad):
+def calc_tx_ocup(pop_pnad, periodo):
     
     # Dicionario que armazena as taxas de ocupação
     txocup = {}
     
+    # Calculo feito de acordo com a Seção 4.6 da LDO
     for clientela in ['Urb', 'Rur']:
         for sexo in ['H', 'M']:
             chave = 'txOcup'+clientela+sexo
@@ -87,22 +69,26 @@ def calc_tx_ocup(pop_pnad):
             # Preenche valores NaN com zero      
             txocup[chave].fillna(0, inplace=True)
 
-    # Repete o ultimo ano nos demais anos
+    # Repete as taxas do ultimo ano nos demais
     for taxa in txocup:
-        for ano in range(2015,2061):
+        for ano in periodo:
             txocup[taxa][ano] = txocup[taxa][ano-1] 
                 
     return txocup
 
 # Calcula taxa de Cobertura Contributiva por SM e acima do SM
-def calc_tx_cobertura_sm(pop_pnad):
+def calc_tx_cobertura_sm(pop_pnad, periodo):
     
     # Dicionario que armazena as taxas 
     txcober = {}
     
     # Padrão da chave: PopOcupUrbSmPnadH # REVISAR
     
-    # taxa de Cobertura Contributiva para o SM
+    # A LDO não descreve a equação para o cálculo dessa taxa
+    # O documento inicial desenvolvido pelo STN, IPEA e SPE sugere o uso da 
+    # PeaUrbSm/Pea, porém acredito que o correto seria PocupSm/Pocup
+    
+    # Taxa de Cobertura Contributiva para o SM
     for sexo in ['H', 'M']:
        chave = 'txCsmUrb'+sexo
        pocupSm = pop_pnad['PopOcupUrbSmPnad'+sexo]   
@@ -123,27 +109,27 @@ def calc_tx_cobertura_sm(pop_pnad):
        # Preenche valores NaN com zero      
        txcober[chave].fillna(0, inplace=True)
 
-    # Repete o ultimo ano nos demais anos
+    # Repete as taxas para todos os anos
     for taxa in txcober:
-        for ano in range(2015,2061):
+        for ano in periodo:
             txcober[taxa][ano] = txcober[taxa][ano-1] 
-    
-            
+                
     return txcober
 
 
 # Calcula taxa de empregados Contribuintes, Segurados Especiais
 # e Potenciais segurados especiais para clientela Rural
-def calc_tx_segurados_rur(pop_pnad):
+def calc_tx_segurados_rur(pop_pnad, periodo):
     
     # Dicionario que armazena as taxas 
     tx_seg_rur = {}
     
     # Padrões da chave: SegEspRurPnadH, ContrRurPnadH, SegPotRurPnadH 
-    # REVISAR: O texto diz para usar a PeaRur como denominador, mas acho
-    # que seria a SegRurPnadH.
+    # A LDO não descreve como calcular essa taxa
+    # O documento inicial do modelo do STN, IPEA e SPE diz para usar 
+    # a PeaRur como denominador, mas acho que o correto seria a SegRurPnadH.
     
-    # taxa de Cobertura Contributiva para o SM
+    # Taxas de participação de subconuntos da população rural
     for clientela_rural in ['SegEspRur', 'ContrRur', 'SegPotRur']:
         for sexo in ['H', 'M']:
            chave = 'tx'+clientela_rural+sexo
@@ -154,9 +140,9 @@ def calc_tx_segurados_rur(pop_pnad):
            # Preenche valores NaN com zero      
            tx_seg_rur[chave].fillna(0, inplace=True)
         
-    # Repete o ultimo ano nos demais anos
+    # Repete as taxas para todos os anos
     for taxa in tx_seg_rur:
-        for ano in range(2015,2061):
+        for ano in periodo:
             tx_seg_rur[taxa][ano] = tx_seg_rur[taxa][ano-1] 
     
             

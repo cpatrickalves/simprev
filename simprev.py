@@ -8,7 +8,7 @@ from util.dados import DadosLDO
 import modelos.fazenda as fz
 
 
-# Não usado pode enquanto
+# Não usado por enquanto
 def main():
     pass
 
@@ -86,7 +86,7 @@ salarios = dados.get_tabelas(dados.ids_salarios)
 
 # Calcula taxas de urbanização, participação e ocupação
 print('Calculando taxas ...\n')
-taxas = fz.calc_taxas(populacao_pnad)
+taxas = fz.calc_taxas(populacao_pnad, periodo)
 
 # Calcula: Pop Urbana|Rural, PEA e Pop Ocupada,
 # Contribuintes, Segurados

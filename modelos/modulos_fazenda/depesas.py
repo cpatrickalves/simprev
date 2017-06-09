@@ -110,9 +110,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
              if ano in despesas[beneficio].columns:      # verifica se existe projeção para esse ano
                  desp_total[ano] += despesas[beneficio][ano].sum()
 
-    despesas['total'] = desp_total
-
-    return despesas
+    return desp_total
 
 # Calcula a taxa de reposição (Eq. 48)
 def calc_tx_reposicao(valMedBenef, salarios, periodo):

@@ -47,13 +47,14 @@ def calc_pop_urb_rur(populacao, taxas):
     # Cria o objeto dados que possui os IDs das tabelas de populações
     dados = LerTabelas()
 
-    # Para cada um dos sexos calcula as clientelas
+    # Para cada um dos sexos calcula as clientelas 
+    # Equações 1 e 2 da LDO de 2018
     for pop in dados.ids_pop_ibge:
         chave_urb = pop.replace('Ibge', 'Urb')
         chave_rur = pop.replace('Ibge', 'Rur')
         chave_tx = pop.replace('PopIbge', 'txUrb')
-        pop_urb_rur[chave_urb] = populacao[pop] * taxas[chave_tx]
-        pop_urb_rur[chave_rur] = populacao[pop] * (1 - taxas[chave_tx])
+        pop_urb_rur[chave_urb] = populacao[pop] * taxas[chave_tx]           # Eq. 1
+        pop_urb_rur[chave_rur] = populacao[pop] * (1 - taxas[chave_tx])     # Eq. 2
         
         # Elimina colunas com dados ausentes
         pop_urb_rur[chave_urb].dropna(axis=1, inplace=True)  
@@ -61,19 +62,20 @@ def calc_pop_urb_rur(populacao, taxas):
         
     return pop_urb_rur
 
-# Calcula as populações urbana e rural    
-def calc_pea_urb_rur(pop_ur, taxas):
+# Calcula a população economicamente ativa urbana e rural    
+def calc_pea_urb_rur(pop, taxas):
         
     # Dicionário que armazena as populações urbanas e rurais
     pea_urb_rur = {}
     
-    # para cada uma das clientelas e sexos calcula a pea
+    # Para cada uma das clientelas e sexos calcula a pea
+    # Equação 4 da LDO de 2018
     for clientela in ['Urb','Rur']:
         for sexo in ['H','M']:
             chave_pea = 'Pea'+clientela+sexo            
             chave_tx = 'txPart'+clientela+sexo
             chave_pop = 'Pop'+clientela+sexo
-            pea_urb_rur[chave_pea] = pop_ur[chave_pop] * taxas[chave_tx]            
+            pea_urb_rur[chave_pea] = pop[chave_pop] * taxas[chave_tx]       # Eq. 4         
             
             # Elimina colunas com dados ausentes
             pea_urb_rur[chave_pea].dropna(axis=1, inplace=True)  
@@ -87,24 +89,26 @@ def calc_pocup_urb_rur(pea, taxas):
     # Dicionário que armazena as populações ocupadas urbanas e rurais
     pocup_urb_rur = {}
     
-    # para cada uma das clientelas e sexos calcula a Pocup
+    # Para cada uma das clientelas e sexos calcula a Pocup
+    # Equação 6 da LDO de 2018
     for clientela in ['Urb','Rur']:
         for sexo in ['H','M']:
             chave_pocup = 'Ocup'+clientela+sexo            
             chave_tx = 'txOcup'+clientela+sexo
             chave_pea = 'Pea'+clientela+sexo
-            pocup_urb_rur[chave_pocup] = pea[chave_pea] * taxas[chave_tx]            
+            pocup_urb_rur[chave_pocup] = pea[chave_pea] * taxas[chave_tx]   # Eq. 6          
             
             # Elimina colunas com dados ausentes
             pocup_urb_rur[chave_pocup].dropna(axis=1, inplace=True)  
               
-    # para cada uma das clientelas e sexos calcula a Pop desocupada
+    # Para cada uma das clientelas e sexos calcula a Pop desocupada
+    # Equação 7 da LDO de 2018
     for clientela in ['Urb','Rur']:
         for sexo in ['H','M']:
             chave_pdesocup = 'Desocup'+clientela+sexo   
             chave_pocup = 'Ocup'+clientela+sexo                        
             chave_pea = 'Pea'+clientela+sexo
-            pocup_urb_rur[chave_pdesocup] = pea[chave_pea] - pocup_urb_rur[chave_pocup]            
+            pocup_urb_rur[chave_pdesocup] = pea[chave_pea] - pocup_urb_rur[chave_pocup]   # Eq. 7         
             
             # Elimina colunas com dados ausentes
             pocup_urb_rur[chave_pdesocup].dropna(axis=1, inplace=True)  
