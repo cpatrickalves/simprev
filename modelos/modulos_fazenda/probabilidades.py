@@ -6,35 +6,8 @@
 from util.tabelas import LerTabelas
 import pandas as pd
 
-def calc_probabilidades(populacao, segurados, estoques, 
-                        concessoes, cessacoes, periodo):
-    
-    # Dicionário que armazena as probabilidades
-    probabilidades = {}
-    
-    prob_morte = calc_prob_morte(populacao) 
-    fat_ajuste_mort = calc_fat_ajuste_mort(estoques, cessacoes, 
-                                           prob_morte, periodo)
-    
-    prob_entrada_apos = calc_prob_apos(segurados, concessoes, periodo)      
-    #prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
-    #prob_entrada_pens = calc_prob_pensao(concessoes, prob_morte, 
-     #                                    fat_ajuste_mort, periodo)
 
-    probabilidades.update(prob_morte)
-    probabilidades.update(fat_ajuste_mort)
-    probabilidades.update(prob_entrada_apos)
-    #probabilidades.update(prob_entrada_aux) 
-    #probabilidades.update(prob_entrada_pens) 
-
-    # Busca por probabilidades erradas (ex: > 1)
-    busca_erros(probabilidades)
-
-    return probabilidades
-
-
-
-# Calcula probabilidades de entrada em benefícios
+# Calcula probabilidades de entrada em benefícios - Equação 16 da lDO
 def calc_prob_apos(segurados, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
@@ -46,15 +19,17 @@ def calc_prob_apos(segurados, concessoes, periodo):
 
     # Calcula probabilidades de entrada em aposentadorias
     for beneficio in dados.get_id_beneficios(ids_apos):
-        # Verifica se o possui os dados de concessões do benefício 
+        
+        # Verifica se existem dados de concessões do benefício 
         if beneficio in concessoes.keys():
 
             id_segurado = dados.get_id_segurados(beneficio)
             
             # Calcula a probabilidade de entrada
             # Nesse caso prob_entrada é do tipo Series e não DataFrame, pois
-            # Possui somente uma dimensão (não possui colunas)
+            # Possui somente uma dimensão (não possui colunas/anos)
             # A versão da LDO trabalha com estoques, porém o correto seriam os segurados
+            # Eq. 16
             prob_entrada = concessoes[beneficio][ano_prob] / (segurados[id_segurado][ano_prob-1] + (concessoes[beneficio][ano_prob]/2))
                         
             # Adiciona no dicionário
@@ -66,7 +41,7 @@ def calc_prob_apos(segurados, concessoes, periodo):
 
 
 '''
-# VERSAO ORIGINAL
+# VERSAO ORIGINAL - Equação 16
 # Calcula probabilidades de entrada em benefícios
 def calc_prob_apos(estoques, concessoes, periodo):
 
@@ -112,7 +87,7 @@ def calc_prob_apos(estoques, concessoes, periodo):
     return probabilidades
 '''
 
-# Calcula probabilidades de entrada em auxílios
+# Calcula probabilidades de entrada em auxílios - Equações 18 e 19 da LDO de 2018
 def calc_prob_aux(segurados, estoques, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
@@ -129,9 +104,12 @@ def calc_prob_aux(segurados, estoques, concessoes, periodo):
             conc = concessoes[beneficio][ano_prob]
             id_seg = dados.get_id_segurados(beneficio)
             seg_ano_ant = segurados[id_seg][ano_prob-1]
-            prob_auxd = conc / (seg_ano_ant + (conc/2))     # Eq 18 da LDO2018
-            probabilidades[beneficio] = prob_auxd            
-            probabilidades[beneficio].fillna(0, inplace = True)
+            prob_auxd = conc / (seg_ano_ant + (conc/2))      # Eq. 18
+            
+            # Substitui os NaN por zero
+            prob_auxd.fillna(0, inplace = True)
+            probabilidades[beneficio] = prob_auxd
+            
 
     # Calcula probabilidades de entrada em auxílios reclusão e acidente
     for beneficio in dados.get_id_beneficios(['Auxa' ]):#, 'Auxr']):
@@ -141,14 +119,18 @@ def calc_prob_aux(segurados, estoques, concessoes, periodo):
             id_seg = dados.get_id_segurados(beneficio)
             seg = segurados[id_seg][ano_prob]
             # REVISAR, para o caso do Auxr tem-se muitas divisões por zero, gerando inf
-            prob_aux_ar = est / seg                        # Eq 19 da LDO 2018
+            prob_aux_ar = est / seg                        # Eq. 19
+            
+            # Substitui os NaN por zero
+            prob_aux_ar.fillna(0, inplace = True)
             probabilidades[beneficio] = prob_aux_ar
-            probabilidades[beneficio].fillna(0, inplace = True)
 
     
     return probabilidades
 
+
 # Calcula probabilidade de morte baseado no método da fazenda
+# Equações 12 e 13 da LDO de 2018
 def calc_prob_morte(pop):
 
     # Obtem os anos da base do IBGE
@@ -175,11 +157,13 @@ def calc_prob_morte(pop):
                 pop_ano_passado = pop[chave_pop][ano-1][idade-1]
                 pop_prox_ano = pop[chave_pop][ano+1][idade+1]
 
-                mortalidade = (pop_ano_passado - pop_atual)/2 + (pop_atual - pop_prox_ano)/2
-                mort[ano][idade] = mortalidade/pop_atual
+                mortalidade = (pop_ano_passado - pop_atual)/2 + (pop_atual - pop_prox_ano)/2    # Eq. 13
+                mort[ano][idade] = mortalidade/pop_atual                                        # Eq. 12
 
-            # Calculo para a idade de 90 anos (Método UFPA) - REVISAR
+            # Calculo para a idade de 90 anos - REVISAR
+            # Como não é possível usar a Eq. 13 para a idade de 90 anos, usou-se o método da UFPA
             mort[ano][90] = 1 - (pop[chave_pop][ano+1][90] - pop[chave_pop][ano][89] * (1 - mort[ano][89])) / pop[chave_pop][ano][90]
+            #mort[ano][90] = (pop[chave_pop][ano-1][90] - pop[chave_pop][ano-1][89]) / pop[chave_pop][ano][90]
 
             # Para idade 0 anos  = (pop_atual - pop_prox_ano)/ pop_atual
             mort[ano][0] = ( pop[chave_pop][ano][0] - pop[chave_pop][ano+1][1])/pop[chave_pop][ano][0]
@@ -194,7 +178,7 @@ def calc_prob_morte(pop):
     return probMorte
 
 
-# Calcula o Fator de Ajuste de Mortalidade
+# Calcula o Fator de Ajuste de Mortalidade - Equações 14 e 15 - REVISAR - gera probabilidades zero que quando usadas nas equações zera tudo
 def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
 
     # ano utilizado para cálculo
@@ -216,12 +200,13 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
             ces_ano_atual = cessacoes[beneficio][ano_prob]
             est_ano_ant = estoques[beneficio][ano_prob-1]
 
-            # Taxa de cessações
+            # Taxa de cessações - Eq. 15 - REVISAR (ver PDF comentado)
             tx_ces = ces_ano_atual/(est_ano_ant + (ces_ano_atual/2))
+            
             # Probabilidade de morte
             mort = probMort['Mort'+beneficio[-1]][ano_prob]
 
-            # Salva a Série no dicionário
+            # Salva a Série no dicionário - Eq. 14
             fat_ajuste['fam'+beneficio] = tx_ces/mort
 
             # Substitui os NaN por zero
