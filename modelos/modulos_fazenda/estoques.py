@@ -156,6 +156,7 @@ def calc_estoq_pensoes(est, concessoes, prob, segurados, periodo):
         id_fam = 'fam'+benef                                                     # fator de ajuste de mortalidade
         id_pens = benef+"_tipoB"                                                 # Cria um Id para pensão do tipo A
         id_seg = dados.get_id_segurados(benef).replace(sexo, sexo_oposto)        # Obtem o Id do segurado trocando o sexo
+        id_est_ac = dados.get_clientela(benef) + sexo_oposto                     # Obtem o Id do segurado trocando o sexo
             
         # Cria DataFrame para armazenar o estoque de Pensões do tipo B 
         est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=[2014]+periodo)
@@ -174,16 +175,17 @@ def calc_estoq_pensoes(est, concessoes, prob, segurados, periodo):
             # Idades de 1 a 90 anos.
             for idade in range(1,91):
                 dif = 0
+                probab = 1 # temporareo
                 est_ano_anterior = est[id_pens][ano-1][idade-1]
                 prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][idade]
-                conc = prob * (segurados[id_seg][ano][idade-dif] + estoq_acum[id_seg][idade-dif]) * prob[id_mort_sex_op][idade-dif]
+                conc = probab * (segurados[id_seg][ano][idade-dif] + estoq_acum[id_est_ac][ano][idade-dif]) * prob[id_mort_sex_op][ano][idade-dif]
                 cessacoes = 0
                                 
                 # Eq. 23
                 est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver + conc - cessacoes
                 
                 # Salva o histórico de concessões
-                concessoes[benef][ano][idade] = conc
+                concessoes[benef].loc[idade, ano] = conc
         
    # Pe = PeA + PeB      # Eq. 21
     
@@ -206,7 +208,7 @@ def calc_concessoes_pensao(concessoes, estoques, segurados, prob, periodo):
         sexo_oposto = 'M' if sexo=='H' else 'H'                                  # Obtém o oposto
         id_mort_sex_op = 'Mort'+ sexo_oposto                                     # ex: MortM                
         id_seg = dados.get_id_segurados(benef).replace(sexo, sexo_oposto)        # Obtem o Id do segurado trocando o sexo
-        
+                
         # Obtém estoque acumulado de aposentadorias por clientela e sexo
         estoq_acum = calc_estoq_acumulado(estoques, periodo)
         
