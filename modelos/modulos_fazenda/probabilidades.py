@@ -217,54 +217,7 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
 
 # Calcula probabilidades para pensões
 def calc_prob_pensao(concessoes, prob_mort, fam, periodo):
-    
-    # ano utilizado para cálculo
-    #ano_prob = periodo[0]-1   #2014
-
-    # Dicionário que armazena as probabilidades
-    prob_pensao = {}
-
-    # Cria o objeto dados que possui os IDs das tabelas
-    dados = LerTabelas()
-
-    # ???
-    def get_ji(idade):
-        
-        if idade <= 23:
-            return 3
-        elif idade >=27 and idade <=32:
-            return 6
-        elif idade >=37 and idade <=39:
-            return 10
-        elif idade >=45 and idade <=55:
-            return 15
-        elif idade >=61 and idade <=63:
-            return 20
-        else:
-            return 0
-
-     # Calcula a probabilidade para cada tipo de pensão
-    for beneficio in dados.get_id_beneficios(['Pens']):
-        
-        sexo = beneficio[-1]
-        
-        # Verifica se existe dados de estoque
-        if beneficio in concessoes.keys():
-            for ano in periodo:
-                # começo a partir de 3 pois o Ji pode ser 3.
-                for idade in range(3,91):
-                    ji = get_ji(idade)
-                    conc = concessoes[beneficio][ano-ji][idade-ji]
-                    ''' 
-                    produtorio = 1
-                    k = idade-ji
-                    for i in range(k,idade):                        
-                        pmorte = prob_mort['Mort'+sexo][ano-(i-k)][k]
-                        fator = fam['fam'+beneficio][ano-(i-k)][k]
-                        produtorio *= 1 - pmorte * fator
-                        
-                    prob_pensao[beneficio][ano] = conc * produtorio
-                    '''  
+    pass
 
 
 # Calcula probabilidade de morte baseado no método do LTS/UFPA

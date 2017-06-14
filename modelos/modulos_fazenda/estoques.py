@@ -113,27 +113,24 @@ def calc_estoq_salMat(est, pop, seg, periodo):
     
 
 # Projeta os estoque de pensões - Equações 21 a 27 da LDO de 2018
-def calc_estoq_pensoes(est, prob, periodo):
+def calc_estoq_pensoes(est, concessoes, prob, segurados, periodo):
     
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()
     # Obtém o conjunto de benefícios do tipo pensão
     lista_pensoes = dados.get_id_beneficios('Pen')
     
-        
-    PeA = 0
-    
     # Calcula pensões do tipo A
     for benef in lista_pensoes:    
         for ano in periodo:
-                        
-            # Cria uma nova entrada no DataFrame que armazena os estoques
+            
+            # Adiciona uma nova coluna (ano) no DataFrame com valores zero
             est[benef][ano] = 0
             
-            sexo = benef[-1]                                # Obtém o Sexo
-            id_prob_morte = 'Mort'+ sexo                    # ex: MortH
-            id_fam = 'fam'+benef                            # fator de ajuste de mortalidade
-            id_pens = benef.replace('Pens', 'PensA_')       # Cria um Id para pensão do tipo A
+            sexo = benef[-1]                # Obtém o Sexo
+            id_prob_morte = 'Mort'+ sexo    # ex: MortH
+            id_fam = 'fam'+benef            # fator de ajuste de mortalidade
+            id_pens = benef+"_tipoA"         # Cria um Id para pensão do tipo A
             
             # Copia os dados de estoque para Pensão do tipo A 
             est[id_pens] = est[benef].copy()
@@ -142,15 +139,182 @@ def calc_estoq_pensoes(est, prob, periodo):
             # Como não se tem novas concessões desse tipo de pensão, calcula-se
             # nas idades de 1 a 90 anos.
             for idade in range(1,91):
-                est_ano_anterior = est[benef][ano-1][idade-1]
+                est_ano_anterior = est[id_pens][ano-1][idade-1]
                 prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][idade]
                                 
                 # Eq. 22
                 est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver
-              
-    PeB = 0
-        
-    Pe = PeA + PeB      # Eq. 21
-    
-    return Pe
 
+    
+    # Calcula pensões de tipo B - Equação 23
+    for benef in lista_pensoes:  
+        
+        sexo = benef[-1]                                                         # Obtém o Sexo
+        sexo_oposto = 'M' if sexo=='H' else 'H'                                  # Obtém o oposto
+        id_prob_morte = 'Mort'+ sexo                                             # ex: MortH
+        id_mort_sex_op = 'Mort'+ sexo_oposto                                     # ex: MortM
+        id_fam = 'fam'+benef                                                     # fator de ajuste de mortalidade
+        id_pens = benef+"_tipoB"                                                 # Cria um Id para pensão do tipo A
+        id_seg = dados.get_id_segurados(benef).replace(sexo, sexo_oposto)        # Obtem o Id do segurado trocando o sexo
+            
+        # Cria DataFrame para armazenar o estoque de Pensões do tipo B 
+        est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=[2014]+periodo)
+        est[id_pens].index.name = "IDADE"        
+              
+        estoq_acum = calc_estoq_acumulado(est, periodo)
+        
+        for ano in periodo:           
+            # Tipo de Pensão válida a partir de 2015            
+            if ano < 2015:
+                continue    # Pula anos inferiores a 2015
+                     
+            concessoes[benef][ano] = 0
+            
+            # Projeta pensões do tipo B            
+            # Idades de 1 a 90 anos.
+            for idade in range(1,91):
+                dif = 0
+                est_ano_anterior = est[id_pens][ano-1][idade-1]
+                prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][idade]
+                conc = prob * (segurados[id_seg][ano][idade-dif] + estoq_acum[id_seg][idade-dif]) * prob[id_mort_sex_op][idade-dif]
+                cessacoes = 0
+                                
+                # Eq. 23
+                est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver + conc - cessacoes
+                
+                # Salva o histórico de concessões
+                concessoes[benef][ano][idade] = conc
+        
+   # Pe = PeA + PeB      # Eq. 21
+    
+    return None
+
+
+# Calcula as concessões de Pensões - REVISAR - FALTAM AS PROBABILIDADES DE PENSAO
+# Equaçóes 24 e 25
+def calc_concessoes_pensao(concessoes, estoques, segurados, prob, periodo):
+
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+    # Obtém o conjunto de benefícios do tipo pensão
+    lista_pensoes = dados.get_id_beneficios('Pen')
+
+    # Calcula pensões de tipo B - Equação 23
+    for benef in lista_pensoes:  
+        
+        sexo = benef[-1]                                                         # Obtém o Sexo
+        sexo_oposto = 'M' if sexo=='H' else 'H'                                  # Obtém o oposto
+        id_mort_sex_op = 'Mort'+ sexo_oposto                                     # ex: MortM                
+        id_seg = dados.get_id_segurados(benef).replace(sexo, sexo_oposto)        # Obtem o Id do segurado trocando o sexo
+        
+        # Obtém estoque acumulado de aposentadorias por clientela e sexo
+        estoq_acum = calc_estoq_acumulado(estoques, periodo)
+        
+        for ano in periodo:           
+            # Tipo de Pensão válida a partir de 2015            
+            if ano < 2015:
+                continue    # Pula anos inferiores a 2015
+            
+            # Cria nova entrada no DataFrame
+            concessoes[benef][ano] = 0
+            
+            # Calcula concessões
+            # Idades de 1 a 90 anos.
+            for idade in range(1,91):
+                dif = 0
+                seg = segurados[id_seg][ano][idade-dif]
+                est_ac = estoq_acum[id_seg][idade-dif]
+                pmort = prob[id_mort_sex_op][idade-dif]
+                
+                # Eq. 24 e 25
+                concessoes[benef][ano][idade] = prob * (seg + est_ac) * pmort
+                
+    return concessoes
+
+# Calcula as cessações baseada no mecanismo legal de
+# cessação automática da Lei nº 13.135/2015 - Equação 27 - REVISAR FALTAM AS CONCESSOES
+def calc_cessacoes_pensao(cessacoes, concessoes, prob_mort, fam, periodo):
+    
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
+    # Parte da Eq. 27
+    def get_ji(idade):
+        
+        if idade <= 23:
+            return 3
+        elif idade >=27 and idade <=32:
+            return 6
+        elif idade >=37 and idade <=39:
+            return 10
+        elif idade >=45 and idade <=55:
+            return 15
+        elif idade >=61 and idade <=63:
+            return 20
+        else:
+            return 0
+
+    # Calcula a probabilidade para cada tipo de pensão
+    for beneficio in dados.get_id_beneficios(['Pens']):
+        
+        sexo = beneficio[-1]    # Obtém o sexo a partir do nome do benefício
+        
+        # Verifica se existe dados de estoque
+        if beneficio in concessoes.keys():
+            for ano in periodo:
+                
+                # Essa regra só vale a partir de 2015
+                if ano < 2015:
+                    continue    # Pula iteração
+                
+                # Cria nova entrada no Dataframe
+                cessacoes[beneficio][ano] = 0
+                                
+                for idade in range(0,91):
+                    ji = get_ji(idade)
+                    conc = concessoes[beneficio][ano-ji][idade-ji]
+                     
+                    produtorio = 1
+                    k = idade-ji
+                    for i in range(k,idade):                        
+                        pmorte = prob_mort['Mort'+sexo][ano-(i-k)][k]
+                        fator = fam['fam'+beneficio][ano-(i-k)][k]
+                        produtorio *= 1 - pmorte * fator
+                        
+                    cessacoes[beneficio][ano][idade] = conc * produtorio
+                    
+
+
+# Calcula estoque acumulado de aposentadorias por clientela e sexo
+def calc_estoq_acumulado(estoques, periodo):
+    
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+    
+    ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
+
+    # Dicionário que armazena o Estoque acumulado
+    est_acumulado = {}
+    
+    # As chaves do dicionário são as clientelas
+    for clientela in ['UrbPiso', 'UrbAcim', 'Rur']:                
+        # Cria o DataFrame
+        est_acumulado[clientela+'H'] = pd.DataFrame(0.0, index=range(0,91), columns=periodo)        
+        est_acumulado[clientela+'M'] = pd.DataFrame(0.0, index=range(0,91), columns=periodo)        
+        
+        # Obtém todas as aposentadorias e faz o somatório por clientela
+        for beneficio in dados.get_id_beneficios(ids_apos):                   
+            # Verifica se o estoque para o benefício existe
+            if beneficio in estoques.keys():
+                sexo = beneficio[-1]
+                if dados.get_clientela(beneficio) == clientela:                    
+                    est_acumulado[clientela+sexo] += estoques[beneficio]
+                                    
+    return est_acumulado
+                
+                    
+                    
+                    
+                    
+                    
+                    

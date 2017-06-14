@@ -73,7 +73,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                 #fator_prev = 1
                 #ajuste = 1
                 #val_med_novos_ben = fator_prev * ajuste * salarios['SalMedSegUrbAcimPnad'+sexo] # REVISAR Equação
-
+            
             for ano in periodo:
                 if ano in estoques[beneficio].columns:      # verifica se existe projeção para esse ano
                     if 'Aux' in beneficio:                  # Verifica se o beneficio e um Auxílio
@@ -83,10 +83,14 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
 
                         # Idade zero
                         #???
+                        
+                        # Pula pensões por enquanto - REVISAR
+                        if beneficio in dados.get_id_beneficios('Pe'):
+                            continue
 
                         # Idade de 1 a 90 anos
                         for idade in range(1,91):
-
+                            
                             desp_anterior = despesas[beneficio][ano-1][idade-1]
                             conc_anterior = concessoes[beneficio][ano-1][idade-1]
                             tx_rep_anterior = txReposicao[ano-1][idade-1]
