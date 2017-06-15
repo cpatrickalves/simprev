@@ -315,8 +315,57 @@ def calc_estoq_acumulado(estoques, periodo):
     return est_acumulado
                 
                     
+
+def calc_estoq_assistenciais(estoques, concessoes, populacao, prob, periodo):
+    
+    ids_assistenciais= ['LoasDef', 'LoasIdo', 'Rmv']
+
+    for tipo in ids_assistenciais:
+        for sexo in ['H', 'M']:            
+            beneficio = tipo+sexo
+            id_mort = 'Mort'+sexo
+            id_fam = 'fam'+beneficio
+            id_pop = "PopIbge"+sexo
+            
+            # Verifica se existe estoque para o benefício
+            if beneficio in estoques.keys():
+                for ano in periodo:                
+                    # Cria uma nova entrada no DataFrame
+                    estoques[beneficio][ano] = 0
                     
+                    # Idades de 1 a 89 anos 
+                    for idade in range(1,90):
+                        est_ano_ant = estoques[beneficio][ano-1][idade-1]
+                        prob_sobrev = 1 - prob[id_mort][ano][idade] * prob[id_fam][idade]
+                        
+                        # O RMV está em extinção (sem novas concessões)                    
+                        if tipo == 'Rmv':
+                            conc = 0
+                        else:
+                            conc = prob[beneficio][idade] * populacao[id_pop][ano][idade]
+                            # Guarda histórico de concessões
+                            concessoes[beneficio].loc[idade, ano] = conc
+                       
+                        # Eq.28 
+                        est = (est_ano_ant * prob_sobrev) + conc
+                        # Salva no DataFrame
+                        estoques[beneficio].loc[idade, ano] = est                        
+                        
+                    # Idade zero e 90 - REVISAR                    
+                    est_90_ant = estoques[beneficio][ano-1][90]
+                    # O RMV está em extinção (sem novas concessões)                    
+                    if tipo == 'Rmv':
+                        conc = 0
+                    else:
+                        # Idade zero - REVISAR - o valor esta aumentando muito
+                        estoques[beneficio].loc[0, ano] = prob[beneficio][0] * populacao[id_pop][ano][0]
+                        concessoes[beneficio].loc[0, ano] = estoques[beneficio].loc[0, ano]
+                        # Idade 90 - REVISAR - Tendência de queda constante
+                        conc = prob[beneficio][90] * (populacao[id_pop][ano][90] - est_90_ant)                  
+                        concessoes[beneficio].loc[90, ano] = conc
+                                            
+                    prob_sobrev = 1 - prob[id_mort][ano][90] * prob[id_fam][90]
+                    estoques[beneficio].loc[90, ano] = (est_90_ant * prob_sobrev) + conc
                     
-                    
-                    
+    return estoques
                     

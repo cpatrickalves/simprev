@@ -178,7 +178,9 @@ def calc_prob_morte(pop):
     return probMorte
 
 
-# Calcula o Fator de Ajuste de Mortalidade - Equações 14 e 15 - REVISAR - gera probabilidades zero que quando usadas nas equações zera tudo
+# Calcula o Fator de Ajuste de Mortalidade - Equações 14 e 15
+# REVISAR - gera probabilidades zero que quando usadas nas equações zera tudo e
+# algums valores de fam estão muito altos (>100)
 def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
 
     # ano utilizado para cálculo
@@ -187,7 +189,8 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
     # Dicionário que armazena as probabilidades
     fat_ajuste = {}
 
-    tags = ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd', 'Pens']
+    tags = ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd', 
+            'Pens', 'LoasDef', 'LoasIdo', 'Rmv']
 
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()
@@ -283,3 +286,39 @@ def busca_erros(probabilidades):
             print('Tabela: %s' %p)
             print(problemas[p])
             print('_________________\n')
+
+
+
+# Calcula probabilidades de entrada em benefícios assistênciais - Equação 31 da lDO
+def calc_prob_assist(populacao, concessoes, periodo):
+
+    probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
+    ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
+    ids_assist = ['LoasDef', 'LoasIdo']
+
+    # Calcula probabilidades de entrada em aposentadorias
+    for tipo in ids_assist:
+        for sexo in ['H', 'M']:            
+            beneficio = tipo+sexo
+            
+            # Verifica se existem dados de concessões do benefício 
+            if beneficio in concessoes.keys():                            
+                id_pop = "PopIbge"+sexo
+                
+                # Calcula a probabilidade de entrada  
+                conc = concessoes[beneficio][ano_prob]
+                pop_ant = populacao[id_pop][ano_prob-1]
+                # Eq. 31
+                prob_entrada = conc / (pop_ant + (conc/2))
+                                
+                # Substitui os NaN (not a number) por zeros
+                prob_entrada.fillna(0, inplace = True)
+                # Adiciona no dicionário
+                probabilidades[beneficio] = prob_entrada
+     
+    #  Probabilidade de Concessão no RMV é nula, pois o benefício está em extinção (sem novas concessões)
+    for sexo in ['H', 'M']:    
+          probabilidades['Rmv'+sexo] = pd.Series(0, index=range(0,91))
+                                
+    return probabilidades
+

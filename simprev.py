@@ -125,6 +125,8 @@ print('Projetando Despesas ...\n')
 resultados['despesas'] = fz.calc_despesas(despesas, estoques, concessoes, salarios,
                             valMedBenef, probabilidades, dadosLDO2018, periodo)
 
+# Existem probabilidades de morte negativa - fam rmv tb
+# corrigir calculos para idade 90
 # Comparar os segurados calculados com os segurados das planilhas
 # Nos estoques aparecem aposentadorias com menos de 45 anos (corrigir)
 # Alterar as porcentagens 
