@@ -42,8 +42,8 @@ def calc_estoq_apos(est, conc, prob, seg, periodo):
                     est_ano_anterior = est[benef][ano-1][idade-1]
                     prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][idade]
                     entradas = seg[id_segurado][ano][idade] * prob[benef][idade]
+                    # Eq. 11
                     est[benef].loc[idade, ano] = est_ano_anterior * prob_sobreviver + entradas     # Eq. 11
-                    
                     # Salva a quantidade de concessões para uso posterior
                     conc[benef].loc[idade,ano] = entradas
                 
@@ -89,7 +89,8 @@ def calc_estoq_salMat(est, pop, seg, periodo):
                       
             id_seg = dados.get_id_segurados(benef)
             
-            # Acumula mulheres de 16 a 45 anos para o estoque existente
+            # Os estoques de SalMat são agrupados por ano  
+            # Acumula os estoques de mulheres ja presentes no estoque            
             for ano in est[benef]:    
                 est_acumulado[ano] = est[benef][ano].sum()
                     
@@ -104,8 +105,9 @@ def calc_estoq_salMat(est, pop, seg, periodo):
                 for idade in range(16,46):
                     seg_16_45 += seg[id_seg][ano][idade]
                     pop_16_45 += pop['PopIbgeM'][ano][idade]
-                  
-                est_acumulado[ano] = (seg_16_45/pop_16_45) * nascimentos    # Eq. 20
+
+                # Eq. 20
+                est_acumulado[ano] = (seg_16_45/pop_16_45) * nascimentos    
                 
             est[benef] = est_acumulado
             

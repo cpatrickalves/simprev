@@ -17,53 +17,61 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
     # Inicializa com o valor conhecido
     salarioMinimo[ano_inicial] = salMinInicial
     
-    # Projeta crescimento do Salário Mínimo (Eq 36)
+    # Projeta crescimento do Salário Mínimo (Eq. 36)
     for txCres in dadosLDO['TxCrescimentoSalMin']:
         ano_inicial += 1
-        salarioMinimo[ano_inicial] = salarioMinimo[ano_inicial-1] * (1 + txCres/100) #REVISAR
+        salarioMinimo[ano_inicial] = salarioMinimo[ano_inicial-1] * (1 + txCres/100) 
 
     # Salva a Serie no dicionário
     salarios['salarioMinimo']  = salarioMinimo  
     
-    # Projeta crescimento dos salários da Pop. Ocupada a partir da produtividade (Eq 32) - REVISAR - Acho que não é necessário
+    # Projeta crescimento dos salários da Pop. Ocupada a partir dos 
+    # dados da Pnad e da produtividade (Eq 32)
     for clientela in ['Urb', 'Rur']:
         for sexo in ['H', 'M']:
             for ano in periodo:
                 id_sal = 'SalMedPopOcup' + clientela + 'Pnad' + sexo
                 salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100)               
     
-    # Projeta crescimento dos salários da Pop. Ocupada a partir da produtividade (Eq 32) - REVISAR 
-    for sexo in ['H', 'M']:
-        for ano in periodo:
-            id_sal = 'SalMedPopOcupUrbAcimPnad' + sexo
-            salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100)               
-    
                 
-    # Projeta crescimento dos salários dos Segurados acima do SM apartir da produtividade (Eq 37)
+    # Projeta crescimento dos salários dos Segurados acima do SM apartir da produtividade (Eq. 37)
     for sexo in ['H', 'M']:
         for ano in periodo:
             id_sal = 'SalMedSegUrbAcimPnad' + sexo
             salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100)
-
-          
-    # Projeta Massa Salarial para Pop. Ocupada (Eq 33)
+    
+    
+    # Projeta crescimento dos salários da Pop. Ocupada que recebe acima do piso
+    # a partir da Pnad e da produtividade
+    # REVISAR: Esses valores são utilizados na Eq. 45, porém acredito que deveriam
+    # Ser utilizados os segurados e náo a PopOcup
+    for sexo in ['H', 'M']:
+        for ano in periodo:
+            id_sal = 'SalMedPopOcupUrbAcimPnad' + sexo
+            salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100)               
+     
+            
+    # Projeta Massa Salarial para Pop. Ocupada (Eq. 33)
     for clientela in ['Urb', 'Rur']:
         for sexo in ['H', 'M']:            
             id_msal = 'MSalPopOcup' + clientela + sexo
             id_sal = 'SalMedPopOcup' + clientela + 'Pnad' + sexo
             id_pocup = 'Ocup' + clientela + sexo
             salarios[id_msal] = salarios[id_sal] * populacao[id_pocup]
-            
-           
-    # Projeta Massa Salarial para Urbanos que recebem o SM (Eq 34)
+                    
+    
+    # Projeta Massa Salarial para Contribuintes Urbanos que recebem o SM (Eq. 34)
     for sexo in ['H', 'M']:            
         id_csm = 'CsmUrb' + sexo
-        id_msal = 'MSal' + id_csm        
+        id_msal = 'MSal' + id_csm
+        # Multiplica SM do ano correspondente pela quantidade de trabalhadores
+        # em cada idade        
         salarios[id_msal] = salarios['salarioMinimo'] * segurados[id_csm]
         # Elimina colunas vazias
         salarios[id_msal].dropna(how='all', axis=1, inplace=True)  
-     
-    # Projeta Massa Salarial para Segurados que recebem acima do SM (Eq 35)
+            
+    
+    # Projeta Massa Salarial para Segurados que recebem acima do SM (Eq. 35)
     for sexo in ['H', 'M']:            
         id_msal = 'MSalCaUrb' + sexo
         id_sal = 'SalMedSegUrbAcimPnad'+ sexo
@@ -71,14 +79,6 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
         salarios[id_msal] = salarios[id_sal] * segurados[id_seg]
          # Elimina colunas vazias
         salarios[id_msal].dropna(how='all', axis=1, inplace=True)  
-            
         
     return salarios
-            
         
-    
-    
-
-
-
-

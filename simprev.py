@@ -116,6 +116,9 @@ salarios = fz.calc_salarios(salarios, populacao, segurados,
 print('Projetando Valores dos benefícios ...\n')
 valMedBenef = fz.calc_valMedBenef(estoques, despesas, dadosLDO2018, periodo)
 
+# Calcula o número médio de parcelas para cada beneficio
+nparcelas = fz.calc_n_parcelas(estoques, despesas, valMedBenef, periodo)
+
 # Projeta receitas e respesas
 print('Projetando Receita e PIB ...\n')
 resultados['receitas'] = fz.calc_receitas(salarios, aliquota, periodo)
@@ -123,7 +126,7 @@ resultados = fz.calc_pib(resultados, salarios, pib_inicial, periodo)
 
 print('Projetando Despesas ...\n')
 resultados['despesas'] = fz.calc_despesas(despesas, estoques, concessoes, salarios,
-                            valMedBenef, probabilidades, dadosLDO2018, periodo)
+                            valMedBenef, probabilidades, dadosLDO2018, nparcelas, periodo)
 
 # Existem probabilidades de morte negativa - fam rmv tb
 # corrigir calculos para idade 90

@@ -42,8 +42,8 @@ def calc_demografia(populacao, taxas):
 def calc_estoques(estoques, concessoes, probabilidades, populacao, segurados, periodo):
     calc_estoq_apos(estoques, concessoes, probabilidades, segurados, periodo)
     calc_estoq_pensoes(estoques, concessoes, probabilidades, segurados, periodo)
-    # calc_estoq_aux(estoques, probabilidades, segurados, periodo)
-    # calc_estoq_salMat(estoques, populacao , segurados, periodo)
+    calc_estoq_aux(estoques, probabilidades, segurados, periodo)
+    calc_estoq_salMat(estoques, populacao , segurados, periodo)
     calc_estoq_assistenciais(estoques, concessoes, populacao, probabilidades, periodo)
 
     return estoques
@@ -59,7 +59,7 @@ def calc_probabilidades(populacao, segurados, estoques,
                                            prob_morte, periodo)
 
     prob_entrada_apos = calc_prob_apos(segurados, concessoes, periodo)
-    # prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
+    prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
     # prob_entrada_pens = calc_prob_pensao(concessoes, prob_morte,
     #                                    fat_ajuste_mort, periodo)
     prob_assist = calc_prob_assist(populacao, concessoes, periodo)
@@ -68,7 +68,7 @@ def calc_probabilidades(populacao, segurados, estoques,
     probabilidades.update(prob_morte)
     probabilidades.update(fat_ajuste_mort)
     probabilidades.update(prob_entrada_apos)
-    # probabilidades.update(prob_entrada_aux)
+    probabilidades.update(prob_entrada_aux)
     # probabilidades.update(prob_entrada_pens)
     probabilidades.update(prob_assist)
 

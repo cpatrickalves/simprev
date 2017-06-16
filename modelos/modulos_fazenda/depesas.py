@@ -33,16 +33,19 @@ def calc_valMedBenef(estoques, despesas, dadosLDO, periodo):
     return valMedBenef
 
 
-def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabilidades, dadosLDO, periodo):
+def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabilidades, dadosLDO, nparcelas, periodo):
 
     # Objeto criado para uso das funções da Classe LerTabelas
     dados = LerTabelas()
-    nparcelas = 13  # REVISAR
-
+        
     ##### Calcula despesas para clientelas Rurais e Urbanos que recebem o Piso (1 SM) #####
     for clientela in ['Rur', 'Piso']:
         beneficios = dados.get_id_beneficios(clientela)
         for beneficio in beneficios:
+            # Pula o Salario Maternidade - REVISAR
+            if beneficio in dados.get_id_beneficios('SalMat'):
+                continue
+            
             if beneficio in estoques:
                 for ano in periodo:
                     if ano in estoques[beneficio].columns:      # verifica se existe projeção para esse ano
@@ -50,9 +53,10 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                         estoq_total = estoques[beneficio][ano].sum()
                         estoq_total_ano_ant = estoques[beneficio][ano-1].sum()
                         valor_benef = salarios['salarioMinimo'][ano]
+                        np = nparcelas[beneficio]
 
                         # Calcula a despesa para cada benefício (Eq. 44)
-                        despesas[beneficio][ano] = ((estoq_total + estoq_total_ano_ant)/2) * valor_benef * nparcelas
+                        despesas[beneficio][ano] = ((estoq_total + estoq_total_ano_ant)/2) * valor_benef * np
 
     ##### Calcula despesas para clientela Urbana que recebe acima do Piso #####
 
@@ -88,23 +92,25 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                         if beneficio in dados.get_id_beneficios('Pe'):
                             continue
 
-                        # Idade de 1 a 90 anos
+                        # Idade de 1 a 90 anos - REVISAR - falta idade zero
                         for idade in range(1,91):
                             
                             desp_anterior = despesas[beneficio][ano-1][idade-1]
                             conc_anterior = concessoes[beneficio][ano-1][idade-1]
                             tx_rep_anterior = txReposicao[ano-1][idade-1]
+                            # REVISAR: Acredito que o correto seria usar os segurados e nao a PopOcup
                             rend_med_ocup_ant = salarios['SalMedPopOcupUrbAcimPnad'+sexo][ano-1][idade-1]
                             prob_morte = probabilidades['Mort'+sexo][ano][idade]
                             fam = probabilidades['fam'+beneficio][idade]
                             reajuste = dadosLDO['TxReajusteBeneficios'][ano]
                             novas_conc = concessoes[beneficio][ano][idade]
                             valor_med_conc = val_med_novos_ben[ano][idade]
+                            np = nparcelas[beneficio]
 
                             # Eq. 45
-                            part1 = desp_anterior + conc_anterior * tx_rep_anterior * rend_med_ocup_ant * (nparcelas/2)
+                            part1 = desp_anterior + conc_anterior * tx_rep_anterior * rend_med_ocup_ant * (np/2)
                             part2 = (1 - prob_morte * fam) * (1 + reajuste/100)
-                            part3 = (novas_conc * valor_med_conc * (nparcelas/2))
+                            part3 = (novas_conc * valor_med_conc * (np/2))
                             despesas[beneficio].loc[idade, ano] = part1 * part2 + part3
 
     ##### Calcula a despesa total #####
@@ -140,4 +146,52 @@ def calc_tx_reposicao(valMedBenef, salarios, periodo):
 
     return txReposicao
 
+# Calcula o número de parcelas paga por ano por um benefício
+# Implementado conforme seção 4.6 da LDO (pag. 43)
+def calc_n_parcelas(estoques, despesa, valMedBenef, periodo):
+    
+    # É necessário o valor total e despesas por beneficios para fazer esse calculo
+    # so temos dados do mes de dezembro, por isso os valores foram fixados manualmente
+    
+    # ano_estoq = periodo[0]-1    # 2014
+    
+    dados = LerTabelas()    
 
+    # Dicionário que armazena o número médio de parcelas para tipo de beneficio
+    n_parcelas = {}
+    
+    ids_apos = ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
+    ids_assistenciais= ['LoasDef', 'LoasIdo', 'Rmv']
+    
+    # Aposentadorias
+    for benef in dados.get_id_beneficios(ids_apos):
+        n_parcelas[benef] = 13
+
+    # Pensões
+    for benef in dados.get_id_beneficios('Pen'):
+        n_parcelas[benef] = 13
+
+    # Auxilios
+    for benef in dados.get_id_beneficios('Aux'):
+        n_parcelas[benef] = 11
+
+    # Salario Maternidade
+    for benef in dados.get_id_beneficios('SalMat'):
+        n_parcelas[benef] = 6
+
+    # Assistenciais
+    for benef in dados.get_id_beneficios(ids_assistenciais):
+        n_parcelas[benef] = 12
+
+   # for beneficio in estoques.keys():
+   #     # Verifica se existe dados de despesa para o beneficio
+   #     if beneficio in despesa.keys():
+   #         desp = despesa[beneficio][ano_estoq].sum()
+   #         est = estoques[beneficio][ano_estoq].sum()
+   #         vm = valMedBenef[beneficio][ano_estoq].mean()
+   #         n_parcelas[beneficio] = Dt/(vm*est)
+                   
+    return n_parcelas
+    
+    
+    
