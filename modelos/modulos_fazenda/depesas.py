@@ -93,21 +93,19 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
             
             for ano in periodo:
                 if ano in estoques[beneficio].columns:      # verifica se existe projeção para esse ano
+                
                     # Os auxílios usam um cálculo diferente
-                    if 'Aux' in beneficio:                  
-                        
+                    if 'Aux' in beneficio:                                          
                         est_ano = estoques[beneficio][ano]
                         vmb = val_med_novos_ben[ano]
+                        np = nparcelas[beneficio]
                         
                         # Eq. 46
-                        despesas[beneficio][ano] = 0
+                        despesas[beneficio][ano] = est_ano * vmb * np
                         
                     else:
                         # Cálculo para Aposentadorias e Pensões
 
-                        # Idade zero
-                        #???
-                        
                         # Pula pensões por enquanto - REVISAR
                         if beneficio in dados.get_id_beneficios('Pe'):
                             continue
@@ -133,7 +131,13 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                             part2 = (1 - prob_morte * fam) * (1 + reajuste/100)
                             part3 = (novas_conc * valor_med_conc * (np/2))
                             despesas[beneficio].loc[idade, ano] = part1 * part2 + part3
-
+                            
+                        # Idade zero
+                        novas_conc = concessoes[beneficio][ano][0]
+                        valor_med_conc = val_med_novos_ben[ano][0]
+                        np = nparcelas[beneficio]
+                        despesas[beneficio].loc[0, ano] = novas_conc * valor_med_conc * (np/2)
+                        
 
     ##### Calcula despesas para o Salário Maternidade #####
     for beneficio in dados.get_id_beneficios('SalMat'):
