@@ -125,8 +125,9 @@ resultados['receitas'] = fz.calc_receitas(salarios, aliquota, periodo)
 resultados = fz.calc_pib(resultados, salarios, pib_inicial, periodo)
 
 print('Projetando Despesas ...\n')
-resultados['despesas'] = fz.calc_despesas(despesas, estoques, concessoes, salarios,
-                            valMedBenef, probabilidades, dadosLDO2018, nparcelas, periodo)
+resultados = fz.calc_despesas(despesas, estoques, concessoes, salarios,
+                            valMedBenef, probabilidades, dadosLDO2018, 
+                            nparcelas, resultados, periodo)
 
 
 # Compara as equações da LDO com a do DOcumento da fazenda
