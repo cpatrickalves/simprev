@@ -86,7 +86,7 @@ def calc_estoq_salMat(est, pop, seg, periodo):
         if benef in est:
             # Armazena valores do ano 
             est_acumulado = pd.Series(index=est[benef].columns)
-                      
+            # Obtem o tipo de segurado a partir do benefício
             id_seg = dados.get_id_segurados(benef)
             
             # Os estoques de SalMat são agrupados por ano  
@@ -96,7 +96,7 @@ def calc_estoq_salMat(est, pop, seg, periodo):
                     
             # Realiza projeção    
             for ano in periodo:
-                est_acumulado[ano] = 0     # Cria um novo ano com valores zeros
+                est_acumulado[ano] = 0     # Cria um novo ano 
                 nascimentos = pop['PopIbgeM'][ano][0] + pop['PopIbgeH'][ano][0]
                 
                 # Acumula mulheres de 16 a 45 anos
@@ -108,8 +108,9 @@ def calc_estoq_salMat(est, pop, seg, periodo):
 
                 # Eq. 20
                 est_acumulado[ano] = (seg_16_45/pop_16_45) * nascimentos    
-                
-            est[benef] = est_acumulado
+            
+            # Cria uma nova entrada no dicionário para armazenar os estoques acumulados
+            est[benef+"_total"] = est_acumulado
             
     return est
     
@@ -315,8 +316,7 @@ def calc_estoq_acumulado(estoques, periodo):
                     est_acumulado[clientela+sexo] += estoques[beneficio]
                                     
     return est_acumulado
-                
-                    
+                                    
 
 def calc_estoq_assistenciais(estoques, concessoes, populacao, prob, periodo):
     

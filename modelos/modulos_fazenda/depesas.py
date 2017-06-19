@@ -6,6 +6,7 @@ from util.tabelas import LerTabelas
 import pandas as pd
 import numpy as np
 
+# REVISAR - Verificar se não existem beneficio menores que 1 SM
 def calc_valMedBenef(estoques, despesas, dadosLDO, periodo):
 
     # ultimo com despesa/estoque conhecida (2014)
@@ -14,10 +15,13 @@ def calc_valMedBenef(estoques, despesas, dadosLDO, periodo):
     # Dicionário que armazena os valores médios para cada benefício
     valMedBenef = {}
 
-    for beneficio in estoques.keys():
-        if beneficio in despesas.keys():
+    for beneficio in estoques.keys():                          
+        if beneficio in despesas.keys():            
             # Calcula valor médio
-            valMed = despesas[beneficio][ultimo_ano]/estoques[beneficio][ultimo_ano]
+            desp = despesas[beneficio][ultimo_ano]
+            est = estoques[beneficio][ultimo_ano]
+            valMed = desp /est
+                
             # Converte para um dataframe
             valMedBenef[beneficio] = pd.DataFrame(valMed, columns=[ultimo_ano])
             # Substitui os NaN por zeros
@@ -38,35 +42,43 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
     # Objeto criado para uso das funções da Classe LerTabelas
     dados = LerTabelas()
         
-    ##### Calcula despesas para clientelas Rurais e Urbanos que recebem o Piso (1 SM) #####
-    for clientela in ['Rur', 'Piso']:
+    ##### Calcula despesas para clientelas Rurais, Urbarnas e assistenciais que recebem o Piso (1 SM) #####
+    for clientela in ['Rur', 'Piso', 'Rmv', 'Loas']:
         beneficios = dados.get_id_beneficios(clientela)
         for beneficio in beneficios:
-            # Pula o Salario Maternidade - REVISAR
-            if beneficio in dados.get_id_beneficios('SalMat'):
+            
+            # Pula o SalMat pois o calculo é diferente
+            if 'SalMat' in beneficio:                        
                 continue
             
-            if beneficio in estoques:
-                for ano in periodo:
-                    if ano in estoques[beneficio].columns:      # verifica se existe projeção para esse ano
-                        # Obtem o estoque total do ano e do ano anterior
-                        estoq_total = estoques[beneficio][ano].sum()
-                        estoq_total_ano_ant = estoques[beneficio][ano-1].sum()
+            # Verifica se existe estoque para o beneficio
+            if beneficio in estoques:                
+                for ano in periodo:                                        
+                    # verifica se existe projeção para esse ano
+                    if ano in estoques[beneficio].columns:                  
+                        # Obtem o estoques do ano e do ano anterior
+                        estoq_total = estoques[beneficio][ano]
+                        estoq_total_ano_ant = estoques[beneficio][ano-1]
                         valor_benef = salarios['salarioMinimo'][ano]
                         np = nparcelas[beneficio]
 
                         # Calcula a despesa para cada benefício (Eq. 44)
                         despesas[beneficio][ano] = ((estoq_total + estoq_total_ano_ant)/2) * valor_benef * np
 
+    
     ##### Calcula despesas para clientela Urbana que recebe acima do Piso #####
-
     # Calcula taxa de reposiçao para todos os anos da projeçao
     txReposicao = calc_tx_reposicao(valMedBenef, salarios, periodo)
 
     for beneficio in dados.get_id_beneficios('Acim'):
-        if beneficio in estoques:
-
+        
+        # Pula o SalMat pois o calculo é diferente e feito posteriormente
+        if 'SalMat' in beneficio:                        
+            continue
+        
+        if beneficio in estoques:            
             sexo = beneficio[-1]
+            
             # Eq. 47
             val_med_novos_ben = txReposicao * salarios['SalMedSegUrbAcimPnad'+sexo] # REVISAR Equação
 
@@ -113,14 +125,59 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                             part3 = (novas_conc * valor_med_conc * (np/2))
                             despesas[beneficio].loc[idade, ano] = part1 * part2 + part3
 
+
+    ##### Calcula despesas para o Salário Maternidade #####
+    for beneficio in dados.get_id_beneficios('SalMat'):
+        # Verifica se existe estoque para o beneficio
+        if beneficio in estoques:                        
+            # Objeto do tipo Series que armazena as despesas por ano 
+            desp_acumulada = pd.Series(index=estoques[beneficio].columns)
+            # Acumula as despesas conhecidas 
+            for ano in despesas[beneficio].columns:    
+                desp_acumulada[ano] = despesas[beneficio][ano].sum()
+                        
+            # Projeta os anos restantes
+            # Obtem o estoques do ano e do ano anterior
+            for ano in periodo:
+                estoq_total = estoques[beneficio+'_total'][ano]
+                #estoq_total_ano_ant = estoques[beneficio+'_total'][ano-1]
+                
+                # Obtem o valor médio do benefício
+                if dados.get_clientela(beneficio) == 'UrbAcim':
+                    # Como não se usa dados desagregados de idade, utiliza-se a média
+                    # Considera somente a faixa de 16 a 45 anos
+                    valor_benef = valMedBenef[beneficio][ano][16:46].mean()
+                else:
+                    valor_benef = salarios['salarioMinimo'][ano]                    
+
+                np = nparcelas[beneficio]
+                            
+                # OBS: A LDO não descreve a equação para o calculo de despesas para o SalMat - REVISAR
+                desp_acumulada[ano] = estoq_total * valor_benef * np  
+                
+            # Salva no DataFrame
+            despesas[beneficio+'_total'] = desp_acumulada
+
+
     ##### Calcula a despesa total #####
     desp_total = pd.Series(0.0, index=periodo)  # Objeto do tipo Serie que armazena a despesa total
     for ano in periodo:
         for beneficio in despesas.keys():
-             if ano in despesas[beneficio].columns:      # verifica se existe projeção para esse ano
-                 desp_total[ano] += despesas[beneficio][ano].sum()
+            
+            # O objeto que armazena as despesas com Salário Maternidade é diferente
+            # Verifica se o benefício é do tipo Salário Maternidade
+            if 'SalMat' in beneficio:                
+                if '_total' in beneficio:                                     
+                    if ano in despesas[beneficio].index:      # verifica se existe projeção para esse ano                                                
+                        desp_total[ano] += despesas[beneficio][ano]                        
+                continue # Pula para o próximo benefício
+            
+            # Calculo para os demais benefícios
+            if ano in despesas[beneficio].columns:      # verifica se existe projeção para esse ano
+                desp_total[ano] += despesas[beneficio][ano].sum()               
 
     return desp_total
+
 
 # Calcula a taxa de reposição (Eq. 48)
 def calc_tx_reposicao(valMedBenef, salarios, periodo):

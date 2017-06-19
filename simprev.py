@@ -128,6 +128,8 @@ print('Projetando Despesas ...\n')
 resultados['despesas'] = fz.calc_despesas(despesas, estoques, concessoes, salarios,
                             valMedBenef, probabilidades, dadosLDO2018, nparcelas, periodo)
 
+
+# Compara as equações da LDO com a do DOcumento da fazenda
 # Existem probabilidades de morte negativa - fam rmv tb
 # corrigir calculos para idade 90
 # Comparar os segurados calculados com os segurados das planilhas
