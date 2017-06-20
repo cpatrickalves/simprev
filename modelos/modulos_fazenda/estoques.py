@@ -122,7 +122,8 @@ def calc_estoq_pensoes(est, concessoes, prob, segurados, periodo):
     dados = LerTabelas()
     # Obtém o conjunto de benefícios do tipo pensão
     lista_pensoes = dados.get_id_beneficios('Pen')
-    
+    # Hipótese de que o diferencial de idade médio entre cônjuges é de 4 anos (pag. 45 LDO de 2018) - AQUI
+    D = 4
     # Calcula pensões do tipo A
     for benef in lista_pensoes:    
         for ano in periodo:

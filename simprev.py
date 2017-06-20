@@ -46,7 +46,8 @@ aliquota = 0.31
 pib_inicial = 5521256074049.36
 
 # Objeto que armazena dados da LDO de 2018
-dadosLDO2018 = DadosLDO.get_tabelas()
+ldo = DadosLDO()
+dadosLDO2018 = ldo.get_tabelas()
 
 #############################################################################
 
