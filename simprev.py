@@ -104,7 +104,7 @@ probabilidades = fz.calc_probabilidades(populacao, segurados, estoques,
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')
-estoques = fz.calc_estoques(estoques, concessoes, probabilidades,
+estoques = fz.calc_estoques(estoques, concessoes, cessacoes, probabilidades,
                          populacao, segurados, periodo)
 
 # Projeta Salarios

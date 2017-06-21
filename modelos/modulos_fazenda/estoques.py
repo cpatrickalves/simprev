@@ -116,7 +116,7 @@ def calc_estoq_salMat(est, pop, seg, periodo):
     
 
 # Projeta os estoque de pensões - Equações 21 a 27 da LDO de 2018
-def calc_estoq_pensoes(est, concessoes, probabilidades, segurados, periodo):
+def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, periodo):
     
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()
@@ -148,11 +148,12 @@ def calc_estoq_pensoes(est, concessoes, probabilidades, segurados, periodo):
                 # Eq. 22
                 est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver
   
-    # Obtém concessões
+    # Obtém concessões do tipo B
     conc = calc_concessoes_pensao(concessoes, est, segurados, probabilidades, periodo)
-    
-    return 0 
-    
+    # Obtém cessações
+    cess = calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo)
+       
+    return 0
     # Calcula pensões de tipo B - Equação 23
     for benef in lista_pensoes:  
         
@@ -252,8 +253,9 @@ def calc_concessoes_pensao(concessoes, estoques, segurados, probabilidades, peri
     return concessoes
 
 # Calcula as cessações baseada no mecanismo legal de
-# cessação automática da Lei nº 13.135/2015 - Equação 27 - REVISAR FALTAM AS CONCESSOES
-def calc_cessacoes_pensao(cessacoes, concessoes, prob_mort, fam, periodo):
+# cessação automática da Lei nº 13.135/2015 - Equação 27
+# REVISAR - Cessacoes e concessoes para mulheres esta dando um valor fixo para idades finais
+def calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo):
     
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()
@@ -274,12 +276,12 @@ def calc_cessacoes_pensao(cessacoes, concessoes, prob_mort, fam, periodo):
         else:
             return 0
 
-    # Calcula a probabilidade para cada tipo de pensão
-    for beneficio in dados.get_id_beneficios(['Pens']):
+    # Calcula as cessações para cada tipo de pensão
+    for beneficio in dados.get_id_beneficios(['Pe']):
         
         sexo = beneficio[-1]    # Obtém o sexo a partir do nome do benefício
         
-        # Verifica se existe dados de estoque
+        # Verifica se existe dados de concessões
         if beneficio in concessoes.keys():
             for ano in periodo:
                 
@@ -289,21 +291,30 @@ def calc_cessacoes_pensao(cessacoes, concessoes, prob_mort, fam, periodo):
                 
                 # Cria nova entrada no Dataframe
                 cessacoes[beneficio][ano] = 0
-                                
-                for idade in range(0,91):
+                
+                # Como o ji é 3 para idades menores que 23                                
+                # cessações são zero para i < 3
+                for idade in range(3,91):
                     ji = get_ji(idade)
-                    conc = concessoes[beneficio][ano-ji][idade-ji]
+                    
+                    # As pensões do tipo B só existem a partir de 2015
+                    if (ano-ji) < 2015:                        
+                        cessacoes[beneficio].loc[idade, ano] = 0
+                        continue
+                    else:
+                        conc = concessoes[beneficio][ano-ji][idade-ji]
                      
                     produtorio = 1
                     k = idade-ji
                     for i in range(k,idade):                        
-                        pmorte = prob_mort['Mort'+sexo][ano-(i-k)][k]
-                        fator = fam['fam'+beneficio][ano-(i-k)][k]
-                        produtorio *= 1 - pmorte * fator
+                        pmorte = probabilidades ['Mort'+sexo][ano-(i-k)][k]
+                        fator = probabilidades['fam'+beneficio][k]
+                        produtorio *= (1 - pmorte * fator)
                         
-                    cessacoes[beneficio][ano][idade] = conc * produtorio
+                    cessacoes[beneficio].loc[idade, ano] = conc * produtorio
                     
-
+    return cessacoes
+                    
 
 # Calcula estoque acumulado de aposentadorias por clientela e sexo
 def calc_estoq_acumulado(estoques, periodo):
