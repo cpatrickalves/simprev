@@ -4,6 +4,7 @@
 """
 
 from util.tabelas import LerTabelas
+from modelos.modulos_fazenda.estoques import calc_estoq_acumulado
 import pandas as pd
 
 
@@ -156,7 +157,11 @@ def calc_prob_morte(pop):
                 pop_atual = pop[chave_pop][ano][idade]
                 pop_ano_passado = pop[chave_pop][ano-1][idade-1]
                 pop_prox_ano = pop[chave_pop][ano+1][idade+1]
-
+                
+                # Como a idade 90 anos agrega as seguintes (91,92,etc.) é necessário o calculo abaixo
+                if idade == 89:
+                    pop_prox_ano = pop_prox_ano - pop[chave_pop][ano][90]
+                
                 mortalidade = (pop_ano_passado - pop_atual)/2 + (pop_atual - pop_prox_ano)/2    # Eq. 13
                 mort[ano][idade] = mortalidade/pop_atual                                        # Eq. 12
 
@@ -219,8 +224,68 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
 
 
 # Calcula probabilidades para pensões
-def calc_prob_pensao(concessoes, prob_mort, fam, periodo):
-    pass
+# O modelo da LDO só considera pensões para o cônjuge
+def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
+    
+    # A LDO de 2018 não descreve como calcular as probabilidades para pensões
+    # As equações abaixo são resultado de manipulações das Equações 24 e 25 da LDO
+    # Onde-se isolou-se a variável v para se chegar na equação de calculo das probabilidades
+    
+    probabilidades = {}             # Dicionário que salvas as prob. para cada benefício
+    ano_estoque = periodo[0] - 1    # 2014
+    
+    # Eq. 26
+    # Hipótese de que o diferencial de idade médio entre cônjuges é de 4 anos (pag. 45 LDO de 2018)
+    Dit = 4
+        
+    lista = LerTabelas()
+    est_acumulado = calc_estoq_acumulado(estoque, periodo)   
+
+    for beneficio in lista.get_id_beneficios('Pe'):
+        
+        # Cria Objeto do tipo Serie que armazena as probabilidades
+        probabilidades[beneficio] = pd.Series(0.0, index=range(0,91))
+        
+        sexo = beneficio[-1]                                # Última letra do benefício
+        sexo_oposto = 'M' if sexo=='H' else 'H'             # Obtém o oposto
+        clientela = lista.get_clientela(beneficio)
+        id_conc = beneficio.replace(sexo, sexo_oposto)      # Troca o sexo do benefício
+        id_segurados = lista.get_id_segurados(beneficio)
+        
+        # Para cada idade i
+        for idade in range(0,91):
+            
+            # A soma ou subtração depende do sexo
+            if sexo == 'M':
+                i_Dit = idade - Dit
+            else:
+                i_Dit = idade + Dit
+            
+            # Trata valores negativos e maiores que 90
+            if i_Dit < 0:
+                i_Dit = 0
+            
+            if i_Dit > 90:
+                i_Dit = 90
+                
+            conc = concessoes[id_conc][ano_estoque][idade]
+            seg = segurados[id_segurados][ano_estoque][i_Dit]
+            est_ac = est_acumulado[clientela+sexo][ano_estoque][i_Dit]
+            pmorte = prob_morte['Mort'+sexo][ano_estoque][i_Dit]
+        
+            # Se a quantidade de segurados e estoques for zero a prob da infinito
+            if seg == 0 and est_ac == 0:
+                probPensao = 0
+            else:
+                # Equação baseada nas Eq. 26 e 27 - REVISAR
+                probPensao = conc / (seg + est_ac) * pmorte                 
+                
+            probabilidades[beneficio][i_Dit] = probPensao
+        
+        # Corrige o tipo dos índices para inteiros    
+        probabilidades[beneficio].index = list(range(0,91))             
+                
+    return probabilidades
 
 
 # Calcula probabilidade de morte baseado no método do LTS/UFPA

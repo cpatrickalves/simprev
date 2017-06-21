@@ -60,8 +60,7 @@ def calc_probabilidades(populacao, segurados, estoques,
 
     prob_entrada_apos = calc_prob_apos(segurados, concessoes, periodo)
     prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
-    # prob_entrada_pens = calc_prob_pensao(concessoes, prob_morte,
-    #                                    fat_ajuste_mort, periodo)
+    prob_entrada_pens = calc_prob_pensao(concessoes, segurados, estoques, prob_morte, periodo)
     prob_assist = calc_prob_assist(populacao, concessoes, periodo)
     
     
@@ -69,7 +68,7 @@ def calc_probabilidades(populacao, segurados, estoques,
     probabilidades.update(fat_ajuste_mort)
     probabilidades.update(prob_entrada_apos)
     probabilidades.update(prob_entrada_aux)
-    # probabilidades.update(prob_entrada_pens)
+    probabilidades.update(prob_entrada_pens)
     probabilidades.update(prob_assist)
 
     # Busca por probabilidades erradas (ex: > 1)
