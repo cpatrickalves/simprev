@@ -261,7 +261,7 @@ def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
             else:
                 i_Dit = idade + Dit
             
-            # Trata valores negativos e maiores que 90
+            # Trata valores negativos e maiores que 90 para i_Dit
             if i_Dit < 0:
                 i_Dit = 0
             
@@ -273,17 +273,15 @@ def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
             est_ac = est_acumulado[clientela+sexo][ano_estoque][i_Dit]
             pmorte = prob_morte['Mort'+sexo][ano_estoque][i_Dit]
         
-            # Se a quantidade de segurados e estoques for zero a prob da infinito
+            # Se a quantidade de segurados e estoque for zero a prob daria infinito
             if seg == 0 and est_ac == 0:
                 probPensao = 0
             else:
                 # Equação baseada nas Eq. 26 e 27 - REVISAR
-                probPensao = conc / (seg + est_ac) * pmorte                 
+                # Essa equação gera probabilidades maiores que 1
+                probPensao = conc / ((seg + est_ac) * pmorte)                 
                 
             probabilidades[beneficio][i_Dit] = probPensao
-        
-        # Corrige o tipo dos índices para inteiros    
-        probabilidades[beneficio].index = list(range(0,91))             
                 
     return probabilidades
 
