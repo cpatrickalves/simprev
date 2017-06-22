@@ -121,39 +121,42 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()
     # Obtém o conjunto de benefícios do tipo pensão
-    lista_pensoes = dados.get_id_beneficios('Pen')
+    lista_pensoes = dados.get_id_beneficios('Pe')
     
     # Calcula pensões do tipo A
-    for benef in lista_pensoes:    
-        for ano in periodo:
+    for benef in lista_pensoes:   
+        sexo = benef[-1]                # Obtém o Sexo
+        id_prob_morte = 'Mort'+ sexo    # ex: MortH
+        id_fam = 'fam'+benef            # fator de ajuste de mortalidade
+        id_pens = benef+"_tipoA"        # Cria um Id para pensão do tipo A
+        
+        # Cria um novo DataFrame para Pensão do tipo A 
+        est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=[2014]+periodo)
+        est[id_pens].index.name = "IDADE"    
+        
+        # Copia os dados de estoque de 2014
+        est[id_pens][2014] = est[benef][2014]
+        
+        for ano in periodo:          
             
             # Adiciona uma nova coluna (ano) no DataFrame com valores zero
-            est[benef][ano] = 0
-            
-            sexo = benef[-1]                # Obtém o Sexo
-            id_prob_morte = 'Mort'+ sexo    # ex: MortH
-            id_fam = 'fam'+benef            # fator de ajuste de mortalidade
-            id_pens = benef+"_tipoA"         # Cria um Id para pensão do tipo A
-            
-            # Copia os dados de estoque para Pensão do tipo A 
-            est[id_pens] = est[benef].copy()
+            est[id_pens][ano] = 0
             
             # Projeta pensões do tipo A
             # Como não se tem novas concessões desse tipo de pensão, calcula-se
-            # nas idades de 1 a 90 anos.
+            # somente nas idades de 1 a 90 anos.
             for idade in range(1,91):
                 est_ano_anterior = est[id_pens][ano-1][idade-1]
                 prob_sobreviver = 1 - probabilidades[id_prob_morte][ano][idade] * probabilidades[id_fam][idade]
                                 
                 # Eq. 22
-                est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver
-  
-    # Obtém concessões do tipo B
-    conc = calc_concessoes_pensao(concessoes, est, segurados, probabilidades, periodo)
-    # Obtém cessações
-    cess = calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo)
-       
-    return 0
+                est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver               
+    
+    
+    # Obtém concessões e cessalções do tipo B
+    concessoes = calc_concessoes_pensao(concessoes, est, segurados, probabilidades, periodo)    
+    cessacoes = calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo)
+    
     # Calcula pensões de tipo B - Equação 23
     for benef in lista_pensoes:  
         
@@ -165,29 +168,31 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
         # Cria DataFrame para armazenar o estoque de Pensões do tipo B 
         est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=[2014]+periodo)
         est[id_pens].index.name = "IDADE"        
-              
+        
+        # Projeta anos seguintes
         for ano in periodo:          
-                                
-            # Cria uma nova entrada com valores zero
-            concessoes[benef][ano] = 0
+            
+            # Pula anos inferiores a 2015
+            if ano < 2015:
+                continue
             
             # Projeta pensões do tipo B            
             # Idades de 1 a 90 anos.
             for idade in range(1,91):                 
                 est_ano_anterior = est[id_pens][ano-1][idade-1]
                 prob_sobreviver = 1 - probabilidades[id_prob_morte][ano][idade] * probabilidades[id_fam][idade]                                
-                conc = 0
-                cessacoes = 0
+                conc = concessoes[benef][ano][idade]
+                cess = cessacoes[benef][ano][idade]
                                 
                 # Eq. 23
-                est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver + conc - cessacoes
-                
-                # Salva o histórico de concessões
-                concessoes[benef].loc[idade, ano] = conc
-        
-   # Pe = PeA + PeB      # Eq. 21
+                est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver + conc - cess                
+                        
     
-    return None
+    # Calcula total de pensões
+    for benef in lista_pensoes:   
+        est[benef] = est[benef+"_tipoA"] + est[benef+"_tipoB"]      # Eq. 21
+    
+    return est
 
 
 # Calcula as concessões de Pensões - REVISAR
@@ -300,19 +305,20 @@ def calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo):
                     # As pensões do tipo B só existem a partir de 2015
                     if (ano-ji) < 2015:                        
                         cessacoes[beneficio].loc[idade, ano] = 0
-                        continue
-                    else:
-                        conc = concessoes[beneficio][ano-ji][idade-ji]
-                     
-                    produtorio = 1
-                    k = idade-ji
-                    for i in range(k,idade):                        
-                        pmorte = probabilidades ['Mort'+sexo][ano-(i-k)][k]
-                        fator = probabilidades['fam'+beneficio][k]
-                        produtorio *= (1 - pmorte * fator)
                         
-                    cessacoes[beneficio].loc[idade, ano] = conc * produtorio
-                    
+                    else:                    
+                        conc = concessoes[beneficio][ano-ji][idade-ji]                     
+                        produtorio = 1
+                        k = idade-ji
+                        for i in range(k,idade):                        
+                            pmorte = probabilidades ['Mort'+sexo][ano-(i-k)][k]
+                            fator = probabilidades['fam'+beneficio][k]
+                            produtorio *= (1 - pmorte * fator)
+                            
+                        cessacoes[beneficio].loc[idade, ano] = conc * produtorio
+                        
+                    # REVISAR - Existem casos em que todas as concessões são cessadasSão gerados cessações para estoques que não existem
+                    # Ex: PensRurM - 2015 - 24                     
     return cessacoes
                     
 

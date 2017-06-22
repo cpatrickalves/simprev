@@ -202,24 +202,38 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
 
     # Calcula o fator de ajuste para cada tipo de aposentadoria
     for beneficio in dados.get_id_beneficios(tags):
+        
+        sexo = beneficio[-1]
 
         # Verifica se existem dados de estoque e cessações do benefício
         if beneficio in estoques.keys() and beneficio in cessacoes.keys():
-            ces_ano_atual = cessacoes[beneficio][ano_prob]
-            est_ano_ant = estoques[beneficio][ano_prob-1]
-
-            # Taxa de cessações - Eq. 15 - REVISAR (ver PDF comentado)
-            tx_ces = ces_ano_atual/(est_ano_ant + (ces_ano_atual/2))
             
-            # Probabilidade de morte
-            mort = probMort['Mort'+beneficio[-1]][ano_prob]
+            fat_ajuste['fam'+beneficio] = pd.Series(1, index=list(range(0,91)))
+            
+            '''
+            for idade in range(1,91):
+                
+                ces_ano_atual = cessacoes[beneficio][ano_prob][idade]
+                est_ano_ant = estoques[beneficio][ano_prob-1][idade-1]
+    
+                # Taxa de cessações - Eq. 15 - REVISAR (ver PDF comentado)
+                tx_ces = ces_ano_atual/(est_ano_ant + (ces_ano_atual/2))
+                
+                # Probabilidade de morte
+                mort = probMort['Mort'+sexo][ano_prob][idade]
+    
+                # Salva a Série no dicionário - Eq. 14
+                fat_ajuste['fam'+beneficio][idade] = tx_ces/mort
+               
+                if fat_ajuste['fam'+beneficio][idade] > 100:                
+                   print('{} {} - tx_ces({}) = ces_ano_atual({})/(est_ano_ant({}) + (ces_ano_atual({})/2))'.format(beneficio, idade,tx_ces ,ces_ano_atual, est_ano_ant, ces_ano_atual))
+                   print('fat({}) = tx_ces({}) / mort({})'.format(fat_ajuste['fam'+beneficio][idade], tx_ces, mort))
+                
+                # Substitui os NaN por zero
+                fat_ajuste['fam'+beneficio].fillna(0, inplace=True)
 
-            # Salva a Série no dicionário - Eq. 14
-            fat_ajuste['fam'+beneficio] = tx_ces/mort
-
-            # Substitui os NaN por zero
-            fat_ajuste['fam'+beneficio].fillna(0, inplace=True)
-
+            '''
+            
     return fat_ajuste # REVISAR - Confirmar se é fixa para todos os anos
 
 

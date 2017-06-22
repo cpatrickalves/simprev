@@ -132,6 +132,8 @@ resultados = fz.calc_despesas(despesas, estoques, concessoes, salarios,
 
 
 # Compara as equações da LDO com a do DOcumento da fazenda
+# Buscar por estoques e outros valores (probabilidades) negativos
+# Buscar por fatores de ajuste de mortalidades muito elevados
 # Existem probabilidades de morte negativa - fam rmv tb
 # corrigir calculos para idade 90
 # Comparar os segurados calculados com os segurados das planilhas
