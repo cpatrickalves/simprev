@@ -105,12 +105,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                         
                     else:
                         # Cálculo para Aposentadorias e Pensões
-
-                        # Pula pensões por enquanto - REVISAR
-                        if beneficio in dados.get_id_beneficios('Pe'):
-                            continue
-
-                        # Idade de 1 a 90 anos - REVISAR - falta idade zero
+                        # Idade de 1 a 90 anos
                         for idade in range(1,91):
                             
                             desp_anterior = despesas[beneficio][ano-1][idade-1]
@@ -121,6 +116,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                             np = nparcelas[beneficio]
                             prob_morte = probabilidades['Mort'+sexo][ano][idade]
                             fam = probabilidades['fam'+beneficio][idade]
+                            # REVISAR - Os valores de salario já tem reajuste, acho que não é necessário aqui
                             reajuste = dadosLDO['TxReajusteBeneficios'][ano]
                             novas_conc = concessoes[beneficio][ano][idade]
                             valor_med_conc = val_med_novos_ben[ano][idade]
@@ -243,7 +239,7 @@ def calc_n_parcelas(estoques, despesa, valMedBenef, periodo):
         n_parcelas[benef] = 13
 
     # Pensões
-    for benef in dados.get_id_beneficios('Pen'):
+    for benef in dados.get_id_beneficios('Pe'):
         n_parcelas[benef] = 13
 
     # Auxilios
