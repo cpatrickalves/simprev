@@ -5,6 +5,8 @@
 
 from util.tabelas import LerTabelas
 from util.dados import DadosLDO
+from util.resultados import calc_resultados
+from util.graficos import plot_erros, plot_resultados
 import modelos.fazenda as fz
 
 
@@ -122,13 +124,22 @@ nparcelas = fz.calc_n_parcelas(estoques, despesas, valMedBenef, periodo)
 
 # Projeta receitas e respesas
 print('Projetando Receita e PIB ...\n')
-resultados['receitas'] = fz.calc_receitas(salarios, aliquota, periodo)
+resultados['Receitas'] = fz.calc_receitas(salarios, aliquota, periodo)
 resultados = fz.calc_pib(resultados, salarios, pib_inicial, periodo)
 
 print('Projetando Despesas ...\n')
 resultados = fz.calc_despesas(despesas, estoques, concessoes, salarios,
                             valMedBenef, probabilidades, dadosLDO2018, 
                             nparcelas, resultados, periodo)
+
+print('Calculando resultados finais ...\n')
+resultados = calc_resultados(resultados, dadosLDO2018)
+
+print('Exibe resultados ...\n')
+print('Erro de Despesa = {}'.format(resultados['Erro Despesa'][2018]))
+print('Erro de Receita = {}'.format(resultados['Erro Receita'][2018]))
+
+plot_erros(resultados)
 
 
 # Compara as equações da LDO com a do DOcumento da fazenda

@@ -185,7 +185,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
             if ano in despesas[beneficio].columns:      # verifica se existe projeção para esse ano
                 desp_total[ano] += despesas[beneficio][ano].sum()               
 
-    resultados['despesas'] = desp_total
+    resultados['Despesas'] = desp_total
     resultados['txReposicao'] = txReposicao
     
     return resultados
