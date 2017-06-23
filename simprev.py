@@ -58,13 +58,12 @@ periodo = list(range(ano_inicial, ano_final+1))
 
 resultados = {}
 
-
 #############################################################################
 
 print('--- Iniciando projeção --- \n')
 print('Lendo arquivo de dados ... \n')
 # Arquivo com os dados da Fazenda
-arquivo = '../datasets/FAZENDA/dados_fazenda.xlsx'
+arquivo = 'dados/dados_fazenda.xlsx'
 # Abri o arquivo
 dados = LerTabelas(arquivo)
 
@@ -135,11 +134,11 @@ resultados = fz.calc_despesas(despesas, estoques, concessoes, salarios,
 print('Calculando resultados finais ...\n')
 resultados = calc_resultados(resultados, dadosLDO2018)
 
-print('Exibe resultados ...\n')
+print('RESULTADOS: \n')
 print('Erro de Despesa = {}'.format(resultados['Erro Despesa'][2018]))
 print('Erro de Receita = {}'.format(resultados['Erro Receita'][2018]))
 
-plot_erros(resultados)
+plot_resultados(resultados)
 
 
 # Compara as equações da LDO com a do DOcumento da fazenda

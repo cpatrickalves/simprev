@@ -72,7 +72,7 @@ def calc_probabilidades(populacao, segurados, estoques,
     probabilidades.update(prob_assist)
 
     # Busca por probabilidades erradas (ex: > 1)
-    #busca_erros(probabilidades) - REVISAR
+    busca_erros(probabilidades) # REVISAR (adicionar valores negativos)
 
     return probabilidades
 

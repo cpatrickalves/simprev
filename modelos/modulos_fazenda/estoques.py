@@ -153,7 +153,7 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
                 est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver               
     
     
-    # Obtém concessões e cessalções do tipo B
+        # Obtém concessões e cessalções do tipo B
     concessoes = calc_concessoes_pensao(concessoes, est, segurados, probabilidades, periodo)    
     cessacoes = calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo)
     

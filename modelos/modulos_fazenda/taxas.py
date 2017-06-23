@@ -85,9 +85,7 @@ def calc_tx_cobertura_sm(pop_pnad, periodo):
     # Padrão da chave: PopOcupUrbSmPnadH # REVISAR
     
     # A LDO não descreve a equação para o cálculo dessa taxa
-    # O documento inicial desenvolvido pelo STN, IPEA e SPE sugere o uso da 
-    # PeaUrbSm/Pea, porém acredito que o correto seria PocupSm/Pocup
-    
+        
     # Taxa de Cobertura Contributiva para o SM
     for sexo in ['H', 'M']:
        chave = 'txCsmUrb'+sexo
