@@ -29,7 +29,9 @@ class LerTabelas():
                         'PopOcupUrbAcimPnadH', 'PopOcupUrbSmPnadM',
                         'PopOcupUrbAcimPnadM', 'SegEspRurPnadH','ContrRurPnadH',
                         'SegPotRurPnadH', 'SegEspRurPnadM', 'ContrRurPnadM',
-                        'SegPotRurPnadM', 'SegRurPnadH', 'SegRurPnadM']
+                        'SegPotRurPnadM', 'SegRurPnadH', 'SegRurPnadM', 
+                        'SegUrbSmPnadH','SegUrbSmPnadM', 'SegUrbAcimPnadH',
+                        'SegUrbAcimPnadM' ]
         # Ids utilizados para as tabelas de salários
         self.ids_salarios = ['SalMedPopOcupRurPnadH', 'SalMedPopOcupRurPnadM',
                         'SalMedPopOcupUrbPnadH', 'SalMedPopOcupUrbPnadM',

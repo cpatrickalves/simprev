@@ -13,14 +13,15 @@ def calc_receitas(salarios, aliquota, periodo):
     receita = pd.Series(0, index=periodo)
 
     # Para cada sexo e clientela calcula as receitas (Eq. 39)
-    for sexo in ['H','M']:
-        for clientela in ['Ca', 'Csm']:
-            for ano in periodo:
+    for ano in periodo:
+        for sexo in ['H','M']:
+            for clientela in ['Ca', 'Csm']:            
                 id_sal = 'MSal' + clientela + 'Urb' + sexo
                 receita[ano] += salarios[id_sal][ano].sum()
 
-    # Aplica a alíquota efetiva média
-    receita = receita * aliquota
+    # Aplica a alíquota efetiva média e multiplicação por 13, pois os rendimentos 
+    # utilizados são mensais, porém os calculos são anuais. REVISAR
+    receita = receita * aliquota * 13
 
     return receita
 

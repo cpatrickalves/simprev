@@ -96,7 +96,7 @@ print('Calculando dados demográficos ...\n')
 segurados = fz.calc_demografia(populacao, taxas)
 
 # Corrige inconsistências nos estoques
-dados.corrige_erros_estoque(estoques, concessoes, cessacoes)
+#dados.corrige_erros_estoque(estoques, concessoes, cessacoes)
 
 # Calcula as probabilidades de entrada em benefício e morte
 print('Calculando probabilidades ...\n')
@@ -135,8 +135,13 @@ print('Calculando resultados finais ...\n')
 resultados = calc_resultados(resultados, dadosLDO2018)
 
 print('RESULTADOS: \n')
-print('Erro de Despesa = {}'.format(resultados['Erro Despesa'][2018]))
-print('Erro de Receita = {}'.format(resultados['Erro Receita'][2018]))
+print('Erro de Despesa em 2018 = {}'.format(resultados['Erro Despesa'][2018]))
+print('Erro de Receita em 2018 = {}'.format(resultados['Erro Receita'][2018]))
+print()
+print('Erro de Despesa em 2060 = {}'.format(resultados['Erro Despesa'][2060]))
+print('Erro de Receita em 2060 = {}'.format(resultados['Erro Receita'][2060]))
+
+
 
 plot_resultados(resultados)
 

@@ -76,19 +76,18 @@ def calc_tx_ocup(pop_pnad, periodo):
                 
     return txocup
 
-# Calcula taxa de Cobertura Contributiva por SM e acima do SM
-def calc_tx_cobertura_sm(pop_pnad, periodo):
+
+# Calcula taxa/propoção da Pop. Ocupada por SM e acima do SM para população ocupada
+def calc_tx_ocup_csm_ca(pop_pnad, periodo):
     
     # Dicionario que armazena as taxas 
     txcober = {}
     
-    # Padrão da chave: PopOcupUrbSmPnadH # REVISAR
-    
-    # A LDO não descreve a equação para o cálculo dessa taxa
-        
+    # Padrão da chave: PopOcupUrbSmPnadH 
+            
     # Taxa de Cobertura Contributiva para o SM
     for sexo in ['H', 'M']:
-       chave = 'txCsmUrb'+sexo
+       chave = 'txOcupCsmUrb'+sexo
        pocupSm = pop_pnad['PopOcupUrbSmPnad'+sexo]   
        pocup = pop_pnad['PopOcupUrbPnad'+sexo]
        txcober[chave] = pocupSm/pocup
@@ -99,10 +98,51 @@ def calc_tx_cobertura_sm(pop_pnad, periodo):
                
     # taxa de Cobertura Contributiva acima do SM
     for sexo in ['H', 'M']:
-       chave = 'txCaUrb'+sexo
-       pocupSm = pop_pnad['PopOcupUrbAcimPnad'+sexo]   
+       chave = 'txOcupCaUrb'+sexo
+       pocupAcima = pop_pnad['PopOcupUrbAcimPnad'+sexo]   
        pocup = pop_pnad['PopOcupUrbPnad'+sexo]
-       txcober[chave] = pocupSm/pocup
+       txcober[chave] = pocupAcima/pocup
+
+       # Preenche valores NaN com zero      
+       txcober[chave].fillna(0, inplace=True)
+
+    # Repete as taxas para todos os anos
+    for taxa in txcober:
+        for ano in periodo:
+            txcober[taxa][ano] = txcober[taxa][ano-1] 
+                
+    return txcober
+
+
+# Calcula taxa de Segurados por SM e acima do SM
+def calc_tx_segurados_urb(pop_pnad, periodo):
+    
+    # Dicionario que armazena as taxas 
+    txcober = {}
+    
+    # Padrão da chave: SegUrbAcimPnadH # REVISAR
+    
+    # Pag. 42 da LDO: taxas de cobertura contributiva por SM e acima do SM
+    # calculadas pela relação da população de contribuintes para o sistema previdenciário
+    # sobre a população ocupada;
+        
+    # Taxa de Cobertura Contributiva para o SM
+    for sexo in ['H', 'M']:
+       chave = 'txSegCsmUrb'+sexo
+       segSm = pop_pnad['SegUrbSmPnad'+sexo]   
+       pocup = pop_pnad['PopOcupUrbPnad'+sexo]
+       txcober[chave] = segSm/pocup
+
+       # Preenche valores NaN com zero      
+       txcober[chave].fillna(0, inplace=True)
+
+               
+    # taxa de Cobertura Contributiva acima do SM
+    for sexo in ['H', 'M']:
+       chave = 'txSegCaUrb'+sexo
+       segAcima = pop_pnad['SegUrbAcimPnad'+sexo]   
+       pocup = pop_pnad['PopOcupUrbPnad'+sexo]
+       txcober[chave] = segAcima/pocup
 
        # Preenche valores NaN com zero      
        txcober[chave].fillna(0, inplace=True)

@@ -16,11 +16,14 @@ def calc_demografia(populacao, taxas):
     # Calcula PEA Urbana e Rural
     pea = calc_pea_urb_rur(pop_ur, taxas)
     
-    # Calcula Pocupada Urbana e Rural
+    # Calcula Pop. Ocupada Urbana e Rural
     pocup = calc_pocup_urb_rur(pea, taxas)
     
-    # Calcula Pocupada Urbana e Rural
-    csm_ca = calc_Csm_Ca(pocup, taxas)
+    # Calcula Pop. ocupada Urbana e Rural que recebe o SM e acima do SM
+    pocup_csm_ca = calc_pocup_Csm_Ca(pocup, taxas)
+        
+    # Calcula Segurados urbanos
+    segurados_urb = calc_segurados_urb(pocup, taxas)
         
     # Calcula os Segurados Rurais
     segurados_rur = calc_segurados_rur(pea, taxas)
@@ -30,9 +33,10 @@ def calc_demografia(populacao, taxas):
     populacao.update(pop_ur)
     populacao.update(pea)
     populacao.update(pocup)
+    populacao.update(pocup_csm_ca)
     
     # Adiciona contribuintes e segurados no dicionário segurados
-    segurados.update(csm_ca)
+    segurados.update(segurados_urb)
     segurados.update(segurados_rur)
     
     return segurados    
@@ -116,8 +120,9 @@ def calc_pocup_urb_rur(pea, taxas):
     return pocup_urb_rur
 
 
-# Calcula as populações ocupadas urbana que recebem o SM e acima do SM    
-def calc_Csm_Ca(pocup, taxas):
+# Calcula as populações ocupadas urbana que recebem o SM e acima do SM
+# OBS: Este cálculo não é descrito na LDO de 2018
+def calc_pocup_Csm_Ca(pocup, taxas):
         
     # Dicionário que armazena os Contribuintes Urbanos que recebem
     # o SM e acima do SM
@@ -127,8 +132,29 @@ def calc_Csm_Ca(pocup, taxas):
         for sexo in ['H','M']:
             chave = clientela+sexo                    
             chave_pocup = 'OcupUrb'+sexo
-            chave_tx = 'tx'+clientela+sexo
-            csm_ca[chave] = pocup[chave_pocup] * taxas[chave_tx]            
+            chave_tx = 'txOcup'+clientela+sexo
+            csm_ca[chave] = pocup[chave_pocup] * taxas[chave_tx]    # Eq. 8         
+            
+            # Elimina colunas com dados ausentes
+            csm_ca[chave].dropna(axis=1, inplace=True)  
+                                         
+    return csm_ca
+
+
+# Calcula os segurados urbanos que recebem o SM e acima do SM
+# Equação 8 da LDO de 2018   
+def calc_segurados_urb(pocup, taxas):
+        
+    # Dicionário que armazena os Contribuintes Urbanos que recebem
+    # o SM e acima do SM
+    csm_ca = {}
+            
+    for clientela in ['CsmUrb', 'CaUrb']:    
+        for sexo in ['H','M']:
+            chave = clientela+sexo                    
+            chave_pocup = 'OcupUrb'+sexo
+            chave_tx = 'txSeg'+clientela+sexo
+            csm_ca[chave] = pocup[chave_pocup] * taxas[chave_tx]    # Eq. 8         
             
             # Elimina colunas com dados ausentes
             csm_ca[chave].dropna(axis=1, inplace=True)  

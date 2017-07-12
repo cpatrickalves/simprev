@@ -22,3 +22,12 @@ def plot_resultados(resultados):
     plt.legend()
     plt.show()
     
+    plt.plot(resultados['Receitas LDO'], label='LDO',lw=4 )
+    plt.plot(resultados['Receitas'], label='LTS/UFPA', lw=4)    
+    plt.grid(True)
+    plt.xlabel('ANO')
+    plt.ylabel('VALOR (R$)')
+    plt.title('Receitas do RGPS')
+    plt.legend()
+    plt.show()
+    
