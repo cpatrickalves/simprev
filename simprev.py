@@ -41,7 +41,7 @@ salMin = 724.00
 # Teto do RGPS de 2014 a 2017 - REVISAR - usar tanto na receita quanto na despesa
 tetoInicialRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
 
-# Alíquota efetiva média
+# Alíquota efetiva média de contribuição
 aliquota = 0.31
 
 # PIB 2014
