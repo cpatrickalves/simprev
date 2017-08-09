@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 # REVISAR - Verificar se não existem beneficio menores que 1 SM
-def calc_valMedBenef(estoques, despesas, dadosLDO, periodo):
+def calc_valMedBenef(estoques, despesas, dadosLDO, salarios, periodo):
 
     # ultimo com despesa/estoque conhecida (2014)
     ultimo_ano = periodo[0] - 1
@@ -33,7 +33,23 @@ def calc_valMedBenef(estoques, despesas, dadosLDO, periodo):
             reajuste = 1.0 + dadosLDO['TxReajusteBeneficios'][ano]/100
             valMedBenef[beneficio][ano] = valMedBenef[beneficio][ano-1] * reajuste
 
-
+    # Limita o valor dos benefícios pelo teto        
+    for beneficio in valMedBenef.keys():
+        for ano in valMedBenef[beneficio]:
+            teto = salarios['tetoRGPS'][ano]
+            for idade in valMedBenef[beneficio].index:                
+                if valMedBenef[beneficio][ano][idade] > teto:
+                    valMedBenef[beneficio].loc[idade, ano] = teto
+                    
+    # Garante que o benefício não seja menor que 1 SM
+    for beneficio in valMedBenef.keys():
+        for ano in valMedBenef[beneficio]:
+            sm = salarios['salarioMinimo'][ano]
+            for idade in valMedBenef[beneficio].index:                
+                if valMedBenef[beneficio][ano][idade] < sm:                    
+                    valMedBenef[beneficio].loc[idade, ano] = sm
+                                        
+    
     return valMedBenef
 
 

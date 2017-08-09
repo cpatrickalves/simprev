@@ -116,7 +116,7 @@ salarios = fz.calc_salarios(salarios, populacao, segurados,
 
 # Projeta Valores médios dos benefícios
 print('Projetando Valores dos benefícios ...\n')
-valMedBenef = fz.calc_valMedBenef(estoques, despesas, dadosLDO2018, periodo)
+valMedBenef = fz.calc_valMedBenef(estoques, despesas, dadosLDO2018, salarios, periodo)
 
 # Calcula o número médio de parcelas para cada beneficio
 nparcelas = fz.calc_n_parcelas(estoques, despesas, valMedBenef, periodo)
