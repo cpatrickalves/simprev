@@ -19,7 +19,7 @@ def calc_receitas(salarios, aliquota, periodo):
                 id_sal = 'MSal' + clientela + 'Urb' + sexo
                 receita[ano] += salarios[id_sal][ano].sum()
 
-    # Aplica a alíquota efetiva média e multiplicação por 13, pois os rendimentos 
+    # Aplica a alíquota efetiva média e multiplica o valor por 13, pois os rendimentos 
     # utilizados são mensais, porém os calculos são anuais. REVISAR
     receita = receita * aliquota * 13
 

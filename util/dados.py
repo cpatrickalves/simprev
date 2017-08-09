@@ -25,9 +25,14 @@ class DadosLDO():
         
         # Reajustes retirados das LDOs de 2017 e 2018
         self.reajuste_2015_2018 = [6.23, 11.28, 7.5, 4.62]
+        self.inflacao_2015_2018 = [6.23, 11.28, 7.5, 4.5]
+        #self.inflacao_2015_2018 = [4.5, 4.5, 4.5, 4.5]
 
         # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 
         self.ValoresTxReajusteBeneficios = self.reajuste_2015_2018 + ([4.5] * 42)   
+        
+        # Taxa de Inflação em %  (2015-2060) 
+        self.TxInflacao = self.inflacao_2015_2018 + ([4.5] * 42)   
         
         # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 
         self.TxCresMassaSalContribuintes = [7.52, 7.36, 7.42, 7.35, 7.28, 7.24, 7.17, 7.09, 7.01, 6.93, 6.85,
@@ -42,12 +47,13 @@ class DadosLDO():
 
         dados['TxCrescimentoSalMin'] = pd.Series(self.ValoresTxCrescimentoSalMin, index=self.periodo)
         dados['TxReajusteBeneficios'] = pd.Series(self.ValoresTxReajusteBeneficios, index=self.periodo)
+        dados['TxInflacao'] = pd.Series(self.TxInflacao, index=self.periodo)
 
         # Tabela 6.1 da LDO de 2018
         dados['Tabela_6.1'] = self.dados.parse('Tabela 6.1', index_col=0)
         # Tabela 6.2 da LDO de 2018
         dados['Tabela_6.2'] = self.dados.parse('Tabela 6.2', index_col=0)
-        
+                
         # Corrige a unidade (os dados estão em milhões)
         dados['Tabela_6.2']['Receita'] *= 10**6 
         dados['Tabela_6.2']['Despesa'] *= 10**6 

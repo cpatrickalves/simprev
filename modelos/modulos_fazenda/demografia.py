@@ -174,10 +174,11 @@ def calc_segurados_rur(pea_rur, taxas):
             chave = clientela_rural+sexo                    
             chave_pea = 'PeaRur'+sexo
             chave_tx = 'tx'+clientela_rural+sexo
-            segurados_rur[chave] = pea_rur[chave_pea] * taxas[chave_tx]            
+            segurados_rur[chave] = pea_rur[chave_pea] * taxas[chave_tx]    # Eq. 10            
             
             # Elimina colunas com dados ausentes
             segurados_rur[chave].dropna(axis=1, inplace=True)  
+
 
     # Soma dos Segurados Rurais, pois no cálculo dos estoques usa-se o valor
     # agregado para a clientela Rural

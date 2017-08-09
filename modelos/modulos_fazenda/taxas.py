@@ -114,7 +114,7 @@ def calc_tx_ocup_csm_ca(pop_pnad, periodo):
     return txcober
 
 
-# Calcula taxa de Segurados por SM e acima do SM
+# Calcula taxa de Segurados por SM (Csm) e acima do SM (Ca)
 def calc_tx_segurados_urb(pop_pnad, periodo):
     
     # Dicionario que armazena as taxas 
@@ -135,7 +135,6 @@ def calc_tx_segurados_urb(pop_pnad, periodo):
 
        # Preenche valores NaN com zero      
        txcober[chave].fillna(0, inplace=True)
-
                
     # taxa de Cobertura Contributiva acima do SM
     for sexo in ['H', 'M']:
@@ -166,6 +165,7 @@ def calc_tx_segurados_rur(pop_pnad, periodo):
     # A LDO não descreve como calcular essa taxa
     # O documento inicial do modelo do STN, IPEA e SPE diz para usar 
     # a PeaRur como denominador, mas acho que o correto seria a SegRurPnadH.
+    # Página 42 da LDO
     
     # Taxas de participação de subconuntos da população rural
     for clientela_rural in ['SegEspRur', 'ContrRur', 'SegPotRur']:

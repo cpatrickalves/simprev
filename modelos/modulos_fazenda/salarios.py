@@ -27,18 +27,24 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
     
     # Projeta crescimento dos salários da Pop. Ocupada a partir dos 
     # dados da Pnad e da produtividade (Eq 32)
+    # A equação original não considera Inflação, mas é necessário adicionar pois a inflação 
+    # é considerada no cálculo dos valores dos benefícios
     for clientela in ['Urb', 'Rur']:
         for sexo in ['H', 'M']:
             for ano in periodo:
                 id_sal = 'SalMedPopOcup' + clientela + 'Pnad' + sexo
-                salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100)               
+                inflacao = dadosLDO['TxInflacao'][ano]
+                salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100 + inflacao/100)             
     
                 
     # Projeta crescimento dos salários dos Segurados acima do SM apartir da produtividade (Eq. 37)
+    # A equação original não considera Inflação, mas é necessário adicionar pois a inflação 
+    # é considerada no cálculo dos valores dos benefícios
     for sexo in ['H', 'M']:
         for ano in periodo:
             id_sal = 'SalMedSegUrbAcimPnad' + sexo
-            salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100)
+            inflacao = dadosLDO['TxInflacao'][ano]
+            salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100 + inflacao/100)             
     
     
     # Projeta crescimento dos salários da Pop. Ocupada que recebe acima do piso
@@ -48,7 +54,8 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
     for sexo in ['H', 'M']:
         for ano in periodo:
             id_sal = 'SalMedPopOcupUrbAcimPnad' + sexo
-            salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100)               
+            inflacao = dadosLDO['TxInflacao'][ano]
+            salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100 + inflacao/100)                    
      
             
     # Projeta Massa Salarial para Pop. Ocupada (Eq. 33)
