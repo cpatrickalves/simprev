@@ -39,7 +39,7 @@ produtividade = 1.7  # Pag 45 LDO 2018
 salMin = 724.00
 
 # Teto do RGPS de 2014 a 2017 - REVISAR - usar tanto na receita quanto na despesa
-tetoRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
+tetoInicialRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
 
 # Alíquota efetiva média
 aliquota = 0.31
@@ -111,7 +111,7 @@ estoques = fz.calc_estoques(estoques, concessoes, cessacoes, probabilidades,
 # Projeta Salarios
 print('Projetando Salários ...\n')
 salarios = fz.calc_salarios(salarios, populacao, segurados,
-                         produtividade, salMin, dadosLDO2018,
+                         produtividade, salMin, dadosLDO2018, tetoInicialRGPS,
                          periodo)
 
 # Projeta Valores médios dos benefícios

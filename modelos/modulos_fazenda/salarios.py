@@ -7,7 +7,7 @@ import pandas as pd
 
 # Calcula rendimento médio
 def calc_salarios(salarios, populacao, segurados, produtividade, 
-                  salMinInicial, dadosLDO, periodo):
+                  salMinInicial, dadosLDO, tetoInicialRGPS, periodo):
         
     # último ano do estoque (2014)
     ano_inicial = periodo[0]-1
@@ -86,6 +86,21 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
         salarios[id_msal] = salarios[id_sal] * segurados[id_seg]
          # Elimina colunas vazias
         salarios[id_msal].dropna(how='all', axis=1, inplace=True)  
+        
+        
+    # Projeta crescimento do Teto do RGPS
+    # Objeto do tipo Serie que armazena o Salario Minimo
+    ano_inicial = periodo[0]-1                              # 2014
+    ano_final = ano_inicial + len(tetoInicialRGPS)          # 2018
+    teto = pd.Series(tetoInicialRGPS, index=range(ano_inicial, ano_final))
+    
+    for ano in range(ano_final, (periodo[-1]+1)):           # 2018-2060        
+        inflacao = dadosLDO['TxInflacao'][ano]              # em %
+        teto[ano] = teto[ano-1] * (1 + inflacao/100) 
+
+    # Salva a Serie no dicionário
+    salarios['tetoRGPS'] = teto
+                
         
     return salarios
         
