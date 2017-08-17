@@ -3,14 +3,15 @@
 @author: Patrick Alves
 """
 
-# Calcula taxa de urbanizacao conforme Equação 3 e 
-# lógica descrita na item 4.6 da LDO
+# Calcula taxa de urbanizacao 
+# OBS: A LDO não descreve como calcular essa taxa, a Eq. utilizada foi deduzida
+# a partir da lógica aplicada no cálculo de outras taxas (ex: taxa de Participação)
 def calc_tx_urb(pop_pnad, periodo):
     
     # Dicionário que armazena as taxas de urbanização
     txurb = {}
-    tx_crescimento_urb = 0 # REVISAR
-    limite_crescimento = 0 # REVISAR
+    tx_crescimento_urb = 0 
+    limite_crescimento = 1000   # OBS: A LDO não define nenhum valor de limite
 
     for sexo in ['H','M']:
         chave = 'txUrb'+sexo         
@@ -19,22 +20,26 @@ def calc_tx_urb(pop_pnad, periodo):
         # Preenche valores Nan com zero      
         txurb[chave].fillna(0, inplace=True)
         
-    # Crescimento a partir de 2015
+    # Crescimento a partir de 2015 - Eq. 3 da LDO de 2018
     for taxa in txurb:
         for ano in periodo:
             txurb[taxa][ano] = txurb[taxa][ano-1] * (1 + tx_crescimento_urb ) 
         
+        # Verifica se existe alguma taxa maior que o limite definido        
+        if (txurb[taxa][ano] > limite_crescimento).any():
+            pass # OBS: Como não existe limite definido na LDO, será implementado em outro momento.           
+    
     return txurb
 
-# Calcula taxa de participação    
+# Calcula taxa de Participação no Mercado de Trabalho  
 def calc_tx_part(pop_pnad, periodo):
     
     # Dicionário que armazena as taxas de urbanização
     txpart = {}
-    tx_crescimento_part = 0 # REVISAR
-    limite_crescimento = 0 # REVISAR
+    tx_crescimento_part = 0 
+    limite_crescimento = 1000   # OBS: A LDO não define nenhum valor de limite
     
-    # Calculo feito de acordo com a Seção 4.6 da LDO    
+    # Calculo feito de acordo com o 3o item da Seção 4.6 da LDO    
     for clientela in ['Urb', 'Rur']:
         for sexo in ['H','M']:
             chave = 'txPart'+clientela+sexo         
@@ -45,11 +50,15 @@ def calc_tx_part(pop_pnad, periodo):
             # Preenche valores NaN com zero      
             txpart[chave].fillna(0, inplace=True)
 
-    # Crescimento da taxa a partir de 2015
+    # Crescimento da taxa a partir de 2015 - Eq. 5 da LDO de 2018
     for taxa in txpart:
         for ano in periodo:
             txpart[taxa][ano] = txpart[taxa][ano-1] * (1 + tx_crescimento_part) 
-        
+                      
+        # Verifica se existe alguma taxa maior que o limite definido        
+        if (txpart[taxa][ano] > limite_crescimento).any():
+            pass # OBS: Como não existe limite definido na LDO, será implementado em outro momento.   
+            
     return txpart
 
 # Calcula taxa de Ocupação
@@ -58,7 +67,7 @@ def calc_tx_ocup(pop_pnad, periodo):
     # Dicionario que armazena as taxas de ocupação
     txocup = {}
     
-    # Calculo feito de acordo com a Seção 4.6 da LDO
+    # Calculo feito de acordo com o 4o item da Seção 4.6 da LDO de 2018
     for clientela in ['Urb', 'Rur']:
         for sexo in ['H', 'M']:
             chave = 'txOcup'+clientela+sexo
@@ -165,14 +174,14 @@ def calc_tx_segurados_rur(pop_pnad, periodo):
     # A LDO não descreve como calcular essa taxa
     # O documento inicial do modelo do STN, IPEA e SPE diz para usar 
     # a PeaRur como denominador, mas acho que o correto seria a SegRurPnadH.
-    # Página 42 da LDO
+    # Página 42 da LDO 
     
     # Taxas de participação de subconuntos da população rural
     for clientela_rural in ['SegEspRur', 'ContrRur', 'SegPotRur']:
         for sexo in ['H', 'M']:
            chave = 'tx'+clientela_rural+sexo
            pnad_rur = pop_pnad[clientela_rural+'Pnad'+sexo]   
-           pea_rur = pop_pnad['SegRurPnad'+sexo]
+           pea_rur = pop_pnad['PeaRurPnad'+sexo]
            tx_seg_rur[chave] = pnad_rur/pea_rur
     
            # Preenche valores NaN com zero      
