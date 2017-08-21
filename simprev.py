@@ -156,4 +156,6 @@ plot_resultados(resultados)
 # Alterar as porcentagens 
 # Calcular taxa de crescimento da massa salarial de contribuintes
 # Adicionar um arquivo de Log com todos os dados/saidas detalhadas
-# Pendente ajustes da inflação
+# Pendente:
+    # ajustes da inflação
+    # Calculo do número médio de parcelas pagas

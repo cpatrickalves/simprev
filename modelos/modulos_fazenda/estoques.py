@@ -5,13 +5,6 @@
 from util.tabelas import LerTabelas
 import pandas as pd
 
-def calc_estoques(estoques, concessoes, probabilidades, populacao, segurados, periodo):
-    
-    calc_estoq_apos(estoques, concessoes, probabilidades, segurados, periodo)
-    #calc_estoq_aux(estoques, probabilidades, segurados, periodo)
-    #calc_estoq_salMat(estoques, populacao , segurados, periodo)
-
-    return estoques
 
 def calc_estoq_apos(est, conc, prob, seg, periodo):
     
@@ -28,9 +21,9 @@ def calc_estoq_apos(est, conc, prob, seg, periodo):
         # Verifica se o beneficio existe no Estoque
         if benef in est:
         
-            sexo = benef[-1]                # Obtém o Sexo
-            id_prob_morte = 'Mort'+ sexo    # ex: MortH
-            id_fam = 'fam'+benef            # fator de ajuste de mortalidade            
+            sexo = benef[-1]                             # Obtém o Sexo
+            id_prob_morte = 'Mort'+ sexo                 # ex: MortH
+            id_fam = 'fam'+benef                         # fator de ajuste de mortalidade
             id_segurado = dados.get_id_segurados(benef)  # ex: CsmUrbH
             
             for ano in periodo:                
@@ -57,6 +50,7 @@ def calc_estoq_apos(est, conc, prob, seg, periodo):
                 
 
     return est
+
 
 # Projeta estoques para Auxílios Doença, Reclusão e Acidente - Equação 17 da LDO de 2018
 def calc_estoq_aux(est, prob, seg, periodo):

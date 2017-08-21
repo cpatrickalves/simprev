@@ -42,7 +42,7 @@ def calc_demografia(populacao, taxas):
     return segurados    
 
 
-# Calcula as populações urbana e rural    
+# Calcula as populações urbana e rural   
 def calc_pop_urb_rur(populacao, taxas):
         
     # Dicionário que armazena as populações urbanas e rurais
@@ -53,8 +53,8 @@ def calc_pop_urb_rur(populacao, taxas):
 
     # Para cada um dos sexos calcula as clientelas 
     # Equações 1 e 2 da LDO de 2018
-    for pop in dados.ids_pop_ibge:
-        chave_urb = pop.replace('Ibge', 'Urb')
+    for pop in dados.ids_pop_ibge:                      # dados.ids_pop_ibge retorna uma lista de IDs das tabelas
+        chave_urb = pop.replace('Ibge', 'Urb')          # Substitui a String 'Ibge' por 'Urb'
         chave_rur = pop.replace('Ibge', 'Rur')
         chave_tx = pop.replace('PopIbge', 'txUrb')
         pop_urb_rur[chave_urb] = populacao[pop] * taxas[chave_tx]           # Eq. 1
@@ -65,6 +65,7 @@ def calc_pop_urb_rur(populacao, taxas):
         pop_urb_rur[chave_rur].dropna(axis=1, inplace=True)  
         
     return pop_urb_rur
+
 
 # Calcula a população economicamente ativa urbana e rural    
 def calc_pea_urb_rur(pop, taxas):
@@ -164,6 +165,7 @@ def calc_segurados_urb(pocup, taxas):
 
 # Calcula Empregados Contribuintes, Segurados Especiais
 # e Potenciais segurados especiais para clientela Rural
+# Equações 9 e 10 da LDO de 2018  
 def calc_segurados_rur(pea_rur, taxas):
         
     # Dicionário que armazena os Segurados Rurais
@@ -182,6 +184,7 @@ def calc_segurados_rur(pea_rur, taxas):
 
     # Soma dos Segurados Rurais, pois no cálculo dos estoques usa-se o valor
     # agregado para a clientela Rural
+    # Eq. 9
     for sexo in ['H','M']:
         segurados_rur['Rur'+sexo] = (segurados_rur['SegEspRur'+sexo] +
                                      segurados_rur['ContrRur'+sexo] + 

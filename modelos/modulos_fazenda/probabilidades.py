@@ -8,7 +8,7 @@ from modelos.modulos_fazenda.estoques import calc_estoq_acumulado
 import pandas as pd
 
 
-# Calcula probabilidades de entrada em benefícios - Equação 16 da lDO
+# Calcula probabilidades de entrada em aposentadorias - Equação 16 da lDO de 2018
 def calc_prob_apos(segurados, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
@@ -18,7 +18,7 @@ def calc_prob_apos(segurados, concessoes, periodo):
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()
 
-    # Calcula probabilidades de entrada em aposentadorias
+    # Obtém a lista de aposentadorias e itera sobre cada tipo
     for beneficio in dados.get_id_beneficios(ids_apos):
         
         # Verifica se existem dados de concessões do benefício 
@@ -28,7 +28,7 @@ def calc_prob_apos(segurados, concessoes, periodo):
             
             # Calcula a probabilidade de entrada
             # Nesse caso prob_entrada é do tipo Series e não DataFrame, pois
-            # Possui somente uma dimensão (não possui colunas/anos)
+            # Possui somente uma dimensão (é fixa para o ano = ano_prob)
             # A versão da LDO trabalha com estoques, porém o correto seriam os segurados
             # Eq. 16
             prob_entrada = concessoes[beneficio][ano_prob] / (segurados[id_segurado][ano_prob-1] + (concessoes[beneficio][ano_prob]/2))
@@ -40,53 +40,6 @@ def calc_prob_apos(segurados, concessoes, periodo):
 
     return probabilidades
 
-
-'''
-# VERSAO ORIGINAL - Equação 16
-# Calcula probabilidades de entrada em benefícios
-def calc_prob_apos(estoques, concessoes, periodo):
-
-    probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
-    ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
-    ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
-
-    # Dicionário que armazena o Estoque acumulado
-    est_acumulado = {}
-
-    # Acumula os estoques por Clientela, Sexo e Idade do ano anterior
-    # As chaves do dicionário são as clientelas
-    for clientela in ['UrbPiso', 'UrbAcim', 'Rur']:
-        
-        # Cria o DataFrame
-        est_acumulado[clientela] = pd.DataFrame(index=range(0,91), columns=[ano_prob-1])
-        # Preenche com zeros
-        est_acumulado[clientela].fillna(0.0, inplace=True)
-        
-        # Obtem todos os benefícios de uma clientela específica e itera sobre eles
-        for beneficio in get_id_beneficios([clientela]):
-            # Verifica se o estoque para o benefício existe
-            if beneficio in estoques.keys():                        
-                est_acumulado[clientela] += estoques[beneficio]
-
-    # Calcula probabilidades de entrada em aposentadorias
-    for beneficio in get_id_beneficios(ids_apos):
-        # Verifica se o possui os dados de estoque e concessões do benefício 
-        if beneficio in estoques.keys() and beneficio in concessoes.keys():
-
-            clientela = get_clientela(beneficio)
-            
-            # Calcula a probabilidade de entrada
-            # Nesse caso prob_entrada é do tipo Series e não DataFrame, pois
-            # Possui somente uma dimensão (não possui colunas)
-            prob_entrada = concessoes[beneficio][ano_prob] / (est_acumulado[clientela][ano_prob-1] + (concessoes[beneficio][ano_prob]/2))
-                        
-            # Adiciona no dicionário
-            probabilidades[beneficio] = prob_entrada            
-            # Substitui os NaN (not a number) por zeros
-            probabilidades[beneficio].fillna(0, inplace = True)
-
-    return probabilidades
-'''
 
 # Calcula probabilidades de entrada em auxílios - Equações 18 e 19 da LDO de 2018
 def calc_prob_aux(segurados, estoques, concessoes, periodo):
@@ -130,7 +83,7 @@ def calc_prob_aux(segurados, estoques, concessoes, periodo):
     return probabilidades
 
 
-# Calcula probabilidade de morte baseado no método da fazenda
+# Calcula probabilidade de morte
 # Equações 12 e 13 da LDO de 2018
 def calc_prob_morte(pop):
 
@@ -171,13 +124,13 @@ def calc_prob_morte(pop):
             #mort[ano][90] = (pop[chave_pop][ano-1][90] - pop[chave_pop][ano-1][89]) / pop[chave_pop][ano][90]
 
             # Para idade 0 anos  = (pop_atual - pop_prox_ano)/ pop_atual
-            mort[ano][0] = ( pop[chave_pop][ano][0] - pop[chave_pop][ano+1][1])/pop[chave_pop][ano][0]
+            mort[ano][0] = (pop[chave_pop][ano][0] - pop[chave_pop][ano+1][1])/pop[chave_pop][ano][0]
 
         # Repete a Prob do ultimo ano como valor do antepenultimo
         mort[periodo[-1]] = mort[periodo[-2]]
 
-        # Adiciona o DataFrame no dicionário com as chaves 'MortH' e 'MortM'
         mort.dropna(how='all', axis=1, inplace=True)  # Elimina colunas com dados ausentes
+        # Adiciona o DataFrame no dicionário com as chaves 'MortH' e 'MortM'
         probMorte['Mort'+sexo] = mort
 
     return probMorte
@@ -194,6 +147,7 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
     # Dicionário que armazena as probabilidades
     fat_ajuste = {}
 
+    # Calculada para aposentadorias, pensões e assistênciais 
     tags = ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd', 
             'Pens', 'LoasDef', 'LoasIdo', 'Rmv']
 
@@ -209,14 +163,17 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
         if beneficio in estoques.keys() and beneficio in cessacoes.keys():
             
             fat_ajuste['fam'+beneficio] = pd.Series(1, index=list(range(0,91)))
-            
-            '''
+                      
             for idade in range(1,91):
                 
                 ces_ano_atual = cessacoes[beneficio][ano_prob][idade]
-                est_ano_ant = estoques[beneficio][ano_prob-1][idade-1]
-    
-                # Taxa de cessações - Eq. 15 - REVISAR (ver PDF comentado)
+                est_ano_ant = estoques[beneficio][ano_prob-1][idade]
+                
+                # REVISAR: Gerar fam acima de 100 para alguns beneficios em idades baixas. 
+                # Isso ocorre devido a pmorte ser muito baixa e os estoques serem muito 
+                # pequenos ou zero.Ver pag. 18 do doc da fazenda                 
+                
+                # Taxa de cessações - Eq. 15
                 tx_ces = ces_ano_atual/(est_ano_ant + (ces_ano_atual/2))
                 
                 # Probabilidade de morte
@@ -224,17 +181,12 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
     
                 # Salva a Série no dicionário - Eq. 14
                 fat_ajuste['fam'+beneficio][idade] = tx_ces/mort
-               
-                if fat_ajuste['fam'+beneficio][idade] > 100:                
-                   print('{} {} - tx_ces({}) = ces_ano_atual({})/(est_ano_ant({}) + (ces_ano_atual({})/2))'.format(beneficio, idade,tx_ces ,ces_ano_atual, est_ano_ant, ces_ano_atual))
-                   print('fat({}) = tx_ces({}) / mort({})'.format(fat_ajuste['fam'+beneficio][idade], tx_ces, mort))
-                
+                             
                 # Substitui os NaN por zero
                 fat_ajuste['fam'+beneficio].fillna(0, inplace=True)
-
-            '''
             
-    return fat_ajuste # REVISAR - Confirmar se é fixa para todos os anos
+            
+    return fat_ajuste 
 
 
 # Calcula probabilidades para pensões
@@ -301,6 +253,7 @@ def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
 
 
 # Calcula probabilidade de morte baseado no método do LTS/UFPA
+# OBS: Mover para outro modelo
 def calc_prob_morte_ufpa(pop):
 
     # Obtem os anos da base do IBGE
@@ -337,6 +290,7 @@ def calc_prob_morte_ufpa(pop):
 
 # Verifica todos os valores de probabilidades calculados e indica aqueles
 # maiores que 1 ou se todos são iguais a zero
+# REVISAR: Implementar Corrige erros
 def busca_erros(probabilidades):
 
     # Lista que salva os problemas
