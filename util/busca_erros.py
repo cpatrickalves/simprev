@@ -41,7 +41,7 @@ def corrige_erros_estoque(estoques, concessoes, cessacoes):
     
 # Verifica todos os valores de probabilidades calculados e indica aqueles
 # maiores que 1 ou se todos são iguais a zero
-def busca_erros_prob(probabilidades):
+def busca_erros_prob(probabilidades, logs):
 
     # Lista que salva os problemas
     problemas = {}
@@ -67,9 +67,9 @@ def busca_erros_prob(probabilidades):
             problemas[p] = probabilidades[p][probabilidades[p].lt(0)].dropna()
         
 
-    if bool(problemas):
-        print('Problemas nas probabilidades\n')
+    if bool(problemas):        
+        logs.append('##### Problemas nas probabilidades #####\n')
         for p in problemas:
-            print('Tabela: %s' %p)
-            print(problemas[p])
-            print('_________________\n')
+            logs.append('Tabela: %s \n' %p)
+            logs.append(str(problemas[p]))
+            logs.append('\n_________________\n\n')

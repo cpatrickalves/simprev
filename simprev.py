@@ -60,6 +60,13 @@ periodo = list(range(ano_inicial, ano_final+1))
 # Dicionário que salva os resultados
 resultados = {}
 
+# Cria variável que armazena os logs
+logs = []
+
+# Arquivo que salva os logs
+
+log_file = 'logs.txt'
+
 #############################################################################
 
 print('--- Iniciando projeção --- \n')
@@ -97,7 +104,7 @@ print('Calculando dados demográficos ...\n')
 segurados = fz.calc_demografia(populacao, taxas)
 
 # Corrige inconsistências nos estoques
-corrige_erros_estoque(estoques, concessoes, cessacoes)
+#corrige_erros_estoque(estoques, concessoes, cessacoes, logs)
 
 # Calcula as probabilidades de entrada em benefício e morte
 print('Calculando probabilidades ...\n')
@@ -105,7 +112,7 @@ probabilidades = fz.calc_probabilidades(populacao, segurados, estoques,
                                      concessoes, cessacoes, periodo)
 
 # Buscar por erros nas probababilidades
-busca_erros_prob(probabilidades)
+busca_erros_prob(probabilidades, logs)
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')
@@ -145,10 +152,12 @@ print()
 print('Erro de Despesa em 2060 = {}'.format(resultados['Erro Despesa'][2060]))
 print('Erro de Receita em 2060 = {}'.format(resultados['Erro Receita'][2060]))
 
-
-
 plot_resultados(resultados)
 
+# Salva o arquivo do Log
+arq = open(log_file,'w')
+arq.writelines(logs)
+arq.close()
 
 # Compara as equações da LDO com a do DOcumento da fazenda
 # Buscar por estoques e outros valores (probabilidades) negativos
