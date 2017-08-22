@@ -75,10 +75,7 @@ def calc_probabilidades(populacao, segurados, estoques,
     probabilidades.update(prob_entrada_aux)
     probabilidades.update(prob_entrada_pens)
     probabilidades.update(prob_assist)
-
-    # Busca por probabilidades erradas (ex: > 1)
-    busca_erros(probabilidades) # REVISAR (adicionar valores negativos)
-
+    
     return probabilidades
 
 # Calcula todas as taxas

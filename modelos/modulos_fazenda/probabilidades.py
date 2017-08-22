@@ -4,7 +4,7 @@
 """
 
 from util.tabelas import LerTabelas
-from modelos.modulos_fazenda.estoques import calc_estoq_acumulado
+from modelos.modulos_fazenda.estoques import calc_estoq_apos_acumulado
 import pandas as pd
 
 
@@ -66,7 +66,7 @@ def calc_prob_aux(segurados, estoques, concessoes, periodo):
             
 
     # Calcula probabilidades de entrada em auxílios reclusão e acidente
-    for beneficio in dados.get_id_beneficios(['Auxa' ]):#, 'Auxr']):
+    for beneficio in dados.get_id_beneficios(['Auxa', 'Auxr']):
         # Verifica se o possui os dados de estoque e concessões do benefício
         if beneficio in estoques.keys():
             est = estoques[beneficio][ano_prob]
@@ -83,7 +83,7 @@ def calc_prob_aux(segurados, estoques, concessoes, periodo):
     return probabilidades
 
 
-# Calcula probabilidade de morte
+# Calcula probabilidade de Morte
 # Equações 12 e 13 da LDO de 2018
 def calc_prob_morte(pop):
 
@@ -137,7 +137,7 @@ def calc_prob_morte(pop):
 
 
 # Calcula o Fator de Ajuste de Mortalidade - Equações 14 e 15
-# REVISAR - gera probabilidades zero que quando usadas nas equações zera tudo e
+# REVISAR - gera probabilidades zero que quando usadas nas equações, zera tudo e
 # algums valores de fam estão muito altos (>100)
 def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
 
@@ -200,12 +200,12 @@ def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
     probabilidades = {}             # Dicionário que salvas as prob. para cada benefício
     ano_estoque = periodo[0] - 1    # 2014
     
-    # Eq. 26
+    # Eq. 26: Dit = Idh - Idm
     # Hipótese de que o diferencial de idade médio entre cônjuges é de 4 anos (pag. 45 LDO de 2018)
     Dit = 4
         
     lista = LerTabelas()
-    est_acumulado = calc_estoq_acumulado(estoque, periodo)   
+    est_apos_acumulado = calc_estoq_apos_acumulado(estoque, periodo)   
 
     for beneficio in lista.get_id_beneficios('Pe'):
         
@@ -236,15 +236,15 @@ def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
                 
             conc = concessoes[id_conc][ano_estoque][idade]
             seg = segurados[id_segurados][ano_estoque][i_Dit]
-            est_ac = est_acumulado[clientela+sexo][ano_estoque][i_Dit]
+            est_ac = est_apos_acumulado[clientela+sexo][ano_estoque][i_Dit]
             pmorte = prob_morte['Mort'+sexo][ano_estoque][i_Dit]
         
             # Se a quantidade de segurados e estoque for zero a prob daria infinito
             if seg == 0 and est_ac == 0:
                 probPensao = 0
             else:
-                # Equação baseada nas Eq. 26 e 27 - REVISAR
-                # Essa equação gera probabilidades maiores que 1
+                # Equação baseada nas Eq. 24 e 25 - REVISAR
+                # Essa equação pode gerar probabilidades maiores que 1
                 probPensao = conc / ((seg + est_ac) * pmorte)                 
                 
             probabilidades[beneficio][i_Dit] = probPensao
@@ -287,37 +287,6 @@ def calc_prob_morte_ufpa(pop):
         probMorte['Mort'+sexo] = mort
 
     return probMorte
-
-# Verifica todos os valores de probabilidades calculados e indica aqueles
-# maiores que 1 ou se todos são iguais a zero
-# REVISAR: Implementar Corrige erros
-def busca_erros(probabilidades):
-
-    # Lista que salva os problemas
-    problemas = {}
-    # Verifica se existe probabilidades maiores que 1
-    for p in probabilidades:
-        
-        # Pula os fatores de ajuste de mortalidade
-        if p[:3] == 'fam':
-            continue
-        
-        # Se existe algum elemento em alguma coluna maior que 0.99
-        if (probabilidades[p] > 0.99).any().any():
-            # Salva o benefício e uma tabela com os valores maires que 0.99
-            problemas[p] = probabilidades[p][probabilidades[p].gt(0.99)].dropna()
-        
-        # Verifica se todos os valores são zero
-        elif (probabilidades[p] == 0.0).all().all():
-            problemas[p] = 'Todas as probabilidades são zero'
-
-    if bool(problemas):
-        print('Problemas nas probabilidades\n')
-        for p in problemas:
-            print('Tabela: %s' %p)
-            print(problemas[p])
-            print('_________________\n')
-
 
 
 # Calcula probabilidades de entrada em benefícios assistênciais - Equação 31 da lDO

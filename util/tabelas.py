@@ -177,39 +177,6 @@ class LerTabelas():
         return colecao_tabelas
 
 
-    def corrige_erros_estoque(self, estoques, concessoes, cessacoes):
-        """
-        Identifica idades em que o número de Concessões não bate com o Estoque do ano e idade seguintes
-        e faz uma correção. Essas correções são utilizadas nos cálculos das probabilidades
-        
-        :param estoques: dicionário com os estoques 
-        :param concessoes: dicionário com as concessões
-        :param cessacoes: dicionário com as cessações
-        :return: 
-        """
-
-        count = 0
-        # Para todos os benefícios...
-        for beneficio in concessoes:
-            # Verifica se existe o benefício nas outras tabelas
-            if beneficio in estoques.keys() and beneficio in cessacoes.keys():
-                for ano in concessoes[beneficio]:
-                    for idade in range(1,90):
-                        con = concessoes[beneficio][ano][idade]
-                        est = estoques[beneficio][ano][idade]
-                        ces = cessacoes[beneficio][ano][idade]
-
-                        # Identifica idades em que o número de Concessões é maior que o Estoque do ano e idade seguinte
-                        if con - ces > est:
-                            #print('{} | ano = {}| id = {} | Con = {} | Ces = {} | Est = {}'.format(beneficio, ano, idade,con,ces,est))
-                            # Corrige o estoque para as idades onde o erro foi encontrado
-                            estoques[beneficio].loc[idade, ano] = round(con - ces)
-                            count+=1
-        #print(count)
-        return estoques
-
-
-
     def get_clientela(self, beneficio):
         """ Identifica e retorna a Clientela de um benefício """
 

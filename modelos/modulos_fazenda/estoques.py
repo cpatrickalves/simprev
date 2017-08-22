@@ -70,7 +70,8 @@ def calc_estoq_aux(est, prob, seg, periodo):
     return est
                 
             
-# Projeta estoques para Salário-Maternidade - Equação 20 da LDO de 2018 - REVISAR
+# Projeta estoques para Salário-Maternidade - Equação 20 da LDO de 2018
+# REVISAR - Considerar todos os tipos de rurais?
 def calc_estoq_salMat(est, pop, seg, periodo):
 
     # Cria o objeto dados que possui os IDs das tabelas
@@ -200,7 +201,7 @@ def calc_concessoes_pensao(concessoes, estoques, segurados, probabilidades, peri
     lista_pensoes = dados.get_id_beneficios('Pe')
     
     # Obtém estoque acumulado de aposentadorias por clientela e sexo
-    estoq_acum = calc_estoq_acumulado(estoques, periodo)
+    estoq_acum = calc_estoq_apos_acumulado(estoques, periodo)
     
     # Eq. 26
     # Hipótese de que o diferencial de idade médio entre cônjuges é de 4 anos (pag. 45 LDO de 2018)
@@ -317,7 +318,7 @@ def calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo):
                     
 
 # Calcula estoque acumulado de aposentadorias por clientela e sexo
-def calc_estoq_acumulado(estoques, periodo):
+def calc_estoq_apos_acumulado(estoques, periodo):
     
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()

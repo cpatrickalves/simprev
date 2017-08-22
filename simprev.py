@@ -5,6 +5,7 @@
 
 from util.tabelas import LerTabelas
 from util.dados import DadosLDO
+from util.busca_erros import corrige_erros_estoque, busca_erros_prob
 from util.resultados import calc_resultados
 from util.graficos import plot_erros, plot_resultados
 import modelos.fazenda as fz
@@ -56,6 +57,7 @@ dadosLDO2018 = ldo.get_tabelas()
 # Cria uma lista com os anos a serem projetados
 periodo = list(range(ano_inicial, ano_final+1))
 
+# Dicionário que salva os resultados
 resultados = {}
 
 #############################################################################
@@ -74,7 +76,7 @@ ids_estoques = dados.get_id_beneficios([], 'Es')
 ids_concessoes = dados.get_id_beneficios([], 'Co')
 ids_cessacoes = dados.get_id_beneficios([], 'Ce')
 ids_despesas = dados.get_id_beneficios([], 'ValEs')
-#ids_valMedBen = dados.get_id_beneficios([], 'ValEs')
+#ids_valMedBen = dados.get_id_beneficios([], 'ValEs') - REVISAR
 
 # Obtem as tabelas e armazena nos dicionários correspondentes
 estoques = dados.get_tabelas(ids_estoques, info=True)
@@ -90,18 +92,20 @@ salarios = dados.get_tabelas(dados.ids_salarios)
 print('Calculando taxas ...\n')
 taxas = fz.calc_taxas(populacao_pnad, periodo)
 
-# Calcula: Pop Urbana|Rural, PEA e Pop Ocupada,
-# Contribuintes, Segurados
+# Calcula: Pop Urbana|Rural, PEA e Pop Ocupada, Contribuintes e Segurados
 print('Calculando dados demográficos ...\n')
 segurados = fz.calc_demografia(populacao, taxas)
 
 # Corrige inconsistências nos estoques
-#dados.corrige_erros_estoque(estoques, concessoes, cessacoes)
+corrige_erros_estoque(estoques, concessoes, cessacoes)
 
 # Calcula as probabilidades de entrada em benefício e morte
 print('Calculando probabilidades ...\n')
 probabilidades = fz.calc_probabilidades(populacao, segurados, estoques,
                                      concessoes, cessacoes, periodo)
+
+# Buscar por erros nas probababilidades
+busca_erros_prob(probabilidades)
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')

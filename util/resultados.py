@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jun 22 10:21:51 2017
 
 @author: Patrick Alves
 """
