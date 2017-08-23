@@ -78,13 +78,14 @@ def calc_estoq_salMat(est, pop, seg, periodo):
     dados = LerTabelas()
 
     for benef in dados.get_id_beneficios('SalMat'):            
+        # Verifica se existem dados de estoque
         if benef in est:
             # Armazena valores do ano 
             est_acumulado = pd.Series(index=est[benef].columns)
             # Obtem o tipo de segurado a partir do benefício
             id_seg = dados.get_id_segurados(benef)
             
-            # Os estoques de SalMat são agrupados por ano  
+            # Os estoques de SalMat são agrupados por ano no modelo (não por idade)
             # Acumula os estoques de mulheres ja presentes no estoque            
             for ano in est[benef]:    
                 est_acumulado[ano] = est[benef][ano].sum()
@@ -118,7 +119,7 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
     # Obtém o conjunto de benefícios do tipo pensão
     lista_pensoes = dados.get_id_beneficios('Pe')
     
-    # Calcula pensões do tipo A
+    ##### Calcula pensões do tipo A
     for benef in lista_pensoes:   
         sexo = benef[-1]                # Obtém o Sexo
         id_prob_morte = 'Mort'+ sexo    # ex: MortH
@@ -129,7 +130,7 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
         est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=[2014]+periodo)
         est[id_pens].index.name = "IDADE"    
         
-        # Copia os dados de estoque de 2014
+        # Copia os dados de estoque de 2014 (pensões do tipo A)
         est[id_pens][2014] = est[benef][2014]
         
         for ano in periodo:          
@@ -148,11 +149,12 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
                 est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver               
     
     
-        # Obtém concessões e cessalções do tipo B
+    ##### Calcula pensões de tipo B - Equação 23
+    
+    # Obtém concessões e cessalções do tipo B
     concessoes = calc_concessoes_pensao(concessoes, est, segurados, probabilidades, periodo)    
     cessacoes = calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo)
-    
-    # Calcula pensões de tipo B - Equação 23
+        
     for benef in lista_pensoes:  
         
         sexo = benef[-1]                                                         # Obtém o Sexo       
@@ -337,7 +339,7 @@ def calc_estoq_apos_acumulado(estoques, periodo):
         est_acumulado[clientela+'H'] = pd.DataFrame(0.0, index=range(0,91), columns=anos)        
         est_acumulado[clientela+'M'] = pd.DataFrame(0.0, index=range(0,91), columns=anos)        
         
-        # Obtém todas as aposentadorias e faz o somatório por clientela
+        # Obtém todas as aposentadorias e faz o somatório por clientela, sexo e idade
         for beneficio in dados.get_id_beneficios(ids_apos):                   
             # Verifica se o estoque para o benefício existe
             if beneficio in estoques.keys():

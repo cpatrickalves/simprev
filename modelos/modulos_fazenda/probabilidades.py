@@ -162,20 +162,23 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
         # Verifica se existem dados de estoque e cessações do benefício
         if beneficio in estoques.keys() and beneficio in cessacoes.keys():
             
-            fat_ajuste['fam'+beneficio] = pd.Series(1, index=list(range(0,91)))
+            fat_ajuste['fam'+beneficio] = pd.Series(1.0, index=list(range(0,91)))
                       
             for idade in range(1,91):
                 
                 ces_ano_atual = cessacoes[beneficio][ano_prob][idade]
                 est_ano_ant = estoques[beneficio][ano_prob-1][idade]
                 
-                # REVISAR: Gerar fam acima de 100 para alguns beneficios em idades baixas. 
+                # REVISAR: Gera fam acima de 100 para alguns beneficios em idades baixas. 
                 # Isso ocorre devido a pmorte ser muito baixa e os estoques serem muito 
                 # pequenos ou zero.Ver pag. 18 do doc da fazenda                 
                 
                 # Taxa de cessações - Eq. 15
-                tx_ces = ces_ano_atual/(est_ano_ant + (ces_ano_atual/2))
-                
+                if ces_ano_atual == 0:
+                    tx_ces = 0 
+                else:
+                    tx_ces = ces_ano_atual/(est_ano_ant + (ces_ano_atual/2))
+                                
                 # Probabilidade de morte
                 mort = probMort['Mort'+sexo][ano_prob][idade]
     

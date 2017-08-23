@@ -39,16 +39,15 @@ def corrige_erros_estoque(estoques, concessoes, cessacoes):
     return estoques
 
     
-# Verifica todos os valores de probabilidades calculados e indica aqueles
-# maiores que 1 ou se todos são iguais a zero
-def busca_erros_prob(probabilidades, logs):
+# Busca e corrige probabilidades maiores que 1 ou se todos são iguais a zero
+def busca_erros_prob(probabilidades, logs, corrigir=False):
 
     # Lista que salva os problemas
     problemas = {}
     # Verifica se existe probabilidades maiores que 1
     for p in probabilidades:
         
-        # Pula os fatores de ajuste de mortalidade
+        # Pula os fatores de ajuste de mortalidade - REVISAR
         if p[:3] == 'fam':
             continue
         
@@ -56,16 +55,23 @@ def busca_erros_prob(probabilidades, logs):
         if (probabilidades[p] > 0.99).any().any():
             # Salva o benefício e uma tabela com os valores maires que 0.99
             problemas[p] = probabilidades[p][probabilidades[p].gt(0.99)].dropna()
-        
+            
+            if corrigir:
+                # Corrige probabilidades             
+                probabilidades[p][probabilidades[p].gt(0.99)] = 0.99
+            
         # Verifica se todos os valores são zero
         elif (probabilidades[p] == 0.0).all().all():
             problemas[p] = 'Todas as probabilidades são zero'
             
         # Se existe algum elemento em alguma coluna com valor negativo
         if (probabilidades[p] < 0).any().any():
-            # Salva o benefício e uma tabela com os valores maires que 0.99
+            # Salva o benefício e uma tabela com os valores negativos
             problemas[p] = probabilidades[p][probabilidades[p].lt(0)].dropna()
         
+            if corrigir:
+                # Corrige probabilidades             
+                probabilidades[p][probabilidades[p].lt(0)] = 0
 
     if bool(problemas):        
         logs.append('##### Problemas nas probabilidades #####\n')

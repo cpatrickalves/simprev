@@ -112,7 +112,7 @@ probabilidades = fz.calc_probabilidades(populacao, segurados, estoques,
                                      concessoes, cessacoes, periodo)
 
 # Buscar por erros nas probababilidades
-busca_erros_prob(probabilidades, logs)
+busca_erros_prob(probabilidades, logs, corrigir=True)
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')
@@ -153,6 +153,9 @@ print('Erro de Despesa em 2060 = {}'.format(resultados['Erro Despesa'][2060]))
 print('Erro de Receita em 2060 = {}'.format(resultados['Erro Receita'][2060]))
 
 plot_resultados(resultados)
+
+print(' - Fim da Projeção -')
+print('Para mais detalhes veja o arquivo de log (logs.txt)')
 
 # Salva o arquivo do Log
 arq = open(log_file,'w')
