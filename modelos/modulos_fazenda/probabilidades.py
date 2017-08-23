@@ -137,8 +137,7 @@ def calc_prob_morte(pop):
 
 
 # Calcula o Fator de Ajuste de Mortalidade - Equações 14 e 15
-# REVISAR - gera probabilidades zero que quando usadas nas equações, zera tudo e
-# algums valores de fam estão muito altos (>100)
+# REVISAR - Assume o valor zero em alguns casos e valores muito altos (>100), gerando estoques negativos
 def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
 
     # ano utilizado para cálculo
@@ -174,6 +173,9 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
                 # pequenos ou zero.Ver pag. 18 do doc da fazenda                 
                 
                 # Taxa de cessações - Eq. 15
+                # Não existem dados de cessação para t > 2015, sendo assim, não faz
+                # sentido ter o índice t nas Eq. 14 e 15. Diante disso, foi considerado
+                # um t fixo em 2014 para toda a projeção.
                 if ces_ano_atual == 0:
                     tx_ces = 0 
                 else:
@@ -247,7 +249,7 @@ def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
                 probPensao = 0
             else:
                 # Equação baseada nas Eq. 24 e 25 - REVISAR
-                # Essa equação pode gerar probabilidades maiores que 1
+                # Essa equação pode gerar probabilidades maiores que 1 para idades menores que 20
                 probPensao = conc / ((seg + est_ac) * pmorte)                 
                 
             probabilidades[beneficio][i_Dit] = probPensao
@@ -256,7 +258,7 @@ def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
 
 
 # Calcula probabilidade de morte baseado no método do LTS/UFPA
-# OBS: Mover para outro modelo
+# Revisar: Mover para outro modelo
 def calc_prob_morte_ufpa(pop):
 
     # Obtem os anos da base do IBGE

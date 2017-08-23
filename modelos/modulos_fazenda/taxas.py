@@ -174,7 +174,7 @@ def calc_tx_segurados_rur(pop_pnad, periodo):
     # A LDO não descreve como calcular essa taxa
     # O documento inicial do modelo do STN, IPEA e SPE diz para usar 
     # a PeaRur como denominador, mas acho que o correto seria a SegRurPnadH.
-    # Página 42 da LDO 
+    # Página 42 da LDO - REVISAR
     
     # Taxas de participação de subconuntos da população rural
     for clientela_rural in ['SegEspRur', 'ContrRur', 'SegPotRur']:

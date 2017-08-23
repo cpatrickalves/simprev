@@ -112,7 +112,7 @@ probabilidades = fz.calc_probabilidades(populacao, segurados, estoques,
                                      concessoes, cessacoes, periodo)
 
 # Buscar por erros nas probababilidades
-busca_erros_prob(probabilidades, logs, corrigir=True)
+busca_erros_prob(probabilidades, logs, corrigir=False)
 
 # Projeta Estoques
 print('Projetando Estoques ...\n')
