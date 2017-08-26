@@ -151,16 +151,16 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
     
     ##### Calcula pensões de tipo B - Equação 23
     
-    # Obtém concessões e cessalções do tipo B
+    # Obtém projeções de concessões e cessações do tipo B
     concessoes = calc_concessoes_pensao(concessoes, est, segurados, probabilidades, periodo)    
     cessacoes = calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo)
         
     for benef in lista_pensoes:  
         
-        sexo = benef[-1]                                                         # Obtém o Sexo       
-        id_prob_morte = 'Mort'+ sexo                                             # ex: MortH        
-        id_fam = 'fam'+benef                                                     # fator de ajuste de mortalidade
-        id_pens = benef+"_tipoB"                                                 # Cria um Id para pensão do tipo A
+        sexo = benef[-1]                     # Obtém o Sexo       
+        id_prob_morte = 'Mort'+ sexo         # ex: MortH        
+        id_fam = 'fam'+benef                 # fator de ajuste de mortalidade
+        id_pens = benef+"_tipoB"             # Cria um Id para pensão do tipo B
             
         # Cria DataFrame para armazenar o estoque de Pensões do tipo B 
         est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=[2014]+periodo)
@@ -184,7 +184,9 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
                 # Eq. 23
                 est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver + conc - cess                
                         
-    
+            # Idade zero            
+            est[id_pens].loc[0, ano] = concessoes[benef][ano][0] - cessacoes[benef][ano][0]                
+            
     # Calcula total de pensões
     for benef in lista_pensoes:   
         est[benef] = est[benef+"_tipoA"] + est[benef+"_tipoB"]      # Eq. 21
@@ -348,6 +350,7 @@ def calc_estoq_apos_acumulado(estoques, periodo):
     return est_acumulado
                                     
 
+# Projeta os estoque de benefícios Assistenciais - Equações 28 a 31 da LDO de 2018
 def calc_estoq_assistenciais(estoques, concessoes, populacao, prob, periodo):
     
     ids_assistenciais= ['LoasDef', 'LoasIdo', 'Rmv']
@@ -382,22 +385,33 @@ def calc_estoq_assistenciais(estoques, concessoes, populacao, prob, periodo):
                         est = (est_ano_ant * prob_sobrev) + conc
                         # Salva no DataFrame
                         estoques[beneficio].loc[idade, ano] = est                        
+                    
+
+                    #### Cálculos para idades zero e 90
                         
-                    # Idade zero e 90 - REVISAR                    
+                    # Estoque atual para 90 anos
                     est_90_ant = estoques[beneficio][ano-1][90]
+
                     # O RMV está em extinção (sem novas concessões)                    
                     if tipo == 'Rmv':
-                        conc = 0
+                        conc_90 = 0
+                        conc_0 = 0
                     else:
-                        # Idade zero - REVISAR - o valor esta aumentando muito
-                        estoques[beneficio].loc[0, ano] = prob[beneficio][0] * populacao[id_pop][ano][0]
-                        concessoes[beneficio].loc[0, ano] = estoques[beneficio].loc[0, ano]
-                        # Idade 90 - REVISAR - Tendência de queda constante
-                        conc = prob[beneficio][90] * (populacao[id_pop][ano][90] - est_90_ant)                  
-                        concessoes[beneficio].loc[90, ano] = conc
-                                            
-                    prob_sobrev = 1 - prob[id_mort][ano][90] * prob[id_fam][90]
-                    estoques[beneficio].loc[90, ano] = (est_90_ant * prob_sobrev) + conc
+                        # Idade zero - REVISAR - o valor esta aumentando muito Para o LoadDef
+                        conc_0 = prob[beneficio][0] * populacao[id_pop][ano][0]
+                        concessoes[beneficio].loc[0, ano] = conc_0
+
+                        # Idade 90 - REVISAR - Tendência de queda constante                        
+                        conc_90 = prob[beneficio][90] * (populacao[id_pop][ano][90] - est_90_ant)                  
+                        concessoes[beneficio].loc[90, ano] = conc_90
+                    
+                    # Idade zero                    
+                    prob_sobrev = 1 - (prob[id_mort][ano][0] * prob[id_fam][0])
+                    estoques[beneficio].loc[0, ano] = conc_0 * prob_sobrev
+
+                    # Idade 90
+                    prob_sobrev = 1 - (prob[id_mort][ano][90] * prob[id_fam][90])
+                    estoques[beneficio].loc[90, ano] = (est_90_ant * prob_sobrev) + conc_90
                     
     return estoques
                     
