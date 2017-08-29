@@ -71,7 +71,11 @@ log_file = 'logs.txt'
 
 print('--- Iniciando projeção --- \n')
 print('Lendo arquivo de dados ... \n')
-# Arquivo com os dados da Fazenda
+
+#### Arquivo com os dados da Fazenda
+# Dados disponibilizados em: http://legis.senado.leg.br/comissoes/docsRecCPI?codcol=2093
+# DOC nº 110 do Ministério da Fazenda do dia 22/06/2017 - Midia 21
+
 arquivo = 'dados/dados_fazenda.xlsx'
 # Abri o arquivo
 dados = LerTabelas(arquivo)

@@ -1,0 +1,9 @@
+### Conjunto de dados utilizados para Projeções das Receitas e Despesas do RGPS ###
+
+Fonte: http://legis.senado.leg.br/comissoes/docsRecCPI?codcol=2093
+Origem: Ministério da Fazenda	
+Arquivos: DOC110 e Mídia 21
+Data: 22/06/2017
+Ofício nº 35/MF
+
+Os dados foram disponibilizados em resposta ao Ofício 122/2017-CPIPREV, nota metodológica atualizada sobre o modelo de projeções Fiscais do Regime Geral da Previdência Social e nota sobre a descrição operacional dos arquivos do modelo, além de mídia digital com arquivos interligados que permitem a realização de cálculos de projeções fiscais do RGPS.
