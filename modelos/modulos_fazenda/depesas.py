@@ -6,7 +6,8 @@ from util.tabelas import LerTabelas
 import pandas as pd
 import numpy as np
 
-# REVISAR - Verificar se não existem beneficio menores que 1 SM
+
+# Calcula os valores médios de todos os benefícios
 def calc_valMedBenef(estoques, despesas, dadosLDO, salarios, periodo):
 
     # ultimo com despesa/estoque conhecida (2014)
@@ -28,6 +29,7 @@ def calc_valMedBenef(estoques, despesas, dadosLDO, salarios, periodo):
             valMedBenef[beneficio].fillna(0.0, inplace=True)
 
     # Projeta aumento dos benefícios
+    # Eq. 38
     for ano in periodo:
         for beneficio in valMedBenef.keys():
             reajuste = 1.0 + dadosLDO['TxReajusteBeneficios'][ano]/100
@@ -53,12 +55,13 @@ def calc_valMedBenef(estoques, despesas, dadosLDO, salarios, periodo):
     return valMedBenef
 
 
+# Calcula despesas com benefícios
 def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabilidades, dadosLDO, nparcelas, resultados, periodo):
 
     # Objeto criado para uso das funções da Classe LerTabelas
     dados = LerTabelas()
         
-    ##### Calcula despesas para clientelas Rurais, Urbarnas e assistenciais que recebem o Piso (1 SM) #####
+    ##### Calcula despesas para clientelas Rurais, Urbanas e assistenciais que recebem o Piso (1 SM) #####
     for clientela in ['Rur', 'Piso', 'Rmv', 'Loas']:
         beneficios = dados.get_id_beneficios(clientela)
         for beneficio in beneficios:
@@ -84,7 +87,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
     
     ##### Calcula despesas para clientela Urbana que recebe acima do Piso #####
     
-    # Calcula taxa de reposiçao para todos os anos da projeçao
+    # Calcula taxa de reposiçao para todos os anos da projeçao usando a Eq. 48
     txReposicao = calc_tx_reposicao(valMedBenef, salarios, periodo)
 
     for beneficio in dados.get_id_beneficios('Acim'):
@@ -93,6 +96,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
         if 'SalMat' in beneficio:                        
             continue
         
+        # Verifica se existem estoques 
         if beneficio in estoques:            
             sexo = beneficio[-1]
             
@@ -110,7 +114,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
             for ano in periodo:
                 if ano in estoques[beneficio].columns:      # verifica se existe projeção para esse ano
                 
-                    # Os auxílios usam um cálculo diferente
+                    # Cálculo das despesas com os Auxílios 
                     if 'Aux' in beneficio:                                          
                         est_ano = estoques[beneficio][ano]
                         vmb = val_med_novos_ben[ano]
@@ -155,18 +159,17 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
     for beneficio in dados.get_id_beneficios('SalMat'):
         # Verifica se existe estoque para o beneficio
         if beneficio in estoques:                        
-            # Objeto do tipo Series que armazena as despesas por ano 
+            # Objeto do tipo Series que armazena as despesas acumuladas por ano 
             desp_acumulada = pd.Series(index=estoques[beneficio].columns)
             # Acumula as despesas conhecidas 
             for ano in despesas[beneficio].columns:    
                 desp_acumulada[ano] = despesas[beneficio][ano].sum()
                         
             # Projeta os anos restantes
-            # Obtem o estoques do ano e do ano anterior
+            # Obtem o estoques acumulados do ano atual 
             for ano in periodo:
                 estoq_total = estoques[beneficio+'_total'][ano]
-                #estoq_total_ano_ant = estoques[beneficio+'_total'][ano-1]
-                
+                                
                 # Obtem o valor médio do benefício
                 if dados.get_clientela(beneficio) == 'UrbAcim':
                     # Como não se usa dados desagregados de idade, utiliza-se a média

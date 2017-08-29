@@ -8,7 +8,7 @@ import pandas as pd
 # Projeta a receita de acordo com a LDO de 2018
 def calc_receitas(salarios, aliquota, periodo):
 
-    # Cria um objeto do tipo Serie com índices iguais a lista período e
+    # Cria um objeto do tipo Serie com índices iguais aos descritos na lista período e
     # todos os valores iguais a zero
     receita = pd.Series(0, index=periodo)
 
@@ -26,7 +26,7 @@ def calc_receitas(salarios, aliquota, periodo):
     return receita
 
     
-# Projeta o PIB de acordo com a LDO de 2018
+# Projeta o PIB de acordo com a LDO de 2018 conforme Equações 41, 42 e 43
 def calc_pib(resultados, salarios, pib_inicial, periodo):
     
     # Cria um objetos do tipo Serie com índices iguais a lista periodo e

@@ -5,14 +5,15 @@
 import pandas as pd
 
 
-# Calcula rendimento médio
+# Calcula rendimentos médios 
 def calc_salarios(salarios, populacao, segurados, produtividade, 
                   salMinInicial, dadosLDO, tetoInicialRGPS, periodo):
      
     ##### Projeta crescimento do Salário Mínimo #####
-    # último ano do estoque (2014)
     
+    # último ano do estoque (2014)    
     ano_inicial = periodo[0]-1
+
     # Objeto do tipo Serie que armazena o Salario Minimo
     salarioMinimo =  pd.Series(index=[ano_inicial])
 
@@ -29,9 +30,11 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
     
     
     ##### Projeta crescimento do Teto do RGPS #####
-    # Objeto do tipo Serie que armazena o Salario Minimo
+    
+    # Objeto do tipo Serie que armazena o teto
     ano_inicial = periodo[0]-1                              # 2014
     ano_final = ano_inicial + len(tetoInicialRGPS)          # 2018
+    # Salva os valores conhecidos de Teto de 2014 a 2017    
     teto = pd.Series(tetoInicialRGPS, index=range(ano_inicial, ano_final))
     
     for ano in range(ano_final, (periodo[-1]+1)):           # 2018-2060        
@@ -54,7 +57,7 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
                 salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + produtividade/100 + inflacao/100)             
     
                 
-    ###### Projeta crescimento dos salários dos Segurados acima do SM apartir da produtividade (Eq. 37)
+    ###### Projeta crescimento dos salários dos Segurados acima do SM a partir da produtividade (Eq. 37)
     # A equação original não considera Inflação, mas é necessário adicionar pois a inflação 
     # é considerada no cálculo dos valores dos benefícios
     for sexo in ['H', 'M']:
@@ -86,29 +89,28 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
     
     ###### Projeta Massa Salarial para Contribuintes Urbanos que recebem o SM (Eq. 34)
     for sexo in ['H', 'M']:            
-        id_csm = 'CsmUrb' + sexo
-        id_msal = 'MSal' + id_csm
-        # Multiplica SM do ano correspondente pela quantidade de trabalhadores
-        # em cada idade        
-        salarios[id_msal] = salarios['salarioMinimo'] * segurados[id_csm]
+        id_contrib = 'CsmUrb' + sexo
+        id_msal = 'MSal' + id_contrib
+        # Multiplica SM do ano correspondente pela quantidade de trabalhadores em cada idade        
+        salarios[id_msal] = salarios['salarioMinimo'] * segurados[id_contrib]
         # Elimina colunas vazias
         salarios[id_msal].dropna(how='all', axis=1, inplace=True)  
             
     
-    ###### Projeta Massa Salarial para Segurados que recebem acima do SM (Eq. 35)
+    ###### Projeta Massa Salarial para Contribuintes que recebem acima do SM (Eq. 35)
     for sexo in ['H', 'M']:            
-        id_msal = 'MSalCaUrb' + sexo
+        id_contrib = 'CaUrb' + sexo
+        id_msal = 'MSal' + id_contrib
         id_sal = 'SalMedSegUrbAcimPnad'+ sexo
-        id_seg = 'CaUrb' + sexo
-        
+                
         # Limita o salário de contribuição pelo teto
-        salContr = salarios[id_sal].copy()                   # faz uma cópia do objeto que armazenas os salários
-        for ano in teto.index:                               # para cada ano  
-            for idade in salContr[ano].index:                # para cada idade
+        salContr = salarios[id_sal].copy()               # faz uma cópia do objeto que armazenas os salários
+        for ano in teto.index:                           # para cada ano  
+            for idade in salContr[ano].index:            # para cada idade
                 if salContr[ano][idade] > teto[ano]:
                     salContr[ano][idade] = teto[ano]
         
-        salarios[id_msal] = salContr * segurados[id_seg]
+        salarios[id_msal] = salContr * segurados[id_contrib]
          # Elimina colunas vazias
         salarios[id_msal].dropna(how='all', axis=1, inplace=True)  
                 
