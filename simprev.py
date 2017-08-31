@@ -166,9 +166,9 @@ resultados = calc_resultados(resultados, dadosLDO2018)
 
 print('RESULTADOS: \n')
 print('Erro de Despesa em 2018 = {}'.format(resultados['Erro Despesa'][2018]))
-print('Erro de Receita em 2018 = {}'.format(resultados['Erro Receita'][2018]))
-print()
 print('Erro de Despesa em 2060 = {}'.format(resultados['Erro Despesa'][2060]))
+print()
+print('Erro de Receita em 2018 = {}'.format(resultados['Erro Receita'][2018]))
 print('Erro de Receita em 2060 = {}'.format(resultados['Erro Receita'][2060]))
 
 plot_resultados(resultados)

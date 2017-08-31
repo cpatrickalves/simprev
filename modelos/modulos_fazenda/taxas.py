@@ -26,7 +26,7 @@ def calc_tx_urb(pop_pnad, periodo):
                 
         # OBS: De acordo com o DOC110/MF, para o anod e 2015 deve-se utilizar as médias de 2011-2014
         # Esse procedimento não é descrito na LDO de 2018
-        txurb[taxa][2015] = txurb[taxa].loc[:,2011:2015].mean(axis=1)
+        txurb[taxa][2015] = txurb[taxa].loc[:,2011:2014].mean(axis=1)
         
         # A partir de 2016
         for ano in periodo[1:]:
@@ -103,7 +103,7 @@ def calc_tx_ocup_csm_ca(pop_pnad, periodo):
             
     # Taxa de Cobertura Contributiva para o SM
     for sexo in ['H', 'M']:
-       chave = 'txOcupCsmUrb'+sexo
+       chave = 'txOcupUrbPiso'+sexo
        pocupSm = pop_pnad['PopOcupUrbSmPnad'+sexo]   
        pocup = pop_pnad['PopOcupUrbPnad'+sexo]
        txcober[chave] = pocupSm/pocup
@@ -114,7 +114,7 @@ def calc_tx_ocup_csm_ca(pop_pnad, periodo):
                
     # taxa de Cobertura Contributiva acima do SM
     for sexo in ['H', 'M']:
-       chave = 'txOcupCaUrb'+sexo
+       chave = 'txOcupUrbAcim'+sexo
        pocupAcima = pop_pnad['PopOcupUrbAcimPnad'+sexo]   
        pocup = pop_pnad['PopOcupUrbPnad'+sexo]
        txcober[chave] = pocupAcima/pocup

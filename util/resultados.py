@@ -11,7 +11,7 @@ def calc_resultados(resultados, dadosLDO):
     
     # Erro com relação a LDO em %
     erro_receita = 100 * (resultados['Receitas'] - rec_ldo) / rec_ldo
-    erro_despesa = 100 * (resultados['Despesas'] - rec_ldo) / rec_ldo
+    erro_despesa = 100 * (resultados['Despesas'] - desp_ldo) / desp_ldo
 
     resultados['Erro Receita'] = erro_receita
     resultados['Erro Despesa'] = erro_despesa

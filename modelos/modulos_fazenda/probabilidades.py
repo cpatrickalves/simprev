@@ -6,13 +6,15 @@
 from util.tabelas import LerTabelas
 from modelos.modulos_fazenda.estoques import calc_estoq_apos_acumulado
 import pandas as pd
+import numpy as np
 
 
-# Calcula probabilidades de entrada em aposentadorias - Equação 16 da lDO de 2018
-def calc_prob_apos(segurados, concessoes, periodo):
+# Calcula probabilidades de entrada em aposentadorias
+# Calculo baseado nas planilhas do DOC110/MF
+def calc_prob_apos_MF(populacao, segurados, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
-    ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
+    
     ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
 
     # Cria o objeto dados que possui os IDs das tabelas
@@ -23,22 +25,80 @@ def calc_prob_apos(segurados, concessoes, periodo):
         
         # Verifica se existem dados de concessões do benefício 
         if beneficio in concessoes.keys():
-
-            id_segurado = dados.get_id_segurados(beneficio)
             
-            # Calcula a probabilidade de entrada
-            # Nesse caso prob_entrada é do tipo Series e não DataFrame, pois
-            # Possui somente uma dimensão (é fixa para o ano = ano_prob)
-            # A versão da LDO trabalha com estoques, porém o correto seriam os segurados
-            # Eq. 16
-            prob_entrada = concessoes[beneficio][ano_prob] / (segurados[id_segurado][ano_prob-1] + (concessoes[beneficio][ano_prob]/2))
-                        
+            sexo = beneficio[-1]    
+            clientela = dados.get_clientela(beneficio)
+            id_popOcup = 'Ocup' + clientela + sexo
+            
+            # OBS: Para clientela Rural utiliza-se toda a população
+            if clientela == 'Rur':
+                id_popOcup = 'PopRur' + sexo
+            
+            # OBS: A implementação descritas nas planilhas do DOC110/MF usa uma equação diferente da Eq. 16
+            # prob_entrada = concessoes/PopOcupada                         
+            prob_entrada = concessoes[beneficio] / populacao[id_popOcup]
+            
+            # Trata divisões por zero
+            prob_entrada.replace([np.inf, -np.inf], np.nan, inplace = True)
+            
+            # De acordo com as planilhas do DOC110/MF o valor do ano inicial da projeção (2015), deve ser igual a média dos anos anteriores         
+            prob_entrada[2015] = prob_entrada.loc[:,:2014].mean(axis=1)
+            
+            # Repete a última probabilidade(2015) nos anos seguintes(2016-2060)      
+            for ano in periodo[1:]:
+                prob_entrada[ano] = prob_entrada[ano-1]
+            
+            # Substitui os NaN (not a number) por zeros
+            prob_entrada.fillna(0, inplace = True)
+
             # Adiciona no dicionário
             probabilidades[beneficio] = prob_entrada            
-            # Substitui os NaN (not a number) por zeros
-            probabilidades[beneficio].fillna(0, inplace = True)
+                       
 
     return probabilidades
+
+
+# Calcula probabilidades de entrada em aposentadorias baseado na Equação 16 da lDO de 2018
+def calc_prob_apos_LDO2018(segurados, concessoes, periodo):
+
+    probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
+    
+    ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
+
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
+    # Obtém a lista de aposentadorias e itera sobre cada tipo
+    for beneficio in dados.get_id_beneficios(ids_apos):
+        
+        # Verifica se existem dados de concessões do benefício 
+        if beneficio in concessoes.keys():
+            
+            # Cria o DataFrame
+            prob_entrada = pd.DataFrame(0.0, index=range(0,91), columns=([2014]+periodo))
+            
+            # Eq. 16
+            # A versão da LDO trabalha com estoques (variável Q), porém o correto seriam os segurados
+            ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)            
+            id_segurado = dados.get_id_segurados(beneficio)
+            prob_entrada[ano_prob] = concessoes[beneficio][ano_prob] / (segurados[id_segurado][ano_prob-1] + (concessoes[beneficio][ano_prob]/2))
+            
+            # Trata divisões por zero
+            prob_entrada.replace([np.inf, -np.inf], np.nan, inplace = True)
+            
+            # Repete a última probabilidade(2014) nos anos seguintes(2015-2060)      
+            for ano in periodo:
+                prob_entrada[ano] = prob_entrada[ano-1]
+            
+            # Substitui os NaN (not a number) por zeros
+            prob_entrada.fillna(0, inplace = True)
+
+            # Adiciona no dicionário
+            probabilidades[beneficio] = prob_entrada            
+                       
+
+    return probabilidades
+
 
 
 # Calcula probabilidades de entrada em auxílios - Equações 18 e 19 da LDO de 2018
@@ -106,22 +166,20 @@ def calc_prob_morte(pop):
         for ano in periodo[1:-1]: # Vai do segundo ao penúltimo ano
 
             # Para cada idade...
-            for idade in range(1,90): # Vai de 1 até 89 anos
+            for idade in range(1,89): # Vai de 1 até 88 anos
                 pop_atual = pop[chave_pop][ano][idade]
                 pop_ano_passado = pop[chave_pop][ano-1][idade-1]
                 pop_prox_ano = pop[chave_pop][ano+1][idade+1]
-                
-                # Como a idade 90 anos agrega as seguintes (91,92,etc.) é necessário o calculo abaixo
-                if idade == 89:
-                    pop_prox_ano = pop_prox_ano - pop[chave_pop][ano][90]
-                
+                                
                 mortalidade = (pop_ano_passado - pop_atual)/2 + (pop_atual - pop_prox_ano)/2    # Eq. 13
                 mort[ano][idade] = mortalidade/pop_atual                                        # Eq. 12
 
-            # Calculo para a idade de 90 anos - REVISAR
-            # Como não é possível usar a Eq. 13 para a idade de 90 anos, usou-se o método da UFPA
-            mort[ano][90] = 1 - (pop[chave_pop][ano+1][90] - pop[chave_pop][ano][89] * (1 - mort[ano][89])) / pop[chave_pop][ano][90]
-            #mort[ano][90] = (pop[chave_pop][ano-1][90] - pop[chave_pop][ano-1][89]) / pop[chave_pop][ano][90]
+            # Calculo para as idades de 89 e 90 anos 
+            # Cálculo baseado nas Equações descritas nas planilhas do DOC110/MF
+            # 89 anos
+            mort[ano][89] = (pop[chave_pop][ano-1][88] - pop[chave_pop][ano][89]) / pop[chave_pop][ano][89]            
+            # 90 anos
+            mort[ano][90] = (pop[chave_pop][ano-1][89] + pop[chave_pop][ano-1][90] - pop[chave_pop][ano][90]) / pop[chave_pop][ano][90]
 
             # Para idade 0 anos  = (pop_atual - pop_prox_ano)/ pop_atual
             mort[ano][0] = (pop[chave_pop][ano][0] - pop[chave_pop][ano+1][1])/pop[chave_pop][ano][0]

@@ -34,14 +34,14 @@ def calc_estoq_apos(est, conc, prob, seg, periodo):
                 for idade in range(1,91): 
                     est_ano_anterior = est[benef][ano-1][idade-1]
                     prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][idade]
-                    entradas = seg[id_segurado][ano][idade] * prob[benef][idade]
+                    entradas = seg[id_segurado][ano][idade] * prob[benef][ano][idade]
                     # Eq. 11
                     est[benef].loc[idade, ano] = est_ano_anterior * prob_sobreviver + entradas     # Eq. 11
                     # Salva a quantidade de concessões para uso posterior
                     conc[benef].loc[idade,ano] = entradas
                 
                 # Calculo para a idade zero
-                est[benef].loc[0, ano] = seg[id_segurado][ano][0] * prob[benef][0]
+                est[benef].loc[0, ano] = seg[id_segurado][ano][0] * prob[benef][ano][0]
                 # Salva a quantidade de concessões para uso posterior
                 conc[benef].loc[0, ano] = est[benef].loc[0, ano]
                 
