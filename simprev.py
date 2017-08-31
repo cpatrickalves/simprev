@@ -11,6 +11,21 @@ from util.graficos import plot_erros, plot_resultados
 import modelos.fazenda as fz
 
 
+###############################################################################
+# SIMPREV  - Simulador para projeção de Receitas e Despesas do RGPS 
+###############################################################################
+'''
+### O SimPrev foi desenvolvido a partir dos documentos:
+1) Anexo IV - Metas Fiscais - IV.6 – Projeções Atuariais para o Regime Geral de Previdência Social – RGPS
+2) Fonte: http://legis.senado.leg.br/comissoes/docsRecCPI?codcol=2093
+   Origem: Ministério da Fazenda	
+   Arquivos: DOC110 e Mídia 21
+   Data: 22/06/2017
+   Ofício nº 35/MF
+   
+'''
+###############################################################################
+
 # Não usado por enquanto
 def main():
     pass

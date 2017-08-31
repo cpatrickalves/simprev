@@ -129,11 +129,11 @@ def calc_pocup_Csm_Ca(pocup, taxas):
     # o SM e acima do SM
     csm_ca = {}
             
-    for clientela in ['CsmUrb', 'CaUrb']:    
+    for clientela in ['OcupCsmUrb', 'OcupCaUrb']:    
         for sexo in ['H','M']:
             chave = clientela+sexo                    
             chave_pocup = 'OcupUrb'+sexo
-            chave_tx = 'txOcup'+clientela+sexo
+            chave_tx = 'tx'+clientela+sexo
             csm_ca[chave] = pocup[chave_pocup] * taxas[chave_tx]    # Eq. 8         
             
             # Elimina colunas com dados ausentes

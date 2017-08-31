@@ -19,10 +19,17 @@ def calc_tx_urb(pop_pnad, periodo):
 
         # Preenche valores Nan com zero      
         txurb[chave].fillna(0, inplace=True)
-        
+    
+    
     # Crescimento a partir de 2015 - Eq. 3 da LDO de 2018
     for taxa in txurb:
-        for ano in periodo:
+                
+        # OBS: De acordo com o DOC110/MF, para o anod e 2015 deve-se utilizar as médias de 2011-2014
+        # Esse procedimento não é descrito na LDO de 2018
+        txurb[taxa][2015] = txurb[taxa].loc[:,2011:2015].mean(axis=1)
+        
+        # A partir de 2016
+        for ano in periodo[1:]:
             txurb[taxa][ano] = txurb[taxa][ano-1] * (1 + tx_crescimento_urb ) 
         
         # Verifica se existe alguma taxa maior que o limite definido        
