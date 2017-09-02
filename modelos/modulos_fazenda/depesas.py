@@ -135,7 +135,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                             rend_med_ocup_ant = salarios['SalMedPopOcupUrbAcimPnad'+sexo][ano-1][idade-1]
                             np = nparcelas[beneficio]
                             prob_morte = probabilidades['Mort'+sexo][ano][idade]
-                            fam = probabilidades['fam'+beneficio][idade]
+                            fam = probabilidades['fam'+beneficio][ano][idade]
                             # REVISAR - Os valores de salario já tem reajuste, acho que não é necessário aqui
                             reajuste = dadosLDO['TxReajusteBeneficios'][ano]
                             novas_conc = concessoes[beneficio][ano][idade]

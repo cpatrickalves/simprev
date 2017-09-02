@@ -60,7 +60,7 @@ def calc_probabilidades(populacao, segurados, estoques,
     probabilidades = {}
 
     prob_morte = calc_prob_morte(populacao)
-    fat_ajuste_mort = calc_fat_ajuste_mort(estoques, cessacoes,
+    fat_ajuste_mort = calc_fat_ajuste_mort_MF(estoques, cessacoes,
                                            prob_morte, periodo)
 
     prob_entrada_apos = calc_prob_apos_MF(populacao, segurados, concessoes, periodo)

@@ -33,7 +33,7 @@ def calc_estoq_apos(est, conc, prob, seg, periodo):
                 # 1 a 90 anos - Equação 11 da LDO de 2018
                 for idade in range(1,91): 
                     est_ano_anterior = est[benef][ano-1][idade-1]
-                    prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][idade]
+                    prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][ano][idade]
                     entradas = seg[id_segurado][ano][idade] * prob[benef][ano][idade]
                     # Eq. 11
                     est[benef].loc[idade, ano] = est_ano_anterior * prob_sobreviver + entradas     # Eq. 11
@@ -143,7 +143,7 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
             # somente nas idades de 1 a 90 anos.
             for idade in range(1,91):
                 est_ano_anterior = est[id_pens][ano-1][idade-1]
-                prob_sobreviver = 1 - probabilidades[id_prob_morte][ano][idade] * probabilidades[id_fam][idade]
+                prob_sobreviver = 1 - probabilidades[id_prob_morte][ano][idade] * probabilidades[id_fam][ano][idade]
                                 
                 # Eq. 22
                 est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver               
@@ -177,7 +177,7 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
             # Idades de 1 a 90 anos.
             for idade in range(1,91):                 
                 est_ano_anterior = est[id_pens][ano-1][idade-1]
-                prob_sobreviver = 1 - probabilidades[id_prob_morte][ano][idade] * probabilidades[id_fam][idade]                                
+                prob_sobreviver = 1 - probabilidades[id_prob_morte][ano][idade] * probabilidades[id_fam][ano][idade]                                
                 conc = concessoes[benef][ano][idade]
                 cess = cessacoes[benef][ano][idade]
                                 
@@ -310,7 +310,7 @@ def calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo):
                         k = idade-ji
                         for i in range(k,idade+1):                        
                             pmorte = probabilidades['Mort'+sexo][ano-(i-k)][k]
-                            fator = probabilidades['fam'+beneficio][k]
+                            fator = probabilidades['fam'+beneficio][ano-(i-k)][k]
                             produtorio *= (1 - pmorte * fator)                            
                             
                         # Eq. 27
@@ -371,7 +371,7 @@ def calc_estoq_assistenciais(estoques, concessoes, populacao, prob, periodo):
                     # Idades de 1 a 89 anos 
                     for idade in range(1,90):
                         est_ano_ant = estoques[beneficio][ano-1][idade-1]
-                        prob_sobrev = 1 - prob[id_mort][ano][idade] * prob[id_fam][idade]
+                        prob_sobrev = 1 - prob[id_mort][ano][idade] * prob[id_fam][ano][idade]
                         
                         # O RMV está em extinção (sem novas concessões)                    
                         if tipo == 'Rmv':
@@ -406,11 +406,11 @@ def calc_estoq_assistenciais(estoques, concessoes, populacao, prob, periodo):
                         concessoes[beneficio].loc[90, ano] = conc_90
                     
                     # Idade zero                    
-                    prob_sobrev = 1 - (prob[id_mort][ano][0] * prob[id_fam][0])
+                    prob_sobrev = 1 - (prob[id_mort][ano][0] * prob[id_fam][ano][0])
                     estoques[beneficio].loc[0, ano] = conc_0 * prob_sobrev
 
                     # Idade 90
-                    prob_sobrev = 1 - (prob[id_mort][ano][90] * prob[id_fam][90])
+                    prob_sobrev = 1 - (prob[id_mort][ano][90] * prob[id_fam][ano][90])
                     estoques[beneficio].loc[90, ano] = (est_90_ant * prob_sobrev) + conc_90
                     
     return estoques

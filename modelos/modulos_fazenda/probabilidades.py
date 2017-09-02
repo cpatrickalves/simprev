@@ -196,7 +196,7 @@ def calc_prob_morte(pop):
 
 # Calcula o Fator de Ajuste de Mortalidade - Equações 14 e 15
 # REVISAR - Assume o valor zero em alguns casos e valores muito altos (>100), gerando estoques negativos
-def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
+def calc_fat_ajuste_mort_LDO2018(estoques, cessacoes, probMort, periodo):
 
     # ano utilizado para cálculo
     ano_prob = periodo[0]-1   #2014
@@ -219,7 +219,7 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
         # Verifica se existem dados de estoque e cessações do benefício
         if beneficio in estoques.keys() and beneficio in cessacoes.keys():
             
-            fat_ajuste['fam'+beneficio] = pd.Series(1.0, index=list(range(0,91)))
+            fat_ajuste['fam'+beneficio] = pd.DataFrame(1.0, index=range(0,91), columns=([2014]+periodo))
                       
             for idade in range(1,91):
                 
@@ -243,12 +243,75 @@ def calc_fat_ajuste_mort(estoques, cessacoes, probMort, periodo):
                 mort = probMort['Mort'+sexo][ano_prob][idade]
     
                 # Salva a Série no dicionário - Eq. 14
-                fat_ajuste['fam'+beneficio][idade] = tx_ces/mort
+                fat_ajuste['fam'+beneficio][ano_prob][idade] = tx_ces/mort
+                
+                # Repete a última probabilidade(2014) nos anos seguintes(2015-2060)      
+                for ano in periodo:
+                    fat_ajuste['fam'+beneficio][ano] = fat_ajuste['fam'+beneficio][ano-1]
                              
-                # Substitui os NaN por zero
-                fat_ajuste['fam'+beneficio].fillna(0, inplace=True)
+                # Substitui os NaN por 1.0
+                fat_ajuste['fam'+beneficio].fillna(1.0, inplace=True)
             
             
+    return fat_ajuste 
+
+
+# Calcula o Fator de Ajuste de Mortalidade (FAM) de acordo com a Planilhas do DOC110/MF
+def calc_fat_ajuste_mort_MF(estoques, cessacoes, probMort, periodo):
+
+    # ano utilizado para cálculo
+    ano_prob = periodo[0]-1   #2014
+
+    # Dicionário que armazena as probabilidades
+    fat_ajuste = {}
+
+    # Calculada para aposentadorias, pensões e assistênciais 
+    tags = ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd', 
+            'Pens', 'LoasDef', 'LoasIdo', 'Rmv']
+
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
+    # Calcula o fator de ajuste para cada tipo de aposentadoria
+    for beneficio in dados.get_id_beneficios(tags):
+        
+        sexo = beneficio[-1]
+
+        # Verifica se existem dados de estoque e cessações do benefício
+        if beneficio in estoques.keys() and beneficio in cessacoes.keys():
+            
+            # A Equação utilizada nas planilhas do MF é diferente da descrita na LDO de 2018 (Eq. 14 e 15)
+            # fam = 1, se Cessações = 0
+            # fam = (Cessações/Estoque)/txMort
+            
+            txCes = cessacoes[beneficio] / estoques[beneficio]
+            fam = txCes / probMort['Mort'+sexo]
+            
+            # Elimina colunas com dados ausentes
+            fam.dropna(how='all', axis=1, inplace=True)  
+            # Trata divisões por zero (gera o valo inf)
+            fam.replace([np.inf, -np.inf], np.nan, inplace = True)
+            # Garante que não existe valor zero
+            fam.replace(0, 1.0, inplace = True)
+            # Substitui os NaN por 1.0
+            fam.fillna(1.0, inplace=True)
+            
+            # Para o primeiro ano de projeção (2015), o FAM é igual a média dos anos anteriores
+            # Exceto para os Rurais, onde o FAM é igual ao do ano anterior
+            if dados.get_clientela(beneficio) == 'Rur':
+                fam[ano_prob+1] = fam[ano_prob]
+            else:
+                fam[ano_prob+1] = fam.loc[:,:ano_prob].mean(axis=1)
+            
+            # Para os anos seguintes o FAM é constante
+            for ano in periodo[1:]:
+                fam[ano] = fam[ano-1]
+            
+            
+            
+            # Salva no dicionário
+            fat_ajuste['fam'+beneficio] = fam
+        
     return fat_ajuste 
 
 
