@@ -64,7 +64,7 @@ def calc_probabilidades(populacao, segurados, estoques,
                                            prob_morte, periodo)
 
     prob_entrada_apos = calc_prob_apos_MF(populacao, segurados, concessoes, periodo)
-    prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
+    prob_entrada_aux = calc_prob_aux_MF(populacao, estoques, concessoes, periodo)
     prob_entrada_pens = calc_prob_pensao(concessoes, segurados, estoques, prob_morte, periodo)
     prob_assist = calc_prob_assist(populacao, concessoes, periodo)
     

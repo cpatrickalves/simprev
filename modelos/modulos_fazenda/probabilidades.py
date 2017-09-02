@@ -100,9 +100,113 @@ def calc_prob_apos_LDO2018(segurados, concessoes, periodo):
     return probabilidades
 
 
+# Calcula probabilidades de entrada em auxílios baseado nas planilhas do DOC110/MF
+def calc_prob_aux_MF(populacao, estoques, concessoes, periodo):
+
+    probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
+    ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
+
+    # Cria o objeto dados que possui os IDs das tabelas
+    dados = LerTabelas()
+
+    # De acordo com as planilhas do DOC110/MF
+    # ProbAuxDoenca = Concedidos/popOcupada
+    # ProbAuxAcidente = Estoque/popOcupada
+    # ProbAuxReclusão = Estoque/popOcupada(somando a idade com 25)
+
+    # O cálculo do Auxílio doença e diferente dos demais auxílios
+    for beneficio in dados.get_id_beneficios(['Auxd']):
+                
+        # Verifica se o possui os dados de estoque e concessões do benefício
+        if beneficio in estoques.keys() and beneficio in concessoes.keys():
+            sexo = beneficio[-1]
+            clientela = dados.get_clientela(beneficio)            
+            conc = concessoes[beneficio][ano_prob]
+            
+            # OBS: Para clientela Rural utiliza-se toda a população
+            if clientela == 'Rur':
+                popOcup = populacao['PopRur' + sexo][ano_prob]
+            else:            
+                popOcup = populacao['Ocup' + clientela + sexo][ano_prob]
+                
+            prob_auxd = conc / popOcup
+            
+            # Substitui os NaN por zero
+            prob_auxd.replace([np.inf, -np.inf], np.nan, inplace = True)
+            prob_auxd.fillna(0, inplace = True)
+            
+            probabilidades[beneficio] = prob_auxd
+            
+
+    # Calcula probabilidades de entrada em auxílio acidente
+    for beneficio in dados.get_id_beneficios(['Auxa']):
+        # Verifica se o possui os dados de estoque e concessões do benefício
+        if beneficio in estoques.keys():
+            sexo = beneficio[-1]
+            clientela = dados.get_clientela(beneficio)         
+            est = estoques[beneficio][ano_prob]
+            
+            # OBS: Para clientela Rural utiliza-se toda a população
+            if clientela == 'Rur':
+                popOcup = populacao['PopRur' + sexo][ano_prob]
+            else:            
+                popOcup = populacao['Ocup' + clientela + sexo][ano_prob]
+                
+            prob_auxa = est / popOcup                        
+            
+            # Substitui os NaN por zero
+            prob_auxa.replace([np.inf, -np.inf], np.nan, inplace = True)
+            prob_auxa.fillna(0, inplace = True)
+            
+            probabilidades[beneficio] = prob_auxa
+
+
+    # Calcula probabilidades de entrada em auxílio reclusão
+    for beneficio in dados.get_id_beneficios(['Auxr']):
+        # Verifica se o possui os dados de estoque e concessões do benefício
+        if beneficio in estoques.keys():
+            sexo = beneficio[-1]
+            clientela = dados.get_clientela(beneficio)
+            # Cria objeto do tipo Serie
+            prob_auxr = pd.Series(0.0, index=range(0,91))
+            deslocamento = 0
+            
+            for idade in range(0,91):
+                est = estoques[beneficio][ano_prob][idade]                
+                
+                # Na planilha são aplicados deslocamentos nas idades
+                if idade < 61 and sexo == 'H': 
+                    deslocamento = 25
+                elif idade < 61 and sexo == 'M': 
+                    deslocamento = 18                    
+                else:
+                    deslocamento = 0
+                
+                # OBS: para o AuxReclusao o sexo utilizado na popOcup é sempre masculino
+                if clientela == 'Rur':
+                    id_popOcup = 'PopRurH'
+                else:
+                    id_popOcup = 'Ocup' + clientela + 'H'
+                  
+                popOcup = populacao[id_popOcup][ano_prob][idade+deslocamento]                        
+                
+                if popOcup == 0:
+                    prob_auxr[idade] = 0
+                else:                        
+                    prob_auxr[idade] = est / popOcup                        
+            
+            # Substitui os NaN por zero
+            prob_auxr.replace([np.inf, -np.inf], np.nan, inplace = True)
+            prob_auxr.fillna(0, inplace = True)
+            
+            probabilidades[beneficio] = prob_auxr
+
+    
+    return probabilidades
+
 
 # Calcula probabilidades de entrada em auxílios - Equações 18 e 19 da LDO de 2018
-def calc_prob_aux(segurados, estoques, concessoes, periodo):
+def calc_prob_aux_LDO2018(segurados, estoques, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
     ano_prob = periodo[0]-1   # ano utilizado para cálculo
@@ -307,10 +411,9 @@ def calc_fat_ajuste_mort_MF(estoques, cessacoes, probMort, periodo):
             for ano in periodo[1:]:
                 fam[ano] = fam[ano-1]
             
-            
-            
             # Salva no dicionário
             fat_ajuste['fam'+beneficio] = fam
+            
         
     return fat_ajuste 
 
