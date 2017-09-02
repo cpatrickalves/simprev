@@ -156,35 +156,36 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                         
 
     ##### Calcula despesas para o Salário Maternidade #####
-    for beneficio in dados.get_id_beneficios('SalMat'):
+    for beneficio in dados.get_id_beneficios('SalMat'):        
+        # 2014-2060
+        anos = estoques[beneficio].index
+        
         # Verifica se existe estoque para o beneficio
         if beneficio in estoques:                        
             # Objeto do tipo Series que armazena as despesas acumuladas por ano 
-            desp_acumulada = pd.Series(index=estoques[beneficio].columns)
-            # Acumula as despesas conhecidas 
-            for ano in despesas[beneficio].columns:    
-                desp_acumulada[ano] = despesas[beneficio][ano].sum()
-                        
-            # Projeta os anos restantes
+            desp_acumulada = pd.Series(0.0, index=anos)
+                                                
             # Obtem o estoques acumulados do ano atual 
-            for ano in periodo:
-                estoq_total = estoques[beneficio+'_total'][ano]
-                                
+            for ano in anos:
+                estoq_total = estoques[beneficio][ano]
+                
+                # REVISAR
                 # Obtem o valor médio do benefício
-                if dados.get_clientela(beneficio) == 'UrbAcim':
+                #if dados.get_clientela(beneficio) == 'UrbAcim':
                     # Como não se usa dados desagregados de idade, utiliza-se a média
                     # Considera somente a faixa de 16 a 45 anos
-                    valor_benef = valMedBenef[beneficio][ano][16:46].mean()
-                else:
-                    valor_benef = salarios['salarioMinimo'][ano]                    
+                #    valor_benef = valMedBenef[beneficio][ano][16:46].mean()
+                #else:
+                #    valor_benef = salarios['salarioMinimo'][ano]                    
+                valor_benef = salarios['salarioMinimo'][ano]                    
 
                 np = nparcelas[beneficio]
                             
-                # OBS: A LDO não descreve a equação para o calculo de despesas para o SalMat - REVISAR
+                # OBS: A LDO não descreve a equação para o calculo de despesas para o SalMat
                 desp_acumulada[ano] = estoq_total * valor_benef * np  
                 
             # Salva no DataFrame
-            despesas[beneficio+'_total'] = desp_acumulada
+            despesas[beneficio] = desp_acumulada
 
 
     ##### Calcula a despesa total #####

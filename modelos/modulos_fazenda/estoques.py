@@ -71,43 +71,50 @@ def calc_estoq_aux(est, prob, seg, periodo):
                 
             
 # Projeta estoques para Salário-Maternidade - Equação 20 da LDO de 2018
-# REVISAR - Considerar todos os tipos de rurais?
 def calc_estoq_salMat(est, pop, seg, periodo):
 
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()
+    
+    # 2014, 2015, ...
+    anos = [(periodo[0]-1)]+periodo
 
-    for benef in dados.get_id_beneficios('SalMat'):            
-        # Verifica se existem dados de estoque
-        if benef in est:
-            # Armazena valores do ano 
-            est_acumulado = pd.Series(index=est[benef].columns)
-            # Obtem o tipo de segurado a partir do benefício
-            id_seg = dados.get_id_segurados(benef)
-            
-            # Os estoques de SalMat são agrupados por ano no modelo (não por idade)
-            # Acumula os estoques de mulheres ja presentes no estoque            
-            for ano in est[benef]:    
-                est_acumulado[ano] = est[benef][ano].sum()
-                    
-            # Realiza projeção    
-            for ano in periodo:
-                est_acumulado[ano] = 0     # Cria um novo ano 
-                nascimentos = pop['PopIbgeM'][ano][0] + pop['PopIbgeH'][ano][0]
+    for benef in dados.get_id_beneficios('SalMat'):                    
+        # Armazena valores do ano 
+        est_acumulado = pd.Series(index=anos)
+        # Obtem o tipo de segurado a partir do benefício
+        id_seg = dados.get_id_segurados(benef)
+        
+        # Os estoques de SalMat são agrupados por ano no modelo (não por idade)
+        # OBS: O calculo dos estoques de SalMat não dependem da existência de estoques anteriores
                 
-                # Acumula mulheres de 16 a 45 anos
-                seg_16_45 = 0
-                pop_16_45 = 0                                
+        # Realiza projeção    
+        for ano in anos:
+            est_acumulado[ano] = 0     # Cria um novo ano 
+            nascimentos = pop['PopIbgeM'][ano][0] + pop['PopIbgeH'][ano][0]
+            
+            # Acumula mulheres de 16 a 45 anos
+            seg_16_45 = 0
+            pop_16_45 = 0    
+
+            # O calculo para os rurais usa a População Rural e não os segurados rurais
+            # OBS: o cálculo para os rurais ainda não bate com os da planilha do MF por causa do 
+            # cálculo da taxa de ruralização ser diferente
+            if 'Rur' in benef:
+                for idade in range(16,46):
+                    seg_16_45 += pop['PopRurM'][ano][idade]
+                    pop_16_45 += pop['PopIbgeM'][ano][idade]                    
+            else:
                 for idade in range(16,46):
                     seg_16_45 += seg[id_seg][ano][idade]
                     pop_16_45 += pop['PopIbgeM'][ano][idade]
 
-                # Eq. 20
-                est_acumulado[ano] = (seg_16_45/pop_16_45) * nascimentos    
-            
-            # Cria uma nova entrada no dicionário para armazenar os estoques acumulados
-            est[benef+"_total"] = est_acumulado
-            
+            # Eq. 20
+            est_acumulado[ano] = (seg_16_45/pop_16_45) * nascimentos    
+        
+        # Cria uma nova entrada no dicionário para armazenar os estoques acumulados
+        est[benef] = est_acumulado
+        
     return est
     
 

@@ -133,7 +133,11 @@ class LerTabelas():
         # Lê cada uma das tabelas dentro do arquivo
         # Converte cada tabela em um DataFrame e salva no dicionário
         for sigla in lista:
-
+            
+            # Pula o Salário maternidade, pois este não depende de estoque anterior
+            if 'SalMat' in sigla:
+                continue
+            
             # Remove os 2 primeiro caracteres para o caso de estoques, concessões
             # ou cessações (ex: 'EsApidRurH' -> 'ApidRurH') e os 5 primeiros caracteres
             # no caso dos estoques de despesa ("ValEs")
