@@ -406,10 +406,17 @@ def calc_fat_ajuste_mort_MF(estoques, cessacoes, probMort, periodo):
                 fam[ano_prob+1] = fam[ano_prob]
             else:
                 fam[ano_prob+1] = fam.loc[:,:ano_prob].mean(axis=1)
-            
+                            
             # Para os anos seguintes o FAM é constante
             for ano in periodo[1:]:
                 fam[ano] = fam[ano-1]
+            
+            # Lógica usada nas planilhas do MF para as Pensões
+            # Garante que o beneficiário pare de receber pensão aos 21 anos
+            # fam = 1/ProbMorte
+            if 'Pens' in beneficio:
+                for ano in periodo:                
+                    fam.loc[21,ano] = 1/probMort['Mort'+sexo].loc[21,ano]
             
             # Salva no dicionário
             fat_ajuste['fam'+beneficio] = fam
@@ -419,8 +426,7 @@ def calc_fat_ajuste_mort_MF(estoques, cessacoes, probMort, periodo):
 
 
 # Calcula probabilidades para pensões
-# O modelo da LDO só considera pensões para o cônjuge
-def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
+def calc_prob_pensao_LDO2018(concessoes, segurados, estoque, prob_morte, periodo):
     
     # A LDO de 2018 não descreve como calcular as probabilidades para pensões
     # As equações abaixo são resultado de manipulações das Equações 24 e 25 da LDO
@@ -479,6 +485,88 @@ def calc_prob_pensao(concessoes, segurados, estoque, prob_morte, periodo):
             probabilidades[beneficio][i_Dit] = probPensao
                 
     return probabilidades
+
+
+
+# Calcula probabilidades para pensões baseado nas planilhas do DOC110/MF
+def calc_prob_pensao_MF(concessoes, segurados, populacao, estoque, prob_morte, periodo):
+    
+    # A LDO de 2018 não descreve como calcular as probabilidades para pensões
+    # As equações abaixo foram extraídas das planilhas do MF
+    
+    probabilidades = {}             # Dicionário que salvas as prob. para cada benefício
+    ano_estoque = periodo[0] - 1    # 2014
+    
+    # Eq. 26: Dit = Idh - Idm
+    # Hipótese de que o diferencial de idade médio entre cônjuges é de 4 anos (pag. 45 LDO de 2018)
+    Dit = 4
+        
+    lista = LerTabelas()
+    est_apos_acumulado = calc_estoq_apos_acumulado(estoque, periodo)   
+
+    for beneficio in lista.get_id_beneficios('Pe'):
+        
+        # Cria Objeto do tipo Serie que armazena as probabilidades
+        probabilidades[beneficio] = pd.Series(0.0, index=range(0,91))
+        
+        sexo = beneficio[-1]                                # Última letra do benefício
+        sexo_oposto = 'M' if sexo=='H' else 'H'             # Obtém o oposto
+        clientela = lista.get_clientela(beneficio)
+        id_conc = beneficio.replace(sexo, sexo_oposto)      # Troca o sexo do benefício
+        # Sempre são usados os segurados do sexo masculino
+        id_segurados = lista.get_id_segurados(beneficio).replace(sexo, 'H')  
+        
+        # Para cada idade i
+        for idade in range(0,91):
+           
+            if idade > 20 and idade < 87:
+                Dit = 4
+            elif idade == 87:
+                Dit = 3
+            elif idade == 88:
+                Dit = 2
+            elif idade == 89:
+                Dit = 1
+            else:
+                Dit = 0
+                        
+            # A soma ou subtração depende do sexo
+            if sexo == 'M':
+                i_Dit = idade + Dit
+            else:
+                i_Dit = idade - Dit
+            
+            # Trata valores negativos e maiores que 90 para i_Dit
+            if i_Dit < 0:
+                i_Dit = 0
+            
+            if i_Dit > 90:
+                i_Dit = 90
+                
+            conc = concessoes[id_conc][ano_estoque][i_Dit]
+            pmorte = prob_morte['Mort'+sexo][ano_estoque][idade]
+            
+            # Para os urbanos com idade de 15 anos e para os rurais utiliza-se toda a população por clientela simples (Urb ou Rur)
+            if idade < 16 or clientela == 'Rur':
+                clientela_simples = clientela[0:3] 
+                potGeradoresPensoes = populacao['Pop' + clientela_simples + sexo][ano_estoque][idade]
+            else:
+                seg = segurados[id_segurados][ano_estoque][idade]
+                est_ac = est_apos_acumulado[clientela+sexo][ano_estoque][idade]
+                potGeradoresPensoes = seg + est_ac
+                               
+            # Evita divisões por zero
+            if potGeradoresPensoes == 0:
+                probPensao = 0
+            else:
+                # Equação baseada nas Eq. 24 e 25
+                # OBS: Essa equação gera probabilidades maiores que 1 
+                probPensao = conc / (potGeradoresPensoes * pmorte)                                 
+                
+            probabilidades[beneficio][idade] = probPensao
+                
+    return probabilidades
+
 
 
 # Calcula probabilidade de morte baseado no método do LTS/UFPA
