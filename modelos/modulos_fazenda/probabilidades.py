@@ -393,6 +393,11 @@ def calc_fat_ajuste_mort_MF(estoques, cessacoes, probMort, periodo):
             
             # Elimina colunas com dados ausentes
             fam.dropna(how='all', axis=1, inplace=True)  
+            
+            # Elimina o ano de 2010 (não é utilizado nas planilhas)
+            if 2010 in fam.columns:
+                fam.drop(2010, axis=1, inplace=True)
+                
             # Trata divisões por zero (gera o valo inf)
             fam.replace([np.inf, -np.inf], np.nan, inplace = True)
             # Garante que não existe valor zero

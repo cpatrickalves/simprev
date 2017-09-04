@@ -147,14 +147,28 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
             
             # Projeta pensões do tipo A
             # Como não se tem novas concessões desse tipo de pensão, calcula-se
-            # somente nas idades de 1 a 90 anos.
-            for idade in range(1,91):
+            # somente nas idades de 1 a 89 anos.
+            for idade in range(1,90):
                 est_ano_anterior = est[id_pens][ano-1][idade-1]
-                prob_sobreviver = 1 - probabilidades[id_prob_morte][ano][idade] * probabilidades[id_fam][ano][idade]
-                                
+                probMorte = probabilidades[id_prob_morte][ano][idade]
+                fam = probabilidades[id_fam][ano][idade]
+                prob_sobreviver = 1 - (probMorte * fam)
+                                                               
                 # Eq. 22
                 est[id_pens].loc[idade, ano] = est_ano_anterior * prob_sobreviver               
-    
+              
+            # Calculo para idade 90                
+            est_ano_anterior = est[id_pens][ano-1][89] + est[id_pens][ano-1][90]
+            id_prob_morte = 'MortH'
+            id_fam = ('fam'+benef).replace(sexo, 'H')                    
+            # para o primeiro ano de projeção (2015) a probMorte é para 89 anos
+            if ano == periodo[0]:
+                probMorte = probabilidades[id_prob_morte][ano][89]
+            else: 
+                probMorte = probabilidades[id_prob_morte][ano][90]
+            fam = probabilidades[id_fam][ano][90]
+            prob_sobreviver = 1 - probMorte * fam
+            est[id_pens].loc[90, ano] = est_ano_anterior * prob_sobreviver               
     
     ##### Calcula pensões de tipo B - Equação 23
     
