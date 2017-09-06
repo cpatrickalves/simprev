@@ -119,7 +119,7 @@ def calc_estoq_salMat(est, pop, seg, periodo):
     
 
 # Projeta os estoque de pensões - Equações 21 a 27 da LDO de 2018
-def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, periodo):
+def calc_estoq_pensoes(populacao, est, concessoes, cessacoes, probabilidades, segurados, periodo):
     
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()
@@ -170,10 +170,11 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
             prob_sobreviver = 1 - probMorte * fam
             est[id_pens].loc[90, ano] = est_ano_anterior * prob_sobreviver               
     
+    
     ##### Calcula pensões de tipo B - Equação 23
     
     # Obtém projeções de concessões e cessações do tipo B
-    concessoes = calc_concessoes_pensao(concessoes, est, segurados, probabilidades, periodo)    
+    concessoes = calc_concessoes_pensao(populacao, concessoes, est, segurados, probabilidades, periodo)    
     cessacoes = calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo)
         
     for benef in lista_pensoes:  
@@ -195,8 +196,8 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
                 continue
             
             # Projeta pensões do tipo B            
-            # Idades de 1 a 90 anos.
-            for idade in range(1,91):                 
+            # Idades de 1 a 89 anos.
+            for idade in range(1,90):                 
                 est_ano_anterior = est[id_pens][ano-1][idade-1]
                 prob_sobreviver = 1 - probabilidades[id_prob_morte][ano][idade] * probabilidades[id_fam][ano][idade]                                
                 conc = concessoes[benef][ano][idade]
@@ -207,6 +208,12 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
                         
             # Idade zero            
             est[id_pens].loc[0, ano] = concessoes[benef][ano][0] - cessacoes[benef][ano][0]                
+            # Idade 90                
+            est_ano_ant90 = est[id_pens][ano-1][89] + est[id_pens][ano-1][90]            
+            prob_sobr90 = 1 - probabilidades[id_prob_morte][ano][90] * probabilidades[id_fam][ano][90]                                
+            conc90 = concessoes[benef][ano][90]
+            cess90 = cessacoes[benef][ano][90]
+            est[id_pens].loc[90, ano] = est_ano_ant90 * prob_sobr90 + conc90 - cess90              
             
     # Calcula total de pensões
     for benef in lista_pensoes:   
@@ -216,8 +223,8 @@ def calc_estoq_pensoes(est, concessoes, cessacoes, probabilidades, segurados, pe
 
 
 # Calcula as concessões de Pensões
-# Equaçóes 24 e 25
-def calc_concessoes_pensao(concessoes, estoques, segurados, probabilidades, periodo):
+# Baseado nas Equaçóes 24 e 25 e planilhas do MF
+def calc_concessoes_pensao(populacao, concessoes, estoques, segurados, probabilidades, periodo):
 
     # Cria o objeto dados que possui os IDs das tabelas
     dados = LerTabelas()
@@ -235,10 +242,11 @@ def calc_concessoes_pensao(concessoes, estoques, segurados, probabilidades, peri
     # Calcula concessões de pensões do tipo B 
     for benef in lista_pensoes:  
         
-        sexo = benef[-1]                                                         # Obtém o Sexo
-        sexo_oposto = 'M' if sexo=='H' else 'H'                                  # Obtém o oposto
-        id_mort_sex_op = 'Mort'+ sexo_oposto                                     # ex: MortM                
-        id_seg = dados.get_id_segurados(benef).replace(sexo, sexo_oposto)        # Obtem o Id do segurado trocando o sexo
+        sexo = benef[-1]                                              # Obtém o Sexo
+        sexo_oposto = 'M' if sexo=='H' else 'H'                       # Obtém o oposto
+        id_mort_sex_op = 'Mort'+ sexo_oposto                          # ex: MortM                
+        # Sempre são usados os segurados do sexo masculino
+        id_seg = dados.get_id_segurados(benef).replace(sexo, 'H')     # Obtem o Id do segurado trocando o sexo
         clientela = dados.get_clientela(benef)   
         id_prob_entr = benef.replace(sexo, sexo_oposto)
                         
@@ -251,9 +259,21 @@ def calc_concessoes_pensao(concessoes, estoques, segurados, probabilidades, peri
             concessoes[benef][ano] = 0
             
             # Calcula concessões
-            # Idades de 1 a 90 anos.
-            for idade in range(1,91):
-                                
+            # Idades de 0 a 90 anos.
+            for idade in range(0,91):
+            
+                # Determina o valor de Dit baseado na idade (relação baseada nas planilhas do MF)
+                if idade > 20 and idade < 87:
+                    Dit = 4
+                elif idade == 87:
+                    Dit = 3
+                elif idade == 88:
+                    Dit = 2
+                elif idade == 89:
+                    Dit = 1
+                else:
+                    Dit = 0
+                                        
                 # A soma ou subtração depende do sexo
                 if sexo == 'H':
                     i_Dit = idade - Dit
@@ -261,19 +281,27 @@ def calc_concessoes_pensao(concessoes, estoques, segurados, probabilidades, peri
                     i_Dit = idade + Dit
                 
                 # Trata valores negativos e maiores que 90
-                if i_Dit < 0:
-                    i_Dit = 0
+                #if i_Dit < 0:
+                #    i_Dit = 0
                 
-                if i_Dit > 90:
-                    i_Dit = 90
+                #if i_Dit > 90:
+                #    i_Dit = 90
                                 
-                prob_entrada = probabilidades[id_prob_entr][i_Dit] 
-                seg = segurados[id_seg][ano][i_Dit]
-                est_ac = estoq_acum[clientela + sexo_oposto][ano][i_Dit]
+                prob_entrada = probabilidades[id_prob_entr][i_Dit]                 
                 pmort = probabilidades[id_mort_sex_op][ano][i_Dit]
                 
+                 # Para os urbanos com idade de 15 anos e para os rurais utiliza-se toda a população por clientela simples (Urb ou Rur)
+                if idade < 16 or clientela == 'Rur':
+                    clientela_simples = clientela[0:3] 
+                    potGeradoresPensoes = populacao['Pop' + clientela_simples + sexo_oposto][ano][i_Dit]
+                else:
+                    seg = segurados[id_seg][ano][i_Dit]
+                    est_ac = estoq_acum[clientela + sexo_oposto][ano][i_Dit]
+                    potGeradoresPensoes = seg + est_ac
+                    
                 # Eq. 24 e 25
-                concessoes[benef].loc[idade, ano] = prob_entrada * (seg + est_ac) * pmort
+                concessoes[benef].loc[idade, ano] = prob_entrada * potGeradoresPensoes * pmort
+               
                 
     return concessoes
 

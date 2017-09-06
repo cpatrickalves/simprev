@@ -518,7 +518,7 @@ def calc_prob_pensao_MF(concessoes, segurados, populacao, estoque, prob_morte, p
         sexo_oposto = 'M' if sexo=='H' else 'H'             # Obtém o oposto
         clientela = lista.get_clientela(beneficio)
         id_conc = beneficio.replace(sexo, sexo_oposto)      # Troca o sexo do benefício
-        # Sempre são usados os segurados do sexo masculino
+        # Sempre são usados os segurados do sexo masculino - REVISAR
         id_segurados = lista.get_id_segurados(beneficio).replace(sexo, 'H')  
         
         # Para cada idade i

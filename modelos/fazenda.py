@@ -46,7 +46,7 @@ def calc_demografia(populacao, taxas):
 
 def calc_estoques(estoques, concessoes, cessacoes, probabilidades, populacao, segurados, periodo):
     calc_estoq_apos(estoques, concessoes, probabilidades, segurados, periodo)
-    calc_estoq_pensoes(estoques, concessoes, cessacoes, probabilidades, segurados, periodo)
+    calc_estoq_pensoes(populacao, estoques, concessoes, cessacoes, probabilidades, segurados, periodo)
     calc_estoq_aux(estoques, probabilidades, segurados, periodo)
     calc_estoq_salMat(estoques, populacao , segurados, periodo)
     calc_estoq_assistenciais(estoques, concessoes, populacao, probabilidades, periodo)
