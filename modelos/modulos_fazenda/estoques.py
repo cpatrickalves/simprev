@@ -6,6 +6,7 @@ from util.tabelas import LerTabelas
 import pandas as pd
 
 
+# Cálculo dos estoques de acordo com a Equação 11 da LDO de 2018
 def calc_estoq_apos(est, conc, prob, seg, periodo):
     
     # Identificações das aposentadorias 
@@ -21,35 +22,40 @@ def calc_estoq_apos(est, conc, prob, seg, periodo):
         # Verifica se o beneficio existe no Estoque
         if benef in est:
         
-            sexo = benef[-1]                             # Obtém o Sexo
-            id_prob_morte = 'Mort'+ sexo                 # ex: MortH
-            id_fam = 'fam'+benef                         # fator de ajuste de mortalidade
-            id_segurado = dados.get_id_segurados(benef)  # ex: CsmUrbH
+            sexo = benef[-1]                                          # Obtém o Sexo
+            id_prob_morte = 'Mort'+ sexo                              # ex: MortH
+            id_fam = 'fam'+benef                                      # fator de ajuste de mortalidade
+            id_seg = 'Ocup'+ dados.get_clientela(benef)+ sexo         # ex: OcupUrbPisoH ou CsmUrbH
+            
+            # Para os Rurais se utiliza toda a população (Fonte: planilhas do MF)
+            if 'Rur' in benef:
+                id_seg = 'PopRur'+sexo
             
             for ano in periodo:                
                 # Adiciona uma nova coluna (ano) no DataFrame com valores zero
                 est[benef][ano] = 0
                 
                 # 1 a 90 anos - Equação 11 da LDO de 2018
-                for idade in range(1,91): 
+                for idade in range(1,91):                     
                     est_ano_anterior = est[benef][ano-1][idade-1]
                     prob_sobreviver = 1 - prob[id_prob_morte][ano][idade] * prob[id_fam][ano][idade]
-                    entradas = seg[id_segurado][ano][idade] * prob[benef][ano][idade]
+                    entradas = seg[id_seg][ano][idade] * prob[benef][ano][idade]
+                    if idade == 90:
+                        est_ano_anterior = est[benef][ano-1][idade-1] + est[benef][ano-1][idade]
+                                            
                     # Eq. 11
                     est[benef].loc[idade, ano] = est_ano_anterior * prob_sobreviver + entradas     # Eq. 11
                     # Salva a quantidade de concessões para uso posterior
                     conc[benef].loc[idade,ano] = entradas
                 
                 # Calculo para a idade zero
-                est[benef].loc[0, ano] = seg[id_segurado][ano][0] * prob[benef][ano][0]
+                est[benef].loc[0, ano] = seg[id_seg][ano][0] * prob[benef][ano][0]
                 # Salva a quantidade de concessões para uso posterior
                 conc[benef].loc[0, ano] = est[benef].loc[0, ano]
-                
-                # Ajuste para a idade de 90+ anos (modelo UFPA) - REVISAR
-                #est[benef].loc[90, ano] = est[benef].loc[90, ano] + est[benef].loc[90, ano - 1]
-                
+                                
 
     return est
+
 
 
 # Projeta estoques para Auxílios Doença, Reclusão e Acidente - Equação 17 da LDO de 2018
@@ -61,10 +67,13 @@ def calc_estoq_aux(est, prob, seg, periodo):
     for benef in dados.get_id_beneficios(['Auxd', 'Auxa']):#'Auxr']): # REVISAR
         # Verifica se existe no Estoque
         if benef in est:            
-            id_seg = dados.get_id_segurados(benef)
+            sexo = benef[-1]
+            id_seg = 'Ocup'+ dados.get_clientela(benef)+ sexo    # ex: OcupUrbPisoH ou CaUrbH            
+            # Para os Rurais se utiliza toda a população (Fonte: planilhas do MF)
+            if 'Rur' in benef:
+                id_seg = 'PopRur'+sexo
             
-            for ano in periodo:
-                # REVISAR: a Equação original usa a Pop, mas o certo seria os Segurados
+            for ano in periodo:                
                 est[benef][ano] = seg[id_seg][ano] * prob[benef]     # Eq. 17
     
     return est

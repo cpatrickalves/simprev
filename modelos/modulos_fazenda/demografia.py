@@ -4,43 +4,6 @@
 """
 from util.tabelas import LerTabelas
 
-# Calcula dados demográficos
-def calc_demografia(populacao, taxas):
-
-    # Dicionário que armazena os segurados rurais e contribuintes urbanos
-    segurados = {}
-    
-    # Calcula Pop Urbana e Rural    
-    pop_ur = calc_pop_urb_rur(populacao, taxas)
-    
-    # Calcula PEA Urbana e Rural
-    pea = calc_pea_urb_rur(pop_ur, taxas)
-    
-    # Calcula Pop. Ocupada Urbana e Rural
-    pocup = calc_pocup_urb_rur(pea, taxas)
-    
-    # Calcula Pop. ocupada Urbana e Rural que recebe o SM e acima do SM
-    pocup_csm_ca = calc_pocup_Csm_Ca(pocup, taxas)
-        
-    # Calcula Segurados urbanos
-    segurados_urb = calc_segurados_urb(pocup, taxas)
-        
-    # Calcula os Segurados Rurais
-    segurados_rur = calc_segurados_rur(pea, taxas)
-    
-    
-    # Adiciona as novas populações no dicionário população
-    populacao.update(pop_ur)
-    populacao.update(pea)
-    populacao.update(pocup)
-    populacao.update(pocup_csm_ca)
-    
-    # Adiciona contribuintes e segurados no dicionário segurados
-    segurados.update(segurados_urb)
-    segurados.update(segurados_rur)
-    
-    return segurados    
-
 
 # Calcula as populações urbana e rural   
 def calc_pop_urb_rur(populacao, taxas):

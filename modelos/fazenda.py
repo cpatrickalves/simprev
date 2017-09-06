@@ -35,11 +35,14 @@ def calc_demografia(populacao, taxas):
     populacao.update(pop_ur)
     populacao.update(pea)
     populacao.update(pocup)
-    populacao.update(pocup_csm_ca)
-    
+        
     # Adiciona contribuintes e segurados no dicionário segurados
+    segurados.update(pocup_csm_ca)
     segurados.update(segurados_urb)
     segurados.update(segurados_rur)
+    # Os segurados rurais são toda a população rural
+    segurados['PopRurH'] = pop_ur['PopRurH']
+    segurados['PopRurM'] = pop_ur['PopRurM']
     
     return segurados    
 
@@ -63,8 +66,8 @@ def calc_probabilidades(populacao, segurados, estoques,
     fat_ajuste_mort = calc_fat_ajuste_mort_MF(estoques, cessacoes,
                                            prob_morte, periodo)
 
-    prob_entrada_apos = calc_prob_apos_MF(populacao, segurados, concessoes, periodo)
-    prob_entrada_aux = calc_prob_aux_MF(populacao, estoques, concessoes, periodo)
+    prob_entrada_apos = calc_prob_apos_MF(segurados, concessoes, periodo)
+    prob_entrada_aux = calc_prob_aux_MF(segurados, estoques, concessoes, periodo)
     prob_entrada_pens = calc_prob_pensao_MF(concessoes, segurados, populacao, estoques, prob_morte, periodo)  
     prob_assist = calc_prob_assist(populacao, concessoes, periodo)
     

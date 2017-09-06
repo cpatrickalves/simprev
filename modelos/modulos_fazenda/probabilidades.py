@@ -11,7 +11,7 @@ import numpy as np
 
 # Calcula probabilidades de entrada em aposentadorias
 # Calculo baseado nas planilhas do DOC110/MF
-def calc_prob_apos_MF(populacao, segurados, concessoes, periodo):
+def calc_prob_apos_MF(segurados, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
     
@@ -36,7 +36,7 @@ def calc_prob_apos_MF(populacao, segurados, concessoes, periodo):
             
             # OBS: A implementação descritas nas planilhas do DOC110/MF usa uma equação diferente da Eq. 16
             # prob_entrada = concessoes/PopOcupada                         
-            prob_entrada = concessoes[beneficio] / populacao[id_popOcup]
+            prob_entrada = concessoes[beneficio] / segurados[id_popOcup]
             
             # Trata divisões por zero
             prob_entrada.replace([np.inf, -np.inf], np.nan, inplace = True)
@@ -101,7 +101,7 @@ def calc_prob_apos_LDO2018(segurados, concessoes, periodo):
 
 
 # Calcula probabilidades de entrada em auxílios baseado nas planilhas do DOC110/MF
-def calc_prob_aux_MF(populacao, estoques, concessoes, periodo):
+def calc_prob_aux_MF(segurados, estoques, concessoes, periodo):
 
     probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
     ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
@@ -125,9 +125,9 @@ def calc_prob_aux_MF(populacao, estoques, concessoes, periodo):
             
             # OBS: Para clientela Rural utiliza-se toda a população
             if clientela == 'Rur':
-                popOcup = populacao['PopRur' + sexo][ano_prob]
+                popOcup = segurados['PopRur' + sexo][ano_prob]
             else:            
-                popOcup = populacao['Ocup' + clientela + sexo][ano_prob]
+                popOcup = segurados['Ocup' + clientela + sexo][ano_prob]
                 
             prob_auxd = conc / popOcup
             
@@ -148,9 +148,9 @@ def calc_prob_aux_MF(populacao, estoques, concessoes, periodo):
             
             # OBS: Para clientela Rural utiliza-se toda a população
             if clientela == 'Rur':
-                popOcup = populacao['PopRur' + sexo][ano_prob]
+                popOcup = segurados['PopRur' + sexo][ano_prob]
             else:            
-                popOcup = populacao['Ocup' + clientela + sexo][ano_prob]
+                popOcup = segurados['Ocup' + clientela + sexo][ano_prob]
                 
             prob_auxa = est / popOcup                        
             
@@ -188,7 +188,7 @@ def calc_prob_aux_MF(populacao, estoques, concessoes, periodo):
                 else:
                     id_popOcup = 'Ocup' + clientela + 'H'
                   
-                popOcup = populacao[id_popOcup][ano_prob][idade+deslocamento]                        
+                popOcup = segurados[id_popOcup][ano_prob][idade+deslocamento]                        
                 
                 if popOcup == 0:
                     prob_auxr[idade] = 0
