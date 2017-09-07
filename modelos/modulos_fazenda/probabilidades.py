@@ -121,19 +121,27 @@ def calc_prob_aux_MF(segurados, estoques, concessoes, periodo):
         if beneficio in estoques.keys() and beneficio in concessoes.keys():
             sexo = beneficio[-1]
             clientela = dados.get_clientela(beneficio)            
-            conc = concessoes[beneficio][ano_prob]
+            # concessões conhecidas dos últimos 4 anos (2011-2014)
+            conc = concessoes[beneficio].loc[:,(ano_prob-3):] 
             
             # OBS: Para clientela Rural utiliza-se toda a população
             if clientela == 'Rur':
-                popOcup = segurados['PopRur' + sexo][ano_prob]
+                # dados de população dos últimos 4 anos
+                popOcup = segurados['PopRur' + sexo].loc[:,(ano_prob-3):]
             else:            
-                popOcup = segurados['Ocup' + clientela + sexo][ano_prob]
+                popOcup = segurados['Ocup' + clientela + sexo].loc[:,(ano_prob-3):]
                 
             prob_auxd = conc / popOcup
             
             # Substitui os NaN por zero
             prob_auxd.replace([np.inf, -np.inf], np.nan, inplace = True)
             prob_auxd.fillna(0, inplace = True)
+            # Remove colunas com todos os valores iguais a zero
+            prob_auxd = prob_auxd.loc[:, (prob_auxd != 0).any(axis=0)]
+                        
+            # Repete a última probabilidade(2014) nos anos seguintes(2015-2060)      
+            for ano in periodo:
+                prob_auxd[ano] = prob_auxd[ano-1]
             
             probabilidades[beneficio] = prob_auxd
             
@@ -144,19 +152,31 @@ def calc_prob_aux_MF(segurados, estoques, concessoes, periodo):
         if beneficio in estoques.keys():
             sexo = beneficio[-1]
             clientela = dados.get_clientela(beneficio)         
-            est = estoques[beneficio][ano_prob]
+            # estoques conhecidos dos últimos 4 anos (2011-2014)
+            est = estoques[beneficio].loc[:,(ano_prob-3):] 
             
             # OBS: Para clientela Rural utiliza-se toda a população
             if clientela == 'Rur':
-                popOcup = segurados['PopRur' + sexo][ano_prob]
+                # dados de população dos últimos 4 anos
+                popOcup = segurados['PopRur' + sexo].loc[:,(ano_prob-3):] 
             else:            
-                popOcup = segurados['Ocup' + clientela + sexo][ano_prob]
+                popOcup = segurados['Ocup' + clientela + sexo].loc[:,(ano_prob-3):] 
                 
             prob_auxa = est / popOcup                        
             
-            # Substitui os NaN por zero
+            # Substitui os inf e NaN por zero
             prob_auxa.replace([np.inf, -np.inf], np.nan, inplace = True)
             prob_auxa.fillna(0, inplace = True)
+            
+            # Remove colunas com todos os valores iguais a zero
+            prob_auxa = prob_auxa.loc[:, (prob_auxa != 0).any(axis=0)]
+            
+            # para o ano seguinte ao do estoque (2015) a probabilidade é a média dos anos anteriores
+            prob_auxa[2015] = prob_auxa.loc[:,:2014].mean(axis=1)
+            
+            # Repete a última probabilidade(2015) nos anos seguintes(2016-2060)      
+            for ano in periodo[1:]:
+                prob_auxa[ano] = prob_auxa[ano-1]
             
             probabilidades[beneficio] = prob_auxa
 
@@ -167,8 +187,8 @@ def calc_prob_aux_MF(segurados, estoques, concessoes, periodo):
         if beneficio in estoques.keys():
             sexo = beneficio[-1]
             clientela = dados.get_clientela(beneficio)
-            # Cria objeto do tipo Serie
-            prob_auxr = pd.Series(0.0, index=range(0,91))
+            # Cria objeto do tipo DataFrame
+            prob_auxr = pd.DataFrame(0.0, index=range(0,91), columns=[ano_prob]+periodo)
             deslocamento = 0
             
             for idade in range(0,91):
@@ -191,13 +211,17 @@ def calc_prob_aux_MF(segurados, estoques, concessoes, periodo):
                 popOcup = segurados[id_popOcup][ano_prob][idade+deslocamento]                        
                 
                 if popOcup == 0:
-                    prob_auxr[idade] = 0
+                    prob_auxr[ano_prob][idade] = 0
                 else:                        
-                    prob_auxr[idade] = est / popOcup                        
+                    prob_auxr[ano_prob][idade] = est / popOcup                        
             
             # Substitui os NaN por zero
             prob_auxr.replace([np.inf, -np.inf], np.nan, inplace = True)
             prob_auxr.fillna(0, inplace = True)
+            
+            # Repete a última probabilidade(2014) nos anos seguintes(2015-2060)      
+            for ano in periodo:
+                prob_auxr[ano] = prob_auxr[ano-1]
             
             probabilidades[beneficio] = prob_auxr
 

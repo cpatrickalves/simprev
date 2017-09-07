@@ -164,14 +164,15 @@ resultados = fz.calc_despesas(despesas, estoques, concessoes, salarios,
 print('Calculando resultados finais ...\n')
 resultados = calc_resultados(resultados, dadosLDO2018)
 
+plot_resultados(resultados)
+plot_erros(resultados)
+
 print('RESULTADOS: \n')
 print('Erro de Despesa em 2018 = {}'.format(resultados['Erro Despesa'][2018]))
 print('Erro de Despesa em 2060 = {}'.format(resultados['Erro Despesa'][2060]))
 print()
 print('Erro de Receita em 2018 = {}'.format(resultados['Erro Receita'][2018]))
 print('Erro de Receita em 2060 = {}'.format(resultados['Erro Receita'][2060]))
-
-plot_resultados(resultados)
 
 print(' - Fim da Projeção -')
 print('Para mais detalhes veja o arquivo de log (logs.txt)')

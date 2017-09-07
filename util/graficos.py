@@ -7,9 +7,16 @@ from matplotlib import pyplot as plt
 # Gera diversos gráficos
 
 def plot_erros(resultados):
+        
+    plt.plot(resultados['Erro Despesa'], label='Despesa',lw=4 )
+    plt.plot(resultados['Erro Receita'], label='Receita', lw=4)    
+    plt.grid(True)
+    plt.xlabel('ANO')
+    plt.ylabel('VARIAÇÃO (%)')
+    plt.title('Variação da Projeção do SimPrev com relação a LDO')
+    plt.legend()
+    plt.show()
     
-    resultados['Erro Despesa'].plot()
-    resultados['Erro Receita'].plot()
 
 def plot_resultados(resultados):
     
