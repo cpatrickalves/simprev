@@ -460,7 +460,7 @@ def calc_estoq_assistenciais(estoques, concessoes, populacao, prob, periodo):
                         if tipo == 'Rmv':
                             conc = 0
                         else:
-                            conc = prob[beneficio][idade] * populacao[id_pop][ano][idade]
+                            conc = prob[beneficio][ano][idade] * populacao[id_pop][ano][idade]
                             # Guarda histórico de concessões
                             concessoes[beneficio].loc[idade, ano] = conc
 
@@ -473,7 +473,7 @@ def calc_estoq_assistenciais(estoques, concessoes, populacao, prob, periodo):
                     #### Cálculos para idades zero e 90
 
                     # Estoque atual para 90 anos
-                    est_90_ant = estoques[beneficio][ano-1][90]
+                    est_90_ant = estoques[beneficio][ano-1][90] + estoques[beneficio][ano-1][89]
 
                     # O RMV está em extinção (sem novas concessões)
                     if tipo == 'Rmv':
@@ -481,11 +481,11 @@ def calc_estoq_assistenciais(estoques, concessoes, populacao, prob, periodo):
                         conc_0 = 0
                     else:
                         # Idade zero - REVISAR - o valor esta aumentando muito Para o LoadDef
-                        conc_0 = prob[beneficio][0] * populacao[id_pop][ano][0]
+                        conc_0 = prob[beneficio][ano][0] * populacao[id_pop][ano][0]
                         concessoes[beneficio].loc[0, ano] = conc_0
 
                         # Idade 90 - REVISAR - Tendência de queda constante
-                        conc_90 = prob[beneficio][90] * (populacao[id_pop][ano][90] - est_90_ant)
+                        conc_90 = prob[beneficio][ano][90] * (populacao[id_pop][ano][90] - est_90_ant)
                         concessoes[beneficio].loc[90, ano] = conc_90
 
                     # Idade zero

@@ -430,8 +430,8 @@ def calc_fat_ajuste_mort_MF(estoques, cessacoes, probMort, periodo):
             fam.fillna(1.0, inplace=True)
             
             # Para o primeiro ano de projeção (2015), o FAM é igual a média dos anos anteriores
-            # Exceto para os Rurais, onde o FAM é igual ao do ano anterior
-            if dados.get_clientela(beneficio) == 'Rur':
+            # Exceto para os Rurais e assistenciais, onde o FAM é igual ao do ano anterior
+            if dados.get_clientela(beneficio) == 'Rur' or 'Loas' in beneficio:
                 fam[ano_prob+1] = fam[ano_prob]
             else:
                 fam[ano_prob+1] = fam.loc[:,:ano_prob].mean(axis=1)
@@ -636,31 +636,43 @@ def calc_prob_morte_ufpa(pop):
 
 
 # Calcula probabilidades de entrada em benefícios assistênciais - Equação 31 da lDO
-def calc_prob_assist(populacao, concessoes, periodo):
+def calc_prob_assist_LDO2018(populacao, concessoes, periodo):
 
-    probabilidades = {}       # Dicionário que salvas as prob. para cada benefício
-    ano_prob = periodo[0]-1   # ano utilizado para cálculo (2014)
+    probabilidades = {}       # Dicionário que salvas as prob. para cada benefício    
+    ano_estoq = periodo[0]-1   # 2014
     ids_assist = ['LoasDef', 'LoasIdo']
 
-    # Calcula probabilidades de entrada em aposentadorias
+    # Calcula probabilidades de entrada em benefícios assistênciais
     for tipo in ids_assist:
         for sexo in ['H', 'M']:            
             beneficio = tipo+sexo
             
             # Verifica se existem dados de concessões do benefício 
-            if beneficio in concessoes.keys():                            
+            if beneficio in concessoes.keys():                     
+                # Cria DataFrame que armazena as probabilidades
+                prob_assist = pd.DataFrame(0.0, index=range(0,91), columns=concessoes[beneficio].columns)
+                
                 id_pop = "PopIbge"+sexo
                 
-                # Calcula a probabilidade de entrada  
-                conc = concessoes[beneficio][ano_prob]
-                pop_ant = populacao[id_pop][ano_prob-1]
-                # Eq. 31
-                prob_entrada = conc / (pop_ant + (conc/2))
-                                
+                # Para os anos de 2011-2014
+                for ano in prob_assist.columns:                
+                    # Calcula a probabilidade de entrada  
+                    conc = concessoes[beneficio][ano]
+                    pop_ant = populacao[id_pop][ano-1]
+                    
+                    # Eq. 31
+                    # OBS: Na implementação das planilhas não utilizou-se o último termo (conc/2)
+                    prob_assist[ano] = conc / (pop_ant + (conc/2))
+                                    
                 # Substitui os NaN (not a number) por zeros
-                prob_entrada.fillna(0, inplace = True)
+                prob_assist.fillna(0, inplace = True)
+                                
+                # Repete a última prob nos anos seguintes                
+                for ano in periodo:
+                    prob_assist[ano] = prob_assist[ano-1]
+                
                 # Adiciona no dicionário
-                probabilidades[beneficio] = prob_entrada
+                probabilidades[beneficio] = prob_assist
      
     #  Probabilidade de Concessão no RMV é nula, pois o benefício está em extinção (sem novas concessões)
     for sexo in ['H', 'M']:    
@@ -668,3 +680,58 @@ def calc_prob_assist(populacao, concessoes, periodo):
                                 
     return probabilidades
 
+
+# Calcula probabilidades de entrada em benefícios assistênciais baseado nas planilhas do MF
+def calc_prob_assist_MF(populacao, concessoes, periodo):
+
+    probabilidades = {}       # Dicionário que salvas as prob. para cada benefício    
+    ano_estoq = periodo[0]-1   # 2014
+    ids_assist = ['LoasDef', 'LoasIdo']
+
+    # Calcula probabilidades de entrada em benefícios assistênciais
+    for tipo in ids_assist:
+        for sexo in ['H', 'M']:            
+            beneficio = tipo+sexo
+            
+            # Verifica se existem dados de concessões do benefício 
+            if beneficio in concessoes.keys():                     
+                # Cria DataFrame que armazena as probabilidades
+                prob_assist = pd.DataFrame(0.0, index=range(0,91), columns=concessoes[beneficio].columns)
+                
+                id_pop = "PopIbge"+sexo
+                
+                # Para os anos de 2011-2014
+                for ano in prob_assist.columns:                
+                    # Calcula a probabilidade de entrada  
+                    conc = concessoes[beneficio][ano]
+                    pop = populacao[id_pop][ano]
+                                        
+                    # Calcula probabilidade
+                    # OBS: Para o LoasDef na idade zero utiliza-se o estoque ao inves das concessoes
+                    prob_assist[ano] = conc / pop
+                                    
+                # Substitui os NaN (not a number) por zeros
+                prob_assist.fillna(0, inplace = True)
+                
+                # Se for Loas Deficiente
+                if 'Def' in beneficio:
+                    # Repete a última prob nos anos seguintes                
+                    for ano in periodo:
+                        prob_assist[ano] = prob_assist[ano-1]
+                # Se Loas Idoso
+                else:                    
+                    # O ano de 2015 é igual ao MAIOR valor dos últimos 4 anos
+                    prob_assist[2015] = prob_assist.loc[:,:ano_estoq].max(axis=1)
+                    
+                    # Repete a última prob nos anos seguintes                
+                    for ano in periodo[1:]:
+                        prob_assist[ano] = prob_assist[ano-1]
+                
+                # Adiciona no dicionário
+                probabilidades[beneficio] = prob_assist
+     
+    #  Probabilidade de Concessão no RMV é nula, pois o benefício está em extinção (sem novas concessões)
+    for sexo in ['H', 'M']:    
+          probabilidades['Rmv'+sexo] = pd.Series(0, index=range(0,91))
+                                
+    return probabilidades

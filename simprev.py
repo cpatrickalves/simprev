@@ -182,6 +182,7 @@ arq = open(log_file,'w')
 arq.writelines(logs)
 arq.close()
 
+# REVISAR:
 # Compara as equações da LDO com a do DOcumento da fazenda
 # Buscar por estoques e outros valores (probabilidades) negativos
 # Buscar por fatores de ajuste de mortalidades muito elevados
