@@ -2,9 +2,10 @@ from modelos.modulos_fazenda.probabilidades import *
 from modelos.modulos_fazenda.demografia import *
 from modelos.modulos_fazenda.taxas import *
 from modelos.modulos_fazenda.estoques import *
-from modelos.modulos_fazenda.salarios import calc_salarios
+from modelos.modulos_fazenda.salarios import *
 from modelos.modulos_fazenda.receitas import *
 from modelos.modulos_fazenda.depesas import *
+from modelos.modulos_fazenda.valorBeneficios import *
 
 
 # Calcula dados demográficos

@@ -144,6 +144,11 @@ salarios = fz.calc_salarios(salarios, populacao, segurados,
                          produtividade, salMin, dadosLDO2018, tetoInicialRGPS,
                          periodo)
 
+# Projeta Massa Salarial
+salarios = fz.calc_MassaSalarial(salarios, populacao, segurados,
+                         produtividade, salMin, dadosLDO2018, tetoInicialRGPS,
+                         periodo)
+
 # Projeta Valores médios dos benefícios
 print('Projetando Valores dos benefícios ...\n')
 valMedBenef = fz.calc_valMedBenef(estoques, despesas, dadosLDO2018, salarios, periodo)
@@ -193,6 +198,7 @@ arq.close()
 # Alterar as porcentagens 
 # Calcular taxa de crescimento da massa salarial de contribuintes
 # Adicionar um arquivo de Log com todos os dados/saidas detalhadas
+# Adicionar a opção de projetar com valores atuais (sem inflacao)
 # Pendente:
     # ajustes da inflação
     # Calculo do número médio de parcelas pagas
