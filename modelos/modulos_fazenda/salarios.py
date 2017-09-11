@@ -6,6 +6,7 @@ import pandas as pd
 
 
 # Calcula rendimentos médios 
+# REVISAR - inflação não é considerada
 def calc_salarios(salarios, populacao, segurados, produtividade, 
                   salMinInicial, dadosLDO, tetoInicialRGPS, periodo):
      

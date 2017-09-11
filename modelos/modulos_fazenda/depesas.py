@@ -4,55 +4,6 @@
 """
 from util.tabelas import LerTabelas
 import pandas as pd
-import numpy as np
-
-
-# Calcula os valores médios de todos os benefícios
-def calc_valMedBenef(estoques, despesas, dadosLDO, salarios, periodo):
-
-    # ultimo com despesa/estoque conhecida (2014)
-    ultimo_ano = periodo[0] - 1
-
-    # Dicionário que armazena os valores médios para cada benefício
-    valMedBenef = {}
-
-    for beneficio in estoques.keys():                          
-        if beneficio in despesas.keys():            
-            # Calcula valor médio
-            desp = despesas[beneficio][ultimo_ano]
-            est = estoques[beneficio][ultimo_ano]
-            valMed = desp /est
-                
-            # Converte para um dataframe
-            valMedBenef[beneficio] = pd.DataFrame(valMed, columns=[ultimo_ano])
-            # Substitui os NaN por zeros
-            valMedBenef[beneficio].fillna(0.0, inplace=True)
-
-    # Projeta aumento dos benefícios
-    # Eq. 38
-    for ano in periodo:
-        for beneficio in valMedBenef.keys():
-            reajuste = 1.0 + dadosLDO['TxReajusteBeneficios'][ano]/100
-            valMedBenef[beneficio][ano] = valMedBenef[beneficio][ano-1] * reajuste
-
-    # Limita o valor dos benefícios pelo teto        
-    for beneficio in valMedBenef.keys():
-        for ano in valMedBenef[beneficio]:
-            teto = salarios['tetoRGPS'][ano]
-            for idade in valMedBenef[beneficio].index:                
-                if valMedBenef[beneficio][ano][idade] > teto:
-                    valMedBenef[beneficio].loc[idade, ano] = teto
-                    
-    # Garante que o benefício não seja menor que 1 SM
-    for beneficio in valMedBenef.keys():
-        for ano in valMedBenef[beneficio]:
-            sm = salarios['salarioMinimo'][ano]
-            for idade in valMedBenef[beneficio].index:                
-                if valMedBenef[beneficio][ano][idade] < sm:                    
-                    valMedBenef[beneficio].loc[idade, ano] = sm
-                                        
-    
-    return valMedBenef
 
 
 # Calcula despesas com benefícios
@@ -79,17 +30,14 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                         estoq_total = estoques[beneficio][ano]
                         estoq_total_ano_ant = estoques[beneficio][ano-1]
                         valor_benef = salarios['salarioMinimo'][ano]
-                        np = nparcelas[beneficio]
+                        npar = nparcelas[beneficio]
 
                         # Calcula a despesa para cada benefício (Eq. 44)
-                        despesas[beneficio][ano] = ((estoq_total + estoq_total_ano_ant)/2) * valor_benef * np
+                        despesas[beneficio][ano] = ((estoq_total + estoq_total_ano_ant)/2) * valor_benef * npar
 
     
     ##### Calcula despesas para clientela Urbana que recebe acima do Piso #####
-    
-    # Calcula taxa de reposiçao para todos os anos da projeçao usando a Eq. 48
-    txReposicao = calc_tx_reposicao(valMedBenef, salarios, periodo)
-
+   
     for beneficio in dados.get_id_beneficios('Acim'):
         
         # Pula o SalMat pois o calculo é diferente e feito posteriormente
@@ -99,10 +47,7 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
         # Verifica se existem estoques 
         if beneficio in estoques:            
             sexo = beneficio[-1]
-            
-            # Eq. 47
-            val_med_novos_ben = txReposicao[beneficio] * salarios['SalMedSegUrbAcimPnad'+sexo] # REVISAR Equação
-
+                       
             # Caso o benefício seja uma Apos. por Tempo de
             # Contribuição Normal, Professor ou Especial
             # Eq. 49 e 50
@@ -117,23 +62,24 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                     # Cálculo das despesas com os Auxílios 
                     if 'Aux' in beneficio:                                          
                         est_ano = estoques[beneficio][ano]
-                        vmb = val_med_novos_ben[ano]
-                        np = nparcelas[beneficio]
+                        vmb = valMedBenef[beneficio][ano]
+                        npar = nparcelas[beneficio]
                         
                         # Eq. 46
-                        despesas[beneficio][ano] = est_ano * vmb * np
+                        despesas[beneficio][ano] = est_ano * vmb * npar
                         
                     else:
                         # Cálculo para Aposentadorias e Pensões
+                        val_med_novos_ben = valMedBenef[beneficio] # REVISAR
                         # Idade de 1 a 90 anos
                         for idade in range(1,91):
                             
                             desp_anterior = despesas[beneficio][ano-1][idade-1]
                             conc_anterior = concessoes[beneficio][ano-1][idade-1]
-                            tx_rep_anterior = txReposicao[beneficio][ano-1][idade-1]
+                            tx_rep_anterior = 1
                             # REVISAR: Acredito que o correto seria usar os segurados e nao a PopOcup
                             rend_med_ocup_ant = salarios['SalMedPopOcupUrbAcimPnad'+sexo][ano-1][idade-1]
-                            np = nparcelas[beneficio]
+                            npar = nparcelas[beneficio]
                             prob_morte = probabilidades['Mort'+sexo][ano][idade]
                             fam = probabilidades['fam'+beneficio][ano][idade]
                             # REVISAR - Os valores de salario já tem reajuste, acho que não é necessário aqui
@@ -143,16 +89,16 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                             
 
                             # Eq. 45
-                            part1 = desp_anterior + conc_anterior * tx_rep_anterior * rend_med_ocup_ant * (np/2)
+                            part1 = desp_anterior + conc_anterior * tx_rep_anterior * rend_med_ocup_ant * (npar/2)
                             part2 = (1 - prob_morte * fam) * (1 + reajuste/100)
-                            part3 = (novas_conc * valor_med_conc * (np/2))
+                            part3 = (novas_conc * valor_med_conc * (npar/2))
                             despesas[beneficio].loc[idade, ano] = part1 * part2 + part3
                             
                         # Idade zero
                         novas_conc = concessoes[beneficio][ano][0]
                         valor_med_conc = val_med_novos_ben[ano][0]
-                        np = nparcelas[beneficio]
-                        despesas[beneficio].loc[0, ano] = novas_conc * valor_med_conc * (np/2)
+                        npar = nparcelas[beneficio]
+                        despesas[beneficio].loc[0, ano] = novas_conc * valor_med_conc * (npar/2)
                         
 
     ##### Calcula despesas para o Salário Maternidade #####
@@ -179,10 +125,10 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
                 #    valor_benef = salarios['salarioMinimo'][ano]                    
                 valor_benef = salarios['salarioMinimo'][ano]                    
 
-                np = nparcelas[beneficio]
+                npar = nparcelas[beneficio]
                             
                 # OBS: A LDO não descreve a equação para o calculo de despesas para o SalMat
-                desp_acumulada[ano] = estoq_total * valor_benef * np  
+                desp_acumulada[ano] = estoq_total * valor_benef * npar  
                 
             # Salva no DataFrame
             despesas[beneficio] = desp_acumulada
@@ -205,37 +151,10 @@ def calc_despesas(despesas, estoques, concessoes, salarios, valMedBenef, probabi
             if ano in despesas[beneficio].columns:      # verifica se existe projeção para esse ano
                 desp_total[ano] += despesas[beneficio][ano].sum()               
 
-    resultados['Despesas'] = desp_total
-    resultados['txReposicao'] = txReposicao
+    resultados['Despesas'] = desp_total    
     
     return resultados
-    
-# Calcula a taxa de reposição (Eq. 48)
-def calc_tx_reposicao(valMedBenef, salarios, periodo):
 
-    # Dicionário que armazena as taxas de reposição
-    txReposicao = {}
-    
-    # Insere o ano de 2014 na lista periodos
-    anos = [2014] + periodo
-
-    for beneficio in valMedBenef.keys():
-        # Cria Dataframe que armazena as taxas
-        txReposicao[beneficio] = pd.DataFrame(index=range(0,91), columns=anos)
-        txReposicao[beneficio].fillna(0.0, inplace=True)
-
-        for ano in anos:    
-            sexo = beneficio[-1]
-            rend_medio_seg = salarios['SalMedSegUrbAcimPnad'+sexo][ano]
-            vmb = valMedBenef[beneficio][ano]
-            # Eq. 48
-            txReposicao[beneficio][ano] = vmb/rend_medio_seg
-
-        # Trata as divisões por zero que geram NaN e Inf
-        txReposicao[beneficio].replace([np.inf, -np.inf], np.nan, inplace=True)
-        txReposicao[beneficio].fillna(0.0, inplace=True)
-        
-    return txReposicao
 
 # Calcula o número de parcelas paga por ano por um benefício
 # Implementado conforme seção 4.6 da LDO (pag. 43)

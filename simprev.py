@@ -102,7 +102,7 @@ ids_estoques = dados.get_id_beneficios([], 'Es')
 ids_concessoes = dados.get_id_beneficios([], 'Co')
 ids_cessacoes = dados.get_id_beneficios([], 'Ce')
 ids_despesas = dados.get_id_beneficios([], 'ValEs')
-#ids_valMedBen = dados.get_id_beneficios([], 'ValEs') - REVISAR
+ids_valConcessoesBen = dados.get_id_beneficios([], 'ValCo')
 
 # Obtem as tabelas e armazena nos dicionários correspondentes
 estoques = dados.get_tabelas(ids_estoques, info=True)
@@ -112,7 +112,7 @@ despesas = dados.get_tabelas(ids_despesas)
 populacao = dados.get_tabelas(dados.ids_pop_ibge)
 populacao_pnad = dados.get_tabelas(dados.ids_pop_pnad)
 salarios = dados.get_tabelas(dados.ids_salarios)
-#valMedBen = dados.get_tabelas(ids_valMedBen)
+valCoBen = dados.get_tabelas(ids_valConcessoesBen)
 
 # Calcula taxas de urbanização, participação e ocupação
 print('Calculando taxas ...\n')
@@ -145,13 +145,15 @@ salarios = fz.calc_salarios(salarios, populacao, segurados,
                          periodo)
 
 # Projeta Massa Salarial
+print('Projetando Massa Salarial ...\n')
 salarios = fz.calc_MassaSalarial(salarios, populacao, segurados,
                          produtividade, salMin, dadosLDO2018, tetoInicialRGPS,
                          periodo)
 
 # Projeta Valores médios dos benefícios
 print('Projetando Valores dos benefícios ...\n')
-valMedBenef = fz.calc_valMedBenef(estoques, despesas, dadosLDO2018, salarios, periodo)
+valMedBenef = fz.calc_valMedBenef(estoques, despesas, valCoBen, concessoes, 
+                                  dadosLDO2018, salarios, segurados, periodo)
 
 # Calcula o número médio de parcelas para cada beneficio
 nparcelas = fz.calc_n_parcelas(estoques, despesas, valMedBenef, periodo)
