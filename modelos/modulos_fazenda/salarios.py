@@ -24,7 +24,8 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
     # Projeta crescimento do Salário Mínimo (Eq. 36)
     for txCres in dadosLDO['TxCrescimentoSalMin']:
         ano_inicial += 1
-        salarioMinimo[ano_inicial] = salarioMinimo[ano_inicial-1] * (1 + txCres/100) 
+        inflacao = 0#dadosLDO['TxInflacao'][ano_inicial] REVISARS
+        salarioMinimo[ano_inicial] = salarioMinimo[ano_inicial-1] * (1 + txCres/100 + inflacao/100) 
 
     # Salva a Serie no dicionário
     salarios['salarioMinimo']  = salarioMinimo  
@@ -66,7 +67,8 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
                 elif ano == 2017:
                     atualizMonet = 1.0629
                 
-                inflacao = dadosLDO['TxInflacao'][ano]
+                # Inflação é contabilizada a partir de 2018
+                inflacao = 0 if ano < 2018 else dadosLDO['TxInflacao'][ano]
                 # Produtivididade 1.7% a partir de 2016
                 prod = produtividade if ano > 2015 else 0
                 salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + prod/100 + inflacao/100) * atualizMonet             
@@ -90,7 +92,8 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
             elif ano == 2017:
                 atualizMonet = 1.0629
             
-            inflacao = dadosLDO['TxInflacao'][ano]
+            # Inflação é contabilizada a partir de 2018
+            inflacao = 0 if ano < 2018 else dadosLDO['TxInflacao'][ano]
             # Produtivididade 1.7% a partir de 2016
             prod = produtividade if ano > 2015 else 0
             salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + prod/100 + inflacao/100) * atualizMonet            
@@ -114,7 +117,8 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
             elif ano == 2017:
                 atualizMonet = 1.0629
             
-            inflacao = dadosLDO['TxInflacao'][ano]
+            # Inflação é contabilizada a partir de 2018
+            inflacao = 0 if ano < 2018 else dadosLDO['TxInflacao'][ano]
             # Produtivididade 1.7% a partir de 2016
             prod = produtividade if ano > 2015 else 0
             salarios[id_sal][ano] = salarios[id_sal][ano-1] * (1 + prod/100 + inflacao/100) * atualizMonet                   
