@@ -164,7 +164,7 @@ resultados['Receitas'] = fz.calc_receitas(salarios, aliquota, periodo)
 resultados = fz.calc_pib(resultados, salarios, pib_inicial, periodo)
 
 print('Projetando Despesas ...\n')
-resultados = fz.calc_despesas(despesas, estoques, concessoes, salarios,
+resultados = fz.calc_despesas(despesas, estoques, concessoes, valCoBen, salarios,
                             valMedBenef, probabilidades, dadosLDO2018, 
                             nparcelas, resultados, periodo)
 
