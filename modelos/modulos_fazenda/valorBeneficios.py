@@ -2,6 +2,7 @@
 """
 @author: Patrick Alves
 """
+
 import pandas as pd
 import numpy as np
 
@@ -98,9 +99,30 @@ def calc_valMedBenef(estoques, despesas, valCoBen, concessoes, dadosLDO, salario
     
     # REVISAR - Esta pendente a implementação do cálculo do Fator Previdenciário para as AposTC
     # Isso influencia nas txRepos e nos ValMeds
+   
+    ##### Cálculo para o Salário Maternidade    
+    # Calculo baseado no Salario Medio das seguradas e na quantidade de seguradas
+    # Necessário somente para as seguradas urbanas que recebem acima do piso
+    # Esse cálculo não é descrito na LDO de 2018, foi baseado nas planilhas do MF
+          
+    # Os valores de SalMat são indexados apenas por ano (2014-2060)
+    salMat = pd.Series(0.0, index=[ultimo_ano]+periodo)
+    for ano in salMat.index:
+        # Total de contribuintes em idade fértil (16 a 45 anos)
+        totalContr = segurados['CaUrbM'][ano][16:46].sum()      # OBS: esse cálculo nas planilhas usa sempre o ano de 2014
+        salMedMidadeFertil = 0.0 
+        
+        for idade in range(16,46):  # 16 a 45 anos                        
+            salmed_x_qtd = (segurados['CaUrbM'][ano][idade] * salarios['SalMedSegUrbAcimPnadM'][ano][idade])/ totalContr
+            salMedMidadeFertil += salmed_x_qtd      # acumula os valores
+            
+        # Salva o salário médio das mulheres em idade fértil
+        salMat[ano] = salMedMidadeFertil
     
+    # Salva no dicionário    
+    valMedBenef['SalMatUrbAcimM'] = salMat
+        
     return valMedBenef
-
 
 
 # Calcula a taxa de reposição (Eq. 48)
@@ -134,8 +156,12 @@ def calc_tx_reposicao(valMedBenef, salarios, periodo):
                 # O rendimento considerado é sempre o do homens
                 rend_medio_seg = salarios['SalMedSegUrbAcimPnadH'][ano_benef][idade+deslocamento]
                 vmb = valMedBenef[beneficio][ano_benef][idade]
-                # Eq. 48    
-                txReposicao[beneficio].loc[idade, ano_benef] = vmb/rend_medio_seg
+                
+                if rend_medio_seg == 0:
+                    txReposicao[beneficio].loc[idade, ano_benef] = 0
+                else:                
+                    # Eq. 48    
+                    txReposicao[beneficio].loc[idade, ano_benef] = vmb/rend_medio_seg
 
         # REVISAR - IMPLEMENTAR CÁLCULO                 
         elif 'Pens' in beneficio:        
