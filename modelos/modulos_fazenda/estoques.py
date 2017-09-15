@@ -159,7 +159,7 @@ def calc_estoq_pensoes(populacao, est, concessoes, cessacoes, probabilidades, se
     dados = LerTabelas()
     # Obtém o conjunto de benefícios do tipo pensão
     lista_pensoes = dados.get_id_beneficios('Pe')
-
+    
     ##### Calcula pensões do tipo A
     for benef in lista_pensoes:
         sexo = benef[-1]                # Obtém o Sexo
@@ -167,12 +167,13 @@ def calc_estoq_pensoes(populacao, est, concessoes, cessacoes, probabilidades, se
         id_fam = 'fam'+benef            # fator de ajuste de mortalidade
         id_pens = benef+"_tipoA"        # Cria um Id para pensão do tipo A
 
-        # Cria um novo DataFrame para Pensão do tipo A
-        est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=[2014]+periodo)
-        est[id_pens].index.name = "IDADE"
+        # Cria um novo DataFrame para Pensão do tipo A - 2010-2014 - REVISAR
+        #est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=(est.columns())+periodo)
+        #est[id_pens].index.name = "IDADE"
 
         # Copia os dados de estoque de 2014 (pensões do tipo A)
-        est[id_pens][2014] = est[benef][2014]
+        #est[id_pens][2014] = est[benef][2014]
+        est[id_pens] = est[benef]
 
         for ano in periodo:
 
@@ -219,7 +220,7 @@ def calc_estoq_pensoes(populacao, est, concessoes, cessacoes, probabilidades, se
         id_pens = benef+"_tipoB"             # Cria um Id para pensão do tipo B
 
         # Cria DataFrame para armazenar o estoque de Pensões do tipo B
-        est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=[2014]+periodo)
+        est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=[periodo[0]-2,periodo[0]-1]+periodo) # 2013-2060 - REVISAR - refatorar
         est[id_pens].index.name = "IDADE"
 
         # Projeta anos seguintes
@@ -250,8 +251,8 @@ def calc_estoq_pensoes(populacao, est, concessoes, cessacoes, probabilidades, se
             est[id_pens].loc[90, ano] = est_ano_ant90 * prob_sobr90 + conc90 - cess90
 
     # Calcula total de pensões
-    for benef in lista_pensoes:
-        est[benef] = est[benef+"_tipoA"] + est[benef+"_tipoB"]      # Eq. 21
+    for benef in lista_pensoes:        
+        est[benef] = est[benef+"_tipoA"].add(est[benef+"_tipoB"])      # Eq. 21        
 
     return est
 

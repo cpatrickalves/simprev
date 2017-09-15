@@ -7,22 +7,51 @@ import pandas as pd
 
 
 # Calcula despesas com benefícios
+# Baseado nas Equações da LDO de 2018 e Planilhas do MF
 def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBenef, probabilidades, dadosLDO, nparcelas, resultados, periodo):
 
     # Objeto criado para uso das funções da Classe LerTabelas
     dados = LerTabelas()
     
-    # Calcula despesa com o dados conhecidos (2011-2014)
+    ##### Calcula despesa com o dados conhecidos (2011-2014)
     # O valor no banco de dados é mensal
     for beneficio in despesas.keys():
         
-        # Auxílio doença 
-        if 'Auxd' in beneficio:
+        # Auxílio doença para os que recebem Acima do Piso
+        if 'AuxdUrbAcim' in beneficio:
             despesas[beneficio] = valCoBen[beneficio] * nparcelas[beneficio]
-        # Aposentadorias e Pensões
-        else:        
-            despesas[beneficio] = despesas[beneficio] * nparcelas[beneficio]
-    
+        
+        # Aposentadorias e Pensões para quem recebe acima do piso
+        elif 'Acim' in beneficio:        
+            desp_dez = despesas[beneficio]  # despesas dos mes de dezembro
+            despesas[beneficio] = desp_dez * nparcelas[beneficio]            
+            
+        # Demais auxílios
+        elif 'Aux' in beneficio:
+            ult_ano_estoq = periodo[0]-1 # 2014
+            qtd_benef = 0
+            if 'Auxd' in beneficio:
+                qtd_benef = concessoes[beneficio][ult_ano_estoq]            
+            else:
+                qtd_benef = estoques[beneficio][ult_ano_estoq]
+            valor_benef = salarios['salarioMinimo'][ult_ano_estoq]
+            npar = nparcelas[beneficio][ult_ano_estoq]
+
+            # Calcula a despesa para cada benefício
+            despesas[beneficio][ult_ano_estoq] = qtd_benef * valor_benef * npar
+            
+        # Demais tipos
+        else:            
+            ult_ano_estoq = periodo[0]-1 # 2014
+            estoq_total = estoques[beneficio][ult_ano_estoq]
+            estoq_total_ano_ant = estoques[beneficio][ult_ano_estoq-1]
+            valor_benef = salarios['salarioMinimo'][ult_ano_estoq]
+            npar = nparcelas[beneficio][ult_ano_estoq]
+            estoq_medio = ((estoq_total + estoq_total_ano_ant)/2) 
+
+            # Calcula a despesa para cada benefício (Eq. 44)
+            despesas[beneficio][ult_ano_estoq] = estoq_medio * valor_benef * npar          
+
     ##### Calcula despesas para clientelas Rurais, Urbanas e assistenciais que recebem o Piso (1 SM) #####
     for clientela in ['Rur', 'Piso', 'Rmv', 'Loas']:
         beneficios = dados.get_id_beneficios(clientela)
@@ -36,16 +65,27 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
             if beneficio in estoques:                
                 for ano in periodo:                                        
                     # verifica se existe projeção para esse ano
-                    if ano in estoques[beneficio].columns:                  
-                        # Obtem o estoques do ano e do ano anterior
-                        estoq_total = estoques[beneficio][ano]
-                        estoq_total_ano_ant = estoques[beneficio][ano-1]
-                        valor_benef = salarios['salarioMinimo'][ano]
-                        npar = nparcelas[beneficio][ano]
-
-                        # Calcula a despesa para cada benefício (Eq. 44)
-                        despesas[beneficio][ano] = ((estoq_total + estoq_total_ano_ant)/2) * valor_benef * npar
-
+                    if ano in estoques[beneficio].columns:                     
+                        # Calculo para Auxílios
+                        if 'Aux' in beneficio:                        
+                            qtd_benef = estoques[beneficio][ano]
+                            valor_benef = salarios['salarioMinimo'][ano]
+                            npar = nparcelas[beneficio][ano]
+                
+                            # Calcula a despesa para cada benefício
+                            despesas[beneficio][ano] = qtd_benef * valor_benef * npar
+                        
+                        # Cálculo para os demais    
+                        else:                                              
+                            # Obtem o estoques do ano e do ano anterior
+                            estoq_total = estoques[beneficio][ano]
+                            estoq_total_ano_ant = estoques[beneficio][ano-1]
+                            valor_benef = salarios['salarioMinimo'][ano]
+                            npar = nparcelas[beneficio][ano]
+    
+                            # Calcula a despesa para cada benefício (Eq. 44)
+                            despesas[beneficio][ano] = ((estoq_total + estoq_total_ano_ant)/2) * valor_benef * npar
+                
     
     ##### Calcula despesas para clientela Urbana que recebe acima do Piso #####
    

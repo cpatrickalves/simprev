@@ -172,6 +172,7 @@ def calc_prob_aux_MF(segurados, estoques, concessoes, periodo):
             prob_auxa = prob_auxa.loc[:, (prob_auxa != 0).any(axis=0)]
             
             # para o ano seguinte ao do estoque (2015) a probabilidade é a média dos anos anteriores
+            # OBS: Para algumas clientelas as Planilhas repetem o último ano
             prob_auxa[2015] = prob_auxa.loc[:,:2014].mean(axis=1)
             
             # Repete a última probabilidade(2015) nos anos seguintes(2016-2060)      
