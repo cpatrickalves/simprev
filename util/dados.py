@@ -53,6 +53,12 @@ class DadosLDO():
                                        5.91, 5.83, 5.77, 5.70, 5.64, 5.59, 5.55, 5.50, 5.46, 5.42, 5.39, 
                                        5.37, 5.34, 5.32, 5.30, 5.27, 5.25, 5.22, 5.20, 5.18, 5.15]
     
+        # REVISAR
+        # Valores retirados da Planilha do MF
+        self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0, 24.0, 24.3, 24.6, 24.9,
+                                     25.2, 25.5, 25.8] + ([26.1] * 37)
+        
+        
     def get_tabelas(self):
         
         # Dicionário que armazena os dados
@@ -61,6 +67,7 @@ class DadosLDO():
         dados['TxCrescimentoSalMin'] = pd.Series(self.ValoresTxCrescimentoSalMin, index=self.periodo)
         dados['TxReajusteBeneficios'] = pd.Series(self.ValoresTxReajusteBeneficios, index=self.periodo)
         dados['TxInflacao'] = pd.Series(self.TxInflacao, index=self.periodo)
+        dados['AliqEfMed'] = pd.Series(self.aliquotasPlanilhasMF, index=[2014]+self.periodo)
 
         # Tabela 6.1 da LDO de 2018
         dados['Tabela_6.1'] = self.dados.parse('Tabela 6.1', index_col=0)

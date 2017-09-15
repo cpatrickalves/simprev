@@ -60,8 +60,8 @@ tetoInicialRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
 # Alíquota efetiva média de contribuição
 aliquota = 0.31
 
-# PIB 2014
-pib_inicial = 5521256074049.36
+# PIBs 2014-2016 (fonte: Planilhas do MF)
+PIBs = [5687309000000,	5904331214709, 6220495999366]
 
 # Objeto que armazena dados da LDO de 2018
 ldo = DadosLDO()
@@ -160,8 +160,8 @@ nparcelas = fz.calc_n_parcelas(estoques, despesas, valMedBenef, periodo)
 
 # Projeta receitas e respesas
 print('Projetando Receita e PIB ...\n')
-resultados['Receitas'] = fz.calc_receitas(salarios, aliquota, periodo)
-resultados = fz.calc_pib(resultados, salarios, pib_inicial, periodo)
+resultados = fz.calc_receitas(salarios, dadosLDO2018, periodo)
+resultados = fz.calc_pib(resultados, salarios, PIBs, periodo)
 
 print('Projetando Despesas ...\n')
 resultados = fz.calc_despesas(despesas, estoques, concessoes, valCoBen, salarios,
