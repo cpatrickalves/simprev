@@ -19,8 +19,7 @@ class DadosLDO():
             
         # Taxa de Crescimento do Salário Mínimo em % (2015-2060)
         # Os 3 primeiros valores estão somados com a inflação (2015-2017)
-        # Valores correspondem a TxCrescimentoSalMin da LDO menos a inflação
-        # REVISAR REAJUSTE PARA 2018
+        # Valores correspondem a TxCrescimentoSalMin da LDO menos a inflação        
         self.ValoresTxCrescimentoSalMin = [8.84 , 11.68, 6.48, 0.0, 0.50, 2.49, 2.49, 
                                            2.58, 2.87, 2.81,2.76, 2.70, 2.63, 2.56, 2.49, 
                                            2.42, 2.34, 2.27, 2.20, 2.13, 2.06, 1.98, 1.91,
@@ -29,35 +28,41 @@ class DadosLDO():
                                            0.95, 0.92, 0.89, 0.86, 0.84, 0.81, 0.79]
         
         #self.ValoresTxCrescimentoSalMin = [8.84 , 11.68, 6.48, 4.62, 5.02, 7.1, 
-        #                                   7.1, 7.2, 7.5, 7.43, 7.39, 7.32, 7.25, 
-        #                                   7.17, 7.1, 7.02, 6.94, 6.87, 6.79, 6.72,
-        #                                   6.65, 6.57, 6.5, 6.41, 6.33, 6.26, 6.19,
-        #                                   6.11, 6.05, 5.98, 5.92, 5.86, 5.81, 5.75,
-        #                                   5.7, 5.65, 5.61, 5.57, 5.54, 5.49, 5.46,
+         #                                  7.1, 7.2, 7.5, 7.43, 7.39, 7.32, 7.25, 
+         #                                  7.17, 7.1, 7.02, 6.94, 6.87, 6.79, 6.72,
+         #                                  6.65, 6.57, 6.5, 6.41, 6.33, 6.26, 6.19,
+         #                                  6.11, 6.05, 5.98, 5.92, 5.86, 5.81, 5.75,
+         #                                  5.7, 5.65, 5.61, 5.57, 5.54, 5.49, 5.46,
          #                                  5.43, 5.39, 5.37, 5.35, 5.32]
         
-        # Reajustes retirados das LDOs de 2017 e 2018
-        self.reajuste_2015_2018 = [6.23, 11.28, 6.58, 4.62]
-        self.inflacao_2015_2018 = [6.23, 11.28, 6.58, 4.5]
-        #self.inflacao_2015_2018 = [4.5, 4.5, 4.5, 4.5]
-
+        # Atualização monetária retirados das Planilhas do MF
+        self.reajuste_2015_2018 = [6.41, 10.67, 6.29, 4.62]
+        self.inflacao_2015_2018 = [6.41, 10.67, 6.29, 4.5]
+                        
+        # Igualando a Inflação
+        #self.reajuste_2015_2018 = [6.23, 11.28, 6.58, 4.62]
+        #self.inflacao_2015_2018 = [6.23, 11.28, 6.58, 4.5]
+        
         # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 
         self.ValoresTxReajusteBeneficios = self.reajuste_2015_2018 + ([4.5] * 42)   
         
         # Taxa de Inflação em %  (2015-2060) 
         self.TxInflacao = self.inflacao_2015_2018 + ([4.5] * 42)   
+        #self.TxInflacao = self.inflacao_2015_2018 + ([0] * 42)   
+        
         
         # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 
         self.TxCresMassaSalContribuintes = [7.52, 7.36, 7.42, 7.35, 7.28, 7.24, 7.17, 7.09, 7.01, 6.93, 6.85,
                                        6.78, 6.70, 6.62, 6.53, 6.45, 6.37, 6.29, 6.21, 6.14, 6.06, 5.98, 
                                        5.91, 5.83, 5.77, 5.70, 5.64, 5.59, 5.55, 5.50, 5.46, 5.42, 5.39, 
                                        5.37, 5.34, 5.32, 5.30, 5.27, 5.25, 5.22, 5.20, 5.18, 5.15]
-    
-        # REVISAR
+                    
+        # Aliquota média de 2014
         # Valores retirados da Planilha do MF
-        self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0, 24.0, 24.3, 24.6, 24.9,
-                                     25.2, 25.5, 25.8] + ([26.1] * 37)
+        self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0] + ([26.8] * 44)
         
+        #self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0, 24.0, 24.3, 24.6, 24.9, 25.2, 25.5, 25.8] + ([26.1] * 37)
+        #self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0, 26.0, 26.0, 26, 26, 26, 26, 26] + ([31.0] * 37)
         
     def get_tabelas(self):
         

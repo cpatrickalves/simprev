@@ -44,8 +44,8 @@ def calc_valMedBenef(estoques, despesas, valCoBen, concessoes, dadosLDO, salario
         # Substitui os NaN por zeros
         valMedBenef[beneficio].fillna(0.0, inplace=True)            
         
-        # Aplica atualização monetária de acordo com as planilhas do MF
-        atualizMonet = 1.0641
+        # OBS: Aplica atualização monetária (6.41%) para o ano de 2014 de acordo com as planilhas do MF        
+        atualizMonet = 1#1.0641
         valMedBenef[beneficio][2014] = valMedBenef[beneficio][2014] * atualizMonet
 
     

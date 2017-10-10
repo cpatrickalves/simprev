@@ -17,12 +17,12 @@ import modelos.fazenda as fz
 '''
 ### O SimPrev foi desenvolvido a partir dos documentos:
 1) Anexo IV - Metas Fiscais - IV.6 – Projeções Atuariais para o Regime Geral de Previdência Social – RGPS
-2) Fonte: http://legis.senado.leg.br/comissoes/docsRecCPI?codcol=2093
+2) Planilhas Oficiais que implementam o modelo
+   Fonte: http://legis.senado.leg.br/comissoes/docsRecCPI?codcol=2093
    Origem: Ministério da Fazenda	
    Arquivos: DOC110 e Mídia 21
    Data: 22/06/2017
-   Ofício nº 35/MF
-   
+   Ofício nº 35/MF   
 '''
 ###############################################################################
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
 ###################### Parâmetros de simulação ###############################
 
-# dicionário que armazena os parâmetros (incompleto) - REVISAR
+# dicionário que armazena os parâmetros (incompleto)
 parametros = {}
 
 # Período de projeção 
@@ -54,11 +54,8 @@ produtividade = 1.7  # Pag 45 LDO 2018
 # Salário Mínimo de 2014
 salMin = 724.00
 
-# Teto do RGPS de 2014 a 2017 - REVISAR - usar tanto na receita quanto na despesa
+# Teto do RGPS de 2014 a 2017
 tetoInicialRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
-
-# Alíquota efetiva média de contribuição
-aliquota = 0.31
 
 # PIBs 2014-2016 (fonte: Planilhas do MF)
 PIBs = [5687309000000,	5904331214709, 6220495999366]
@@ -66,6 +63,9 @@ PIBs = [5687309000000,	5904331214709, 6220495999366]
 # Objeto que armazena dados da LDO de 2018
 ldo = DadosLDO()
 dadosLDO2018 = ldo.get_tabelas()
+
+# Alíquota efetiva média de contribuição utilizada nas Planilhas
+aliquota = dadosLDO2018['AliqEfMed']
 
 #############################################################################
 
@@ -160,8 +160,8 @@ nparcelas = fz.calc_n_parcelas(estoques, despesas, valMedBenef, periodo)
 
 # Projeta receitas e respesas
 print('Projetando Receita e PIB ...\n')
-resultados = fz.calc_receitas(salarios, dadosLDO2018, periodo)
-resultados = fz.calc_pib(resultados, salarios, PIBs, periodo)
+resultados = fz.calc_receitas(salarios, aliquota, periodo)
+resultados = fz.calc_pib_MF(resultados, salarios, PIBs, periodo)
 
 print('Projetando Despesas ...\n')
 resultados = fz.calc_despesas(despesas, estoques, concessoes, valCoBen, salarios,
@@ -190,17 +190,13 @@ arq.writelines(logs)
 arq.close()
 
 # REVISAR:
-# Compara as equações da LDO com a do DOcumento da fazenda
 # Buscar por estoques e outros valores (probabilidades) negativos
 # Buscar por fatores de ajuste de mortalidades muito elevados
 # Existem probabilidades de morte negativa - fam rmv tb
-# corrigir calculos para idade 90
-# Comparar os segurados calculados com os segurados das planilhas
 # Nos estoques aparecem aposentadorias com menos de 45 anos (corrigir)
 # Alterar as porcentagens 
-# Calcular taxa de crescimento da massa salarial de contribuintes
-# Adicionar um arquivo de Log com todos os dados/saidas detalhadas
 # Adicionar a opção de projetar com valores atuais (sem inflacao)
+# Transformar os dados da LDO e parâmetros de entrada (alterar parametros das funções)
 # Pendente:
     # ajustes da inflação
     # Calculo do número médio de parcelas pagas
