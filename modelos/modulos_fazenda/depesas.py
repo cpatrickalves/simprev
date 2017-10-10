@@ -105,7 +105,7 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
             #if ('tcn' in beneficio or 'tce' in beneficio or 'tcp' in beneficio):
                 #fator_prev = 1
                 #ajuste = 1
-                #val_med_novos_ben = fator_prev * ajuste * salarios['SalMedSegUrbAcimPnad'+sexo] # REVISAR Equação
+                #val_med_novos_ben = fator_prev * ajuste * salarios['SalMedSegUrbAcimPnad'+sexo] 
             
             for ano in periodo:
                 if ano in estoques[beneficio].columns:      # verifica se existe projeção para esse ano
@@ -121,7 +121,7 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
                         
                     else:                       
                         # Cálculo para Aposentadorias e Pensões
-                        val_med_novos_ben = valMedBenef[beneficio] # REVISAR
+                        val_med_novos_ben = valMedBenef[beneficio] 
                         # Idade de 1 a 90 anos
                         for idade in range(1,91):
                             

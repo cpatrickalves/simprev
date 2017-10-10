@@ -166,13 +166,8 @@ def calc_estoq_pensoes(populacao, est, concessoes, cessacoes, probabilidades, se
         id_prob_morte = 'Mort'+ sexo    # ex: MortH
         id_fam = 'fam'+benef            # fator de ajuste de mortalidade
         id_pens = benef+"_tipoA"        # Cria um Id para pensão do tipo A
-
-        # Cria um novo DataFrame para Pensão do tipo A - 2010-2014 - REVISAR
-        #est[id_pens] = pd.DataFrame(0.0, index=range(0,91), columns=(est.columns())+periodo)
-        #est[id_pens].index.name = "IDADE"
-
-        # Copia os dados de estoque de 2014 (pensões do tipo A)
-        #est[id_pens][2014] = est[benef][2014]
+        
+        # Copia o Dataframe    
         est[id_pens] = est[benef]
 
         for ano in periodo:
@@ -348,7 +343,7 @@ def calc_cessacoes_pensao(cessacoes, concessoes, probabilidades, periodo):
     dados = LerTabelas()
 
     # Parte da Eq. 27
-    # OBS: Esses valores são diferentes dos descritos na Lei 13.135/2015 - REVISAR
+    # OBS: Esses valores são diferentes dos descritos na Lei 13.135/2015 
     def get_ji(idade):
 
         if idade <= 23:

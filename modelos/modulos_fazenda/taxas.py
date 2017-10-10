@@ -136,7 +136,7 @@ def calc_tx_segurados_urb(pop_pnad, periodo):
     # Dicionario que armazena as taxas 
     txcober = {}
     
-    # Padrão da chave: SegUrbAcimPnadH # REVISAR
+    # Padrão da chave: SegUrbAcimPnadH 
     
     # Pag. 42 da LDO: taxas de cobertura contributiva por SM e acima do SM
     # calculadas pela relação da população de contribuintes para o sistema previdenciário
@@ -178,10 +178,10 @@ def calc_tx_segurados_rur(pop_pnad, periodo):
     tx_seg_rur = {}
     
     # Padrões da chave: SegEspRurPnadH, ContrRurPnadH, SegPotRurPnadH 
-    # A LDO não descreve como calcular essa taxa
+    # OBS: A LDO não descreve como calcular essa taxa
     # O documento inicial do modelo do STN, IPEA e SPE diz para usar 
     # a PeaRur como denominador, mas acho que o correto seria a SegRurPnadH.
-    # Página 42 da LDO - REVISAR
+    # Página 42 da LDO 
     
     # Taxas de participação de subconuntos da população rural
     for clientela_rural in ['SegEspRur', 'ContrRur', 'SegPotRur']:

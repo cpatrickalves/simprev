@@ -261,7 +261,7 @@ def calc_prob_aux_LDO2018(segurados, estoques, concessoes, periodo):
             est = estoques[beneficio][ano_prob]
             id_seg = dados.get_id_segurados(beneficio)
             seg = segurados[id_seg][ano_prob]
-            # REVISAR, para o caso do Auxr tem-se muitas divisões por zero, gerando inf
+            # OBS: para o caso do Auxr tem-se muitas divisões por zero, gerando inf
             prob_aux_ar = est / seg                        # Eq. 19
             
             # Substitui os NaN por zero
@@ -324,7 +324,7 @@ def calc_prob_morte(pop):
 
 
 # Calcula o Fator de Ajuste de Mortalidade - Equações 14 e 15
-# REVISAR - Assume o valor zero em alguns casos e valores muito altos (>100), gerando estoques negativos
+# OBS: Assume o valor zero em alguns casos e valores muito altos (>100), gerando estoques negativos
 def calc_fat_ajuste_mort_LDO2018(estoques, cessacoes, probMort, periodo):
 
     # ano utilizado para cálculo
@@ -355,7 +355,7 @@ def calc_fat_ajuste_mort_LDO2018(estoques, cessacoes, probMort, periodo):
                 ces_ano_atual = cessacoes[beneficio][ano_prob][idade]
                 est_ano_ant = estoques[beneficio][ano_prob-1][idade]
                 
-                # REVISAR: Gera fam acima de 100 para alguns beneficios em idades baixas. 
+                # OBS: Gera fam acima de 100 para alguns beneficios em idades baixas. 
                 # Isso ocorre devido a pmorte ser muito baixa e os estoques serem muito 
                 # pequenos ou zero.Ver pag. 18 do doc da fazenda                 
                 
@@ -508,8 +508,8 @@ def calc_prob_pensao_LDO2018(concessoes, segurados, estoque, prob_morte, periodo
             if seg == 0 and est_ac == 0:
                 probPensao = 0
             else:
-                # Equação baseada nas Eq. 24 e 25 - REVISAR
-                # Essa equação pode gerar probabilidades maiores que 1 para idades menores que 20
+                # Equação baseada nas Eq. 24 e 25 
+                # OBS: Essa equação pode gerar probabilidades maiores que 1 para idades menores que 20
                 probPensao = conc / ((seg + est_ac) * pmorte)                 
                 
             probabilidades[beneficio][i_Dit] = probPensao
@@ -543,7 +543,7 @@ def calc_prob_pensao_MF(concessoes, segurados, populacao, estoque, prob_morte, p
         sexo_oposto = 'M' if sexo=='H' else 'H'             # Obtém o oposto
         clientela = lista.get_clientela(beneficio)
         id_conc = beneficio.replace(sexo, sexo_oposto)      # Troca o sexo do benefício
-        # Sempre são usados os segurados do sexo masculino - REVISAR
+        # OBS: Sempre são usados os segurados do sexo masculino
         id_segurados = lista.get_id_segurados(beneficio).replace(sexo, 'H')  
         
         # Para cada idade i
