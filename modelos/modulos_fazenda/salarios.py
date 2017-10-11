@@ -44,8 +44,8 @@ def calc_salarios(salarios, populacao, segurados, produtividade,
     teto = pd.Series(tetoInicialRGPS, index=range(ano_inicial, ano_final))
     
     for ano in range(ano_final, (periodo[-1]+1)):           # 2018-2060        
-        inflacao = dadosLDO['TxInflacao'][ano]              # em %
-        teto[ano] = teto[ano-1] * (1 + inflacao/100) 
+        inflacao = dadosLDO['TxInflacao'][ano]              # em %                
+        teto[ano] = teto[ano-1] * (1 + produtividade/100) * (1 + inflacao/100)
 
     # Salva a Serie no dicionário
     salarios['tetoRGPS'] = teto

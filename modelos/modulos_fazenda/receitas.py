@@ -10,15 +10,17 @@ def calc_receitas(salarios, aliquota, periodo):
 
     # Dicionário que armazenas os resultados
     resultados = {}
+    ano_inicial = periodo[0] - 1             # 2014
+    periodo_total = [ano_inicial]+periodo    # 2014-2060
     
     # Cria um objeto do tipo Serie com índices iguais aos descritos na lista período e
     # todos os valores iguais a zero
-    mSalContrTotal = pd.Series(0, index=periodo)
-    receita = pd.Series(0, index=periodo)
+    mSalContrTotal = pd.Series(0, index=periodo_total)
+    receita = pd.Series(0, index=periodo_total)
         
     # Para cada sexo e clientela calcula as receitas (Eq. 39)
     # O Fator de Anulização foi adicionado conforme planilhas do MF
-    for ano in periodo:
+    for ano in periodo_total:
         for sexo in ['H','M']:
             for clientela in ['Ca', 'Csm']:            
                 id_sal = 'MSal' + clientela + 'Urb' + sexo

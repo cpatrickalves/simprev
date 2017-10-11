@@ -37,9 +37,10 @@ class DadosLDO():
         
         # Atualização monetária retirados das Planilhas do MF
         self.reajuste_2015_2018 = [6.41, 10.67, 6.29, 4.62]
-        self.inflacao_2015_2018 = [6.41, 10.67, 6.29, 4.5]
+        # OBS: Inflação é zero em 2018
+        self.inflacao_2015_2018 = [6.41, 10.67, 6.29, 0.0]
                         
-        # Igualando a Inflação
+        # Valores reais
         #self.reajuste_2015_2018 = [6.23, 11.28, 6.58, 4.62]
         #self.inflacao_2015_2018 = [6.23, 11.28, 6.58, 4.5]
         
@@ -48,8 +49,7 @@ class DadosLDO():
         
         # Taxa de Inflação em %  (2015-2060) 
         self.TxInflacao = self.inflacao_2015_2018 + ([4.5] * 42)   
-        #self.TxInflacao = self.inflacao_2015_2018 + ([0] * 42)   
-        
+        #self.TxInflacao = self.inflacao_2015_2018 + ([0.0] * 42)   
         
         # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 
         self.TxCresMassaSalContribuintes = [7.52, 7.36, 7.42, 7.35, 7.28, 7.24, 7.17, 7.09, 7.01, 6.93, 6.85,
@@ -59,11 +59,13 @@ class DadosLDO():
                     
         # Aliquota média de 2014
         # Valores retirados da Planilha do MF
+        
+        
+        # Aliquotas médias de 2014 a 2060
+        # aliqMed = receita/MassaSalarial        
         self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0] + ([26.8] * 44)
-        
         #self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0, 24.0, 24.3, 24.6, 24.9, 25.2, 25.5, 25.8] + ([26.1] * 37)
-        #self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0, 26.0, 26.0, 26, 26, 26, 26, 26] + ([31.0] * 37)
-        
+                
     def get_tabelas(self):
         
         # Dicionário que armazena os dados
