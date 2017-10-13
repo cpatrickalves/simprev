@@ -7,7 +7,7 @@ from util.tabelas import LerTabelas
 from util.dados import DadosLDO
 from util.busca_erros import corrige_erros_estoque, busca_erros_prob
 from util.resultados import calc_resultados
-from util.graficos import plot_erros, plot_resultados
+from util.graficos import *
 import modelos.fazenda as fz
 
 
@@ -75,11 +75,13 @@ periodo = list(range(ano_inicial, ano_final+1))
 # Dicionário que salva os resultados
 resultados = {}
 
+# Determina se os gráficos serão salvos em arquivos
+savefig = True
+
 # Cria variável que armazena os logs
 logs = []
 
 # Arquivo que salva os logs
-
 log_file = 'logs.txt'
 
 #############################################################################
@@ -171,8 +173,8 @@ resultados = fz.calc_despesas(despesas, estoques, concessoes, valCoBen, salarios
 print('Calculando resultados finais ...\n')
 resultados = calc_resultados(resultados, dadosLDO2018)
 
-plot_resultados(resultados)
-plot_erros(resultados)
+plot_erros_LDO2018(resultados, savefig)
+plot_resultados(resultados, savefig)
 
 print('RESULTADOS: \n')
 print('Erro de Despesa em 2018 = {}'.format(resultados['Erro Despesa'][2018]))
@@ -200,3 +202,11 @@ arq.close()
 # Pendente:
     # ajustes da inflação
     # Calculo do número médio de parcelas pagas
+    # TAXA DOS RURAIS
+    # ERRO DO PIB
+    
+# Implementar pendências das planilhas (reduzir o erro) - Lembrando que existem calculos errados na planilha
+    # Comparar valores médios benefícios
+    # Comparar probabilidades
+    # Comparar estoques
+    # Ver observações no evernote
