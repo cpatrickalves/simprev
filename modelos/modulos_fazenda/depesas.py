@@ -12,6 +12,7 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
 
     # Objeto criado para uso das funções da Classe LerTabelas
     dados = LerTabelas()
+    ult_ano_estoq = periodo[0]-1 # 2014
     
     ##### Calcula despesa com o dados conhecidos (2011-2014)
     # O valor no banco de dados é mensal
@@ -27,14 +28,21 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
             despesas[beneficio] = desp_dez * nparcelas[beneficio]            
             
         # Demais auxílios
-        elif 'Aux' in beneficio:
-            ult_ano_estoq = periodo[0]-1 # 2014
+        elif 'Aux' in beneficio:            
             qtd_benef = 0
+    
             if 'Auxd' in beneficio:
                 qtd_benef = concessoes[beneficio][ult_ano_estoq]            
             else:
                 qtd_benef = estoques[beneficio][ult_ano_estoq]
-            valor_benef = salarios['salarioMinimo'][ult_ano_estoq]
+    
+            # OBS: Para o Auxílio-acidente a regra é 50% do valor do “Salário de Benefício”
+            # fonte: http://www.previdencia.gov.br/servicos-ao-cidadao/informacoes-gerais/valor-beneficios-incapacidade/
+            if 'Auxa' in beneficio:
+                valor_benef = salarios['salarioMinimo'][ult_ano_estoq] * 0.5
+            else:
+                valor_benef = salarios['salarioMinimo'][ult_ano_estoq]
+                
             npar = nparcelas[beneficio][ult_ano_estoq]
 
             # Calcula a despesa para cada benefício
@@ -42,7 +50,6 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
             
         # Demais tipos
         else:            
-            ult_ano_estoq = periodo[0]-1 # 2014
             estoq_total = estoques[beneficio][ult_ano_estoq]
             estoq_total_ano_ant = estoques[beneficio][ult_ano_estoq-1]
             valor_benef = salarios['salarioMinimo'][ult_ano_estoq]
@@ -70,6 +77,12 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
                         if 'Aux' in beneficio:                        
                             qtd_benef = estoques[beneficio][ano]
                             valor_benef = salarios['salarioMinimo'][ano]
+                                        
+                            # OBS: Para o Auxílio-acidente a regra é 50% do valor do “Salário de Benefício”
+                            # fonte: http://www.previdencia.gov.br/servicos-ao-cidadao/informacoes-gerais/valor-beneficios-incapacidade/
+                            if 'Auxa' in beneficio:
+                                valor_benef = salarios['salarioMinimo'][ano] * 0.5
+                            
                             npar = nparcelas[beneficio][ano]
                 
                             # Calcula a despesa para cada benefício

@@ -92,6 +92,4 @@ def plot_resultados(resultados, savefig=False):
     plt.legend()
     if savefig: plt.savefig('resultadoFinanceiro_pib_SimPrev.png', dpi=300, format='png')
     plt.show()
-          
-    
-    
+        
