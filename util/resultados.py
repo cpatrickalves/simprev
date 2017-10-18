@@ -6,19 +6,19 @@
 
 def calc_resultados(resultados, dadosLDO):
     
-    ###### Calcula erro com relação a LDO ######
+    ###### Obtém resultados da LDO de 2018
     
+    # Receita, despesa e PIB da LDO
     rec_ldo = dadosLDO['Tabela_6.2']['Receita']
     desp_ldo = dadosLDO['Tabela_6.2']['Despesa']
+    pib_ldo = dadosLDO['Tabela_6.2']['PIB']
     
-    # Erro na despesa e receita com relação a LDO de 2018 em %
-    erro_receita = 100 * (resultados['Receitas'] - rec_ldo) / rec_ldo
-    erro_despesa = 100 * (resultados['Despesas'] - desp_ldo) / desp_ldo
-
-    resultados['Erro Receita'] = erro_receita
-    resultados['Erro Despesa'] = erro_despesa
-    resultados['Receitas LDO'] = rec_ldo
-    resultados['Despesas LDO'] = desp_ldo
+    # Receita e despesa sobre o PIB da LDO
+    rec_ldo_pib = dadosLDO['Tabela_6.2']['Receita / PIB'] * 100
+    desp_ldo_pib = dadosLDO['Tabela_6.2']['Despesa / PIB'] * 100
+    
+    resultados['Receitas/PIB LDO'] = rec_ldo_pib
+    resultados['Despesas/PIB LDO'] = desp_ldo_pib
     
     
     ###### Calcula receita e despesa sobre o PIB
@@ -28,6 +28,25 @@ def calc_resultados(resultados, dadosLDO):
     
     resultados['Receitas/PIB'] = rec_pib * 100
     resultados['Despesas/PIB'] = desp_pib * 100
+    
+    ###### Calcula variação em relação a LDO
+    
+    # Variação na despesa, receita e PIB com relação a LDO de 2018 em %
+    erro_receita = 100 * (resultados['Receitas'] - rec_ldo) / rec_ldo
+    erro_despesa = 100 * (resultados['Despesas'] - desp_ldo) / desp_ldo
+    erro_pib = 100 * (resultados['PIB'] - pib_ldo) / pib_ldo
+    
+    # Erro na despesa e receita sobre o PIB
+    erro_receita_pib = 100 * (resultados['Receitas/PIB'] - rec_ldo_pib) / rec_ldo_pib
+    erro_despesa_pib = 100 * (resultados['Despesas/PIB'] - desp_ldo_pib) / desp_ldo_pib
+
+    resultados['Erro Receitas'] = erro_receita
+    resultados['Erro Despesas'] = erro_despesa
+    resultados['Erro PIB'] = erro_pib
+    resultados['Erro Receitas/PIB'] = erro_receita_pib
+    resultados['Erro Despesas/PIB'] = erro_despesa_pib
+    resultados['Receitas LDO'] = rec_ldo
+    resultados['Despesas LDO'] = desp_ldo
     
     
     ###### Cálcula necessidade de Financiamento

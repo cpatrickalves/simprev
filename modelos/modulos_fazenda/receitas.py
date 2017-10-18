@@ -12,6 +12,7 @@ def calc_receitas(salarios, aliquota, periodo):
     resultados = {}
     ano_inicial = periodo[0] - 1             # 2014
     periodo_total = [ano_inicial]+periodo    # 2014-2060
+    tx_cres_rec = pd.Series(0.0, index=periodo)
     
     # Cria um objeto do tipo Serie com índices iguais aos descritos na lista período e
     # todos os valores iguais a zero
@@ -29,8 +30,13 @@ def calc_receitas(salarios, aliquota, periodo):
     # Aplica a alíquota efetiva média
     receita = mSalContrTotal * (aliquota/100)
 
+    # Calcula a taxa de Crescimento da Receita
+    for ano in periodo[1:]:  # pula o primeiro ano
+        tx_cres_rec[ano] = receita[ano]/receita[ano-1] - 1
+
     resultados['Receitas'] = receita
     resultados['MSalContrib'] = mSalContrTotal
+    resultados['tx_cres_receita'] = tx_cres_rec
 
     return resultados
 

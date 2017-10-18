@@ -6,8 +6,7 @@
 # Corrige inconsistências nos estoques
 def corrige_erros_estoque(estoques, concessoes, cessacoes):
     """
-    Identifica idades em que o número de Concessões não bate com o Estoque do ano e idade seguintes
-    e faz uma correção. Essas correções são utilizadas nos cálculos das probabilidades
+    Identifica dados de estoque inconsistentes.
     
     :param estoques: dicionário com os estoques 
     :param concessoes: dicionário com as concessões
@@ -34,7 +33,7 @@ def corrige_erros_estoque(estoques, concessoes, cessacoes):
                         estoques[beneficio].loc[idade, ano] = round(con - ces)
                         
                         count+=1
-    #print('Quantidade de erros encontrados: {}'.format(count))
+    print('Quantidade de erros encontrados: {}'.format(count))
     
     return estoques
 
