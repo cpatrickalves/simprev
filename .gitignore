@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Figuras
+*.png
+
 # Distribution / packaging
 .Python
 env/

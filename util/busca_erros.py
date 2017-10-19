@@ -4,7 +4,7 @@
 """
 
 # Corrige inconsistências nos estoques
-def corrige_erros_estoque(estoques, concessoes, cessacoes):
+def corrige_erros_estoque(estoques, concessoes, cessacoes, logs):
     """
     Identifica dados de estoque inconsistentes.
     
@@ -13,6 +13,7 @@ def corrige_erros_estoque(estoques, concessoes, cessacoes):
     :param cessacoes: dicionário com as cessações
     :return: 
     """
+    logs.append('##### Análisando inconsistências nos Estoques #####\n')
 
     count = 0
     # Para todos os benefícios...
@@ -27,13 +28,13 @@ def corrige_erros_estoque(estoques, concessoes, cessacoes):
 
                     # Identifica idades em que o número de Concessões é maior que o Estoque do ano e idade seguinte
                     if con - ces > est:
-                        #print('{} | ano = {}| id = {} | Con = {} | Ces = {} | Est = {}'.format(beneficio, ano, idade,con,ces,est))
+                        logs.append('{} | ano = {}| id = {} | Con = {} | Ces = {} | Est = {} | erro = {} \n'.format(beneficio, ano, idade,con,ces,est, (con-ces)-est))
                         
                         # Corrige o estoque para as idades onde o erro foi encontrado
                         estoques[beneficio].loc[idade, ano] = round(con - ces)
                         
                         count+=1
-    print('Quantidade de erros encontrados: {}'.format(count))
+    logs.append('Quantidade de erros encontrados: {} \n\n'.format(count))
     
     return estoques
 

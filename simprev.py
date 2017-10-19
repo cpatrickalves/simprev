@@ -125,7 +125,7 @@ print('Calculando dados demográficos ...\n')
 segurados = fz.calc_demografia(populacao, taxas)
 
 # Corrige inconsistências nos estoques
-#corrige_erros_estoque(estoques, concessoes, cessacoes, logs)
+corrige_erros_estoque(estoques, concessoes, cessacoes, logs)
 
 # Calcula as probabilidades de entrada em benefício e morte
 print('Calculando probabilidades ...\n')
