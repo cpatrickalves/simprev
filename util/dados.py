@@ -65,7 +65,24 @@ class DadosLDO():
         # aliqMed = receita/MassaSalarial        
         self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0] + ([26.8] * 44)
         #self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0, 24.0, 24.3, 24.6, 24.9, 25.2, 25.5, 25.8] + ([26.1] * 37)
-                
+
+        # PIBs 2014-2016 (fonte: Planilhas do MF)
+        self.PIBs = [5687309000000,	5904331214709, 6220495999366]
+        
+        # 2010-2016 (fonte: Planilhas do MF)
+        self.receitas_planilha = [284233000000, 304642000000, 314834000000, 330596000000]
+
+    # Dados dos Anuários Estatísticos da Previdência Social
+    def dadosAEPS(self):
+
+        # 2013-2015 (fonte: AEPS 2015 - Tabelas 42.1, 42.4, 42.5 (BENEFÍCIOS))
+        self.receitas_aeps = [292675804000,	312740405000, 319674728000]
+        self.despesas_aeps = [383070416000,	390735753000, 428530621000]
+
+        # 2013-2015 (fonte: AEPS 2015 - Tabela C.1)
+        self.aposentadorias  = [17248792, 17845805, 18331635]
+        self.pensoes = [7165712, 7323921, 7429823]
+
     def get_tabelas(self):
         
         # Dicionário que armazena os dados
@@ -87,7 +104,13 @@ class DadosLDO():
         dados['Tabela_6.2']['Necessidade de Fin.'] *= 10**6 
         dados['Tabela_6.2']['PIB'] *= 10**6 
         
-        #dados['pib_2014'] = 7235139000000
+        # Corrige a unidade (os dados estão em milhões)
+        dados['PIB Planilhas'] = self.PIBs
+        
+        # Corrige a unidade (os dados estão em milhões)
+        dados['Receitas AEPS'] = self.receitas_aeps
+        dados['Despesas AEPS'] = self.despesas_aeps
+        
         
         return dados
        

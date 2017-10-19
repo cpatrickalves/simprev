@@ -82,7 +82,7 @@ def plot_resultados(resultados, savefig=False):
     plt.set_cmap('jet')    
     plt.xticks(np.arange(min(x)+1, max(x)+1, 5.0))    
     plt.legend(loc=0)
-    if savefig: plt.savefig('receitas_despesa_simprev', dpi=300, format='png')
+    if savefig: plt.savefig('receitas_despesa_simprev.png', dpi=300, format='png')
     plt.show()
     
     plt.plot(resultados['Receitas/PIB'], label='Receitas/PIB',lw=4 )

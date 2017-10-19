@@ -598,7 +598,6 @@ def calc_prob_pensao_MF(concessoes, segurados, populacao, estoque, prob_morte, p
     return probabilidades
 
 
-
 # Calcula probabilidade de morte baseado no método do LTS/UFPA
 # Revisar: Mover para outro modelo
 def calc_prob_morte_ufpa(pop):

@@ -58,6 +58,8 @@ def calc_resultados(resultados, dadosLDO):
     resultados['NecFinanc/PIB'] = necess_fin_pib * 100
     
     
+    
+    
     return resultados
 
     

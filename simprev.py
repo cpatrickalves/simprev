@@ -57,15 +57,16 @@ salMin = 724.00
 # Teto do RGPS de 2014 a 2017
 tetoInicialRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
 
-# PIBs 2014-2016 (fonte: Planilhas do MF)
-PIBs = [5687309000000,	5904331214709, 6220495999366]
-
 # Objeto que armazena dados da LDO de 2018
 ldo = DadosLDO()
 dadosLDO2018 = ldo.get_tabelas()
 
 # Alíquota efetiva média de contribuição utilizada nas Planilhas
 aliquota = dadosLDO2018['AliqEfMed']
+
+# PIBs 2014-2016 (fonte: Planilhas do MF)
+PIBs = dadosLDO2018['PIB Planilhas']
+
 
 #############################################################################
 
@@ -125,7 +126,7 @@ print('Calculando dados demográficos ...\n')
 segurados = fz.calc_demografia(populacao, taxas)
 
 # Corrige inconsistências nos estoques
-corrige_erros_estoque(estoques, concessoes, cessacoes, logs)
+#corrige_erros_estoque(estoques, concessoes, cessacoes, logs)
 
 # Calcula as probabilidades de entrada em benefício e morte
 print('Calculando probabilidades ...\n')
