@@ -83,7 +83,9 @@ def calc_probabilidades(populacao, segurados, estoques,
     return probabilidades
 
 # Calcula todas as taxas
-def calc_taxas(pop_pnad, periodo):
+def calc_taxas(pop_pnad, parametros):
+    
+    periodo = parametros['periodo']
     
     taxas = {}
 
@@ -91,7 +93,7 @@ def calc_taxas(pop_pnad, periodo):
     txpart = calc_tx_part(pop_pnad, periodo)
     txocup = calc_tx_ocup(pop_pnad, periodo)
     txocup_csm_ca = calc_tx_ocup_csm_ca(pop_pnad, periodo)
-    txSegurados_urb = calc_tx_segurados_urb(pop_pnad, periodo)
+    txSegurados_urb = calc_tx_segurados_urb(pop_pnad, parametros)
     txSegurados_rur = calc_tx_segurados_rur(pop_pnad, periodo)
     
     taxas.update(txurb)

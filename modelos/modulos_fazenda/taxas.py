@@ -131,8 +131,15 @@ def calc_tx_ocup_csm_ca(pop_pnad, periodo):
 
 
 # Calcula taxa de Segurados por SM (Csm) e acima do SM (Ca)
-def calc_tx_segurados_urb(pop_pnad, periodo):
+def calc_tx_segurados_urb(pop_pnad, parametros):
     
+    periodo = parametros['periodo']
+    
+    # Taxa de formalização
+    formalizacao = parametros['formalizacao']    
+    # Ano no qual a taxa de formalização para de ser aplicada
+    limite_formalizacao = parametros['ano_limite_formalizacao']
+        
     # Dicionario que armazena as taxas 
     txcober = {}
     
@@ -161,11 +168,18 @@ def calc_tx_segurados_urb(pop_pnad, periodo):
 
        # Preenche valores NaN com zero      
        txcober[chave].fillna(0, inplace=True)
-
-    # Repete as taxas para todos os anos
+       
+    ###### Aplica a formalização ###### 
+    
+    # Aplica a taxa de formalização ou repete as taxas para todos os anos    
     for taxa in txcober:
         for ano in periodo:
-            txcober[taxa][ano] = txcober[taxa][ano-1] 
+            # Aplica a taxa a partir do primeiro ano e para de aplicar no ano limite
+            if ano < periodo[0] or ano > limite_formalizacao:  # 2015 ou ano limite
+                txcober[taxa][ano] = txcober[taxa][ano-1] 
+            else:
+                txcober[taxa][ano] = txcober[taxa][ano-1] * (1 + formalizacao/100)
+                
                 
     return txcober
 

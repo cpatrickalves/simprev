@@ -51,6 +51,11 @@ ano_probabilidade = 2014
 # Taxa de crescimento de Produtividade em %
 produtividade = 1.7  # Pag 45 LDO 2018
 
+# Taxa de Formalização anual
+formalizacao = 1.0
+# Ano no qual a taxa de formalização para de ser aplicada
+ano_limite_formalizacao = 2025
+
 # Salário Mínimo de 2014
 salMin = 724.00
 
@@ -72,6 +77,12 @@ PIBs = dadosLDO2018['PIB Planilhas']
 
 # Cria uma lista com os anos a serem projetados
 periodo = list(range(ano_inicial, ano_final+1))
+
+# Salva os parâmetros de entrada no dicionário
+parametros['produtividade'] = produtividade
+parametros['formalizacao'] = formalizacao
+parametros['periodo'] = periodo
+parametros['ano_limite_formalizacao'] = ano_limite_formalizacao 
 
 # Dicionário que salva os resultados
 resultados = {}
@@ -119,7 +130,7 @@ valCoBen = dados.get_tabelas(ids_valConcessoesBen)
 
 # Calcula taxas de urbanização, participação e ocupação
 print('Calculando taxas ...\n')
-taxas = fz.calc_taxas(populacao_pnad, periodo)
+taxas = fz.calc_taxas(populacao_pnad, parametros)
 
 # Calcula: Pop Urbana|Rural, PEA e Pop Ocupada, Contribuintes e Segurados
 print('Calculando dados demográficos ...\n')
@@ -172,7 +183,7 @@ resultados = fz.calc_despesas(despesas, estoques, concessoes, valCoBen, salarios
                             nparcelas, resultados, periodo)
 
 print('Calculando resultados finais ...\n')
-resultados = calc_resultados(resultados, dadosLDO2018)
+resultados = calc_resultados(resultados, estoques, dadosLDO2018)
 
 plot_erros_LDO2018(resultados, savefig)
 plot_resultados(resultados, savefig)

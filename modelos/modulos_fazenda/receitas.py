@@ -20,7 +20,6 @@ def calc_receitas(salarios, aliquota, periodo):
     receita = pd.Series(0, index=periodo_total)
         
     # Para cada sexo e clientela calcula as receitas (Eq. 39)
-    # O Fator de Anulização foi adicionado conforme planilhas do MF
     for ano in periodo_total:
         for sexo in ['H','M']:
             for clientela in ['Ca', 'Csm']:            
