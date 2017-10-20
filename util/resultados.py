@@ -3,8 +3,11 @@
 
 @author: Patrick Alves
 """
+from util.tabelas import LerTabelas
+import pandas as pd
 
-def calc_resultados(resultados, dadosLDO):
+
+def calc_resultados(resultados, estoques, dadosLDO):
     
     ###### Obtém resultados da LDO de 2018
     
@@ -47,8 +50,7 @@ def calc_resultados(resultados, dadosLDO):
     resultados['Erro Despesas/PIB'] = erro_despesa_pib
     resultados['Receitas LDO'] = rec_ldo
     resultados['Despesas LDO'] = desp_ldo
-    
-    
+        
     ###### Cálcula necessidade de Financiamento
     
     necess_fin = resultados['Receitas'] - resultados['Despesas']
@@ -57,8 +59,33 @@ def calc_resultados(resultados, dadosLDO):
     resultados['NecFinanc'] = necess_fin
     resultados['NecFinanc/PIB'] = necess_fin_pib * 100
     
+    ###### Comparação com os dados de 2014 e 2015 do AEPS
     
+    tabelas = LerTabelas()
     
+    # Calcula o estoque total de aposentadorias e Pensões
+    est_apos_total = pd.DataFrame(0.0, columns=estoques['AinvRurH'].columns,index=estoques['AinvRurH'].index)
+    est_pens_total = est_apos_total.copy()
+    
+    # Para todas as aposentadorias
+    for benef in tabelas.get_id_beneficios(['Apin', 'Atcn', 'Atce', 'Atcp', 'Ainv']):
+        if benef in estoques.keys():
+            est_apos_total += estoques[benef]
+    
+    # Para todas as Pensoes
+    for benef in tabelas.get_id_beneficios(['Pens']):
+        if benef in estoques.keys():
+            est_pens_total += estoques[benef]
+    
+    erros_aeps = pd.DataFrame(index=[2014,2015], columns=['Receitas', 'Despesas', 'Aposentadorias', 'Pensões'])
+    
+    erros_aeps['Aposentadorias'] = (est_apos_total.sum() / dadosLDO['Aposentadorias AEPS']) - 1
+    erros_aeps['Pensões'] = (est_pens_total.sum() / dadosLDO['Pensões AEPS']) - 1
+    erros_aeps['Receitas'] = (resultados['Receitas'] / dadosLDO['Receitas AEPS']) - 1
+    erros_aeps['Despesas'] = (resultados['Despesas'] / dadosLDO['Despesas AEPS']) - 1
+    
+    resultados['Erros AEPS'] = erros_aeps * 100
+        
     
     return resultados
 

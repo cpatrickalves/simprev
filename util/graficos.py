@@ -68,6 +68,23 @@ def plot_erros_LDO2018(resultados, savefig=False):
     if savefig: plt.savefig('receitas_simprev_LDO.png', dpi=300, format='png')
     plt.show()
 
+    
+    # Gráfico em barras com os erros comparando com o AEPS           
+    index = np.arange(4)
+    bar_width = 0.35
+        
+    plt.bar(index, resultados['Erros AEPS'].loc[2014, :], bar_width, label='2014', color='b')
+    plt.bar(index + bar_width, resultados['Erros AEPS'].loc[2015, :], bar_width, label='2015', color='r')
+    #plt.bar([2014], erros_aeps['Despesas'][2014], label='Despesas')    
+    plt.grid(True)    
+    plt.ylabel('ERRO (%)')
+    #plt.title('Erros com relação ao AEPS')
+    plt.xticks(index + bar_width, ('Receitas', 'Despesas', 'Aposentadorias', 'Pensões'))#    plt.xticks([2014, 2015])   
+    plt.legend(loc=0)
+    plt.tight_layout()
+    if savefig: plt.savefig('erros_aeps.png', dpi=300, format='png')
+    plt.show()
+
 
 def plot_resultados(resultados, savefig=False):
     

@@ -72,16 +72,15 @@ class DadosLDO():
         # 2010-2016 (fonte: Planilhas do MF)
         self.receitas_planilha = [284233000000, 304642000000, 314834000000, 330596000000]
 
-    # Dados dos Anuários Estatísticos da Previdência Social
-    def dadosAEPS(self):
+        # Dados dos Anuários Estatísticos da Previdência Social
 
         # 2013-2015 (fonte: AEPS 2015 - Tabelas 42.1, 42.4, 42.5 (BENEFÍCIOS))
         self.receitas_aeps = [292675804000,	312740405000, 319674728000]
         self.despesas_aeps = [383070416000,	390735753000, 428530621000]
 
         # 2013-2015 (fonte: AEPS 2015 - Tabela C.1)
-        self.aposentadorias  = [17248792, 17845805, 18331635]
-        self.pensoes = [7165712, 7323921, 7429823]
+        self.aposentadorias_aeps  = [17248792, 17845805, 18331635]
+        self.pensoes_aeps = [7165712, 7323921, 7429823]
 
     def get_tabelas(self):
         
@@ -107,10 +106,12 @@ class DadosLDO():
         # Corrige a unidade (os dados estão em milhões)
         dados['PIB Planilhas'] = self.PIBs
         
-        # Corrige a unidade (os dados estão em milhões)
-        dados['Receitas AEPS'] = self.receitas_aeps
-        dados['Despesas AEPS'] = self.despesas_aeps
+        # Informações do AEPS 2015
+        dados['Receitas AEPS'] = pd.Series(self.receitas_aeps, index=[2013, 2014, 2015])
+        dados['Despesas AEPS'] = pd.Series(self.despesas_aeps, index=[2013, 2014, 2015])
+        dados['Aposentadorias AEPS'] = pd.Series(self.aposentadorias_aeps, index=[2013, 2014, 2015])
+        dados['Pensões AEPS'] = pd.Series(self.pensoes_aeps, index=[2013, 2014, 2015])
         
-        
+                
         return dados
        
