@@ -217,7 +217,15 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
                 if ano in despesas[beneficio].columns:      # verifica se existe projeção para esse ano
                     desp_total[ano] += despesas[beneficio][ano].sum()               
 
-    resultados['Despesas'] = desp_total    
+
+    # Calcula a taxa de crescimento da Despesa
+    tx_cres_desp = pd.Series(0.0, index=periodo)
+    for ano in periodo:  # pula o primeiro ano
+        tx_cres_desp[ano] = desp_total[ano]/desp_total[ano-1] - 1
+
+
+    resultados['despesas'] = desp_total    
+    resultados['tx_cres_despesa'] = tx_cres_desp
     
     return resultados
 

@@ -51,9 +51,9 @@ ano_probabilidade = 2014
 # Taxa de crescimento de Produtividade em %
 produtividade = 1.7  # Pag 45 LDO 2018
 
-# Taxa de Formalização anual
-formalizacao = 1.0
-# Ano no qual a taxa de formalização para de ser aplicada
+# Taxa de aumento na formalização anual em %
+formalizacao = 0
+# Ano no qual a taxa de aumento na formalização para de ser aplicada
 ano_limite_formalizacao = 2025
 
 # Salário Mínimo de 2014
@@ -83,6 +83,7 @@ parametros['produtividade'] = produtividade
 parametros['formalizacao'] = formalizacao
 parametros['periodo'] = periodo
 parametros['ano_limite_formalizacao'] = ano_limite_formalizacao 
+parametros['aliquota_media'] = aliquota
 
 # Dicionário que salva os resultados
 resultados = {}
@@ -98,7 +99,7 @@ log_file = 'logs.txt'
 
 #############################################################################
 
-print('--- Iniciando projeção --- \n')
+print('\n----------- Iniciando projeção ----------- \n')
 print('Lendo arquivo de dados ... \n')
 
 #### Arquivo com os dados da Fazenda
@@ -183,29 +184,29 @@ resultados = fz.calc_despesas(despesas, estoques, concessoes, valCoBen, salarios
                             nparcelas, resultados, periodo)
 
 print('Calculando resultados finais ...\n')
-resultados = calc_resultados(resultados, estoques, dadosLDO2018)
+resultados = calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dadosLDO2018, parametros)
 
 plot_erros_LDO2018(resultados, savefig)
 plot_resultados(resultados, savefig)
 
 print('RESULTADOS: \n')
-print('Erro de Despesa em 2018 = {}'.format(resultados['Erro Despesas'][2018]))
-print('Erro de Despesa em 2060 = {}'.format(resultados['Erro Despesas'][2060]))
+print('Erro de Despesa em 2018 = {}'.format(resultados['erro_despesas'][2018]))
+print('Erro de Despesa em 2060 = {}'.format(resultados['erro_despesas'][2060]))
 print()
-print('Erro de Receita em 2018 = {}'.format(resultados['Erro Receitas'][2018]))
-print('Erro de Receita em 2060 = {}'.format(resultados['Erro Receitas'][2060]))
+print('Erro de Receita em 2018 = {}'.format(resultados['erro_receitas'][2018]))
+print('Erro de Receita em 2060 = {}'.format(resultados['erro_receitas'][2060]))
 print()
-print('Erro no PIB em 2018 = {}'.format(resultados['Erro PIB'][2018]))
-print('Erro no PIB em 2060 = {}'.format(resultados['Erro PIB'][2060]))
+print('Erro no PIB em 2018 = {}'.format(resultados['erro_PIB'][2018]))
+print('Erro no PIB em 2060 = {}'.format(resultados['erro_PIB'][2060]))
 print()
-print('Erro de Receita/PIB em 2018 = {}'.format(resultados['Erro Receitas/PIB'][2018]))
-print('Erro de Receita/PIB em 2060 = {}'.format(resultados['Erro Receitas/PIB'][2060]))
+print('Erro de Receita/PIB em 2018 = {}'.format(resultados['erro_receitas_PIB'][2018]))
+print('Erro de Receita/PIB em 2060 = {}'.format(resultados['erro_receitas_PIB'][2060]))
 print()
-print('Erro de Despesa/PIB em 2018 = {}'.format(resultados['Erro Despesas/PIB'][2018]))
-print('Erro de Despesa/PIB em 2060 = {}'.format(resultados['Erro Despesas/PIB'][2060]))
+print('Erro de Despesa/PIB em 2018 = {}'.format(resultados['erro_despesas_PIB'][2018]))
+print('Erro de Despesa/PIB em 2060 = {}'.format(resultados['erro_despesas_PIB'][2060]))
 
 
-print(' - Fim da Projeção -')
+print('\n ----------- Fim da Projeção -----------')
 print('Para mais detalhes veja o arquivo de log (logs.txt)')
 
 # Salva o arquivo do Log
@@ -214,19 +215,14 @@ arq.writelines(logs)
 arq.close()
 
 # REVISAR:
-# Buscar por estoques e outros valores (probabilidades) negativos
-# Buscar por fatores de ajuste de mortalidades muito elevados
-# Existem probabilidades de morte negativa - fam rmv tb
 # Nos estoques aparecem aposentadorias com menos de 45 anos (corrigir)
 # Alterar as porcentagens 
 # Adicionar a opção de projetar com valores atuais (sem inflacao)
 # Transformar os dados da LDO e parâmetros de entrada (alterar parametros das funções)
-# Pendente:
-    # ajustes da inflação
+# Pendente:    
     # Calculo do número médio de parcelas pagas
-    # TAXA DOS RURAIS
-    # ERRO DO PIB
-    
+    # Verificar o uso da PopOcupada no calculo de concessoes
+        
 # Implementar pendências das planilhas (reduzir o erro) - Lembrando que existem calculos errados na planilha
     # Comparar valores médios benefícios
     # Comparar probabilidades

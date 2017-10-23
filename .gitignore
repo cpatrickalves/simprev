@@ -9,6 +9,9 @@ __pycache__/
 # Figuras
 *.png
 
+# Arquivos CSV
+*.csv
+
 # Distribution / packaging
 .Python
 env/

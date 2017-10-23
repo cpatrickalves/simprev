@@ -5,12 +5,85 @@
 """
 from util.tabelas import LerTabelas
 import pandas as pd
+import os
 
 
-def calc_resultados(resultados, estoques, dadosLDO):
+def calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dadosLDO, parametros):
+    
+    periodo = parametros['periodo']
+    ano_estoque = periodo[0]
+    
+    ###### Calcula receita e despesa sobre o PIB
+        
+    rec_pib = resultados['receitas'] / resultados['PIB']
+    desp_pib = resultados['despesas'] / resultados['PIB']
+    
+    resultados['receitas_PIB'] = rec_pib * 100
+    resultados['despesas_PIB'] = desp_pib * 100
+        
+    
+    ###### Cálcula necessidade de Financiamento
+    
+    necess_fin = resultados['receitas'] - resultados['despesas']
+    necess_fin_pib =  necess_fin / resultados['PIB']
+    
+    resultados['resultado_financeiro'] = necess_fin
+    resultados['resultado_financeiro_PIB'] = necess_fin_pib * 100
+    
+    
+    ###### Cálcula contribuintes, beneficiários e razão de dependência
+    
+    total_contribuintes = segurados['CsmUrbH'].sum() + segurados['CaUrbH'].sum() + segurados['CaUrbM'].sum() + segurados['CsmUrbM'].sum()    
+    total_beneficiarios = 0
+    
+    # Soma os beneficiários de cada benefício
+    for b in estoques.keys():
+        # Pula os benefícios assistenciais e subtipos de pensões (tipo A e B)
+        if 'Loas' in b or 'tipo' in b:
+            continue
+        
+        total_beneficiarios +=  estoques[b].sum()
+    
+    # Salva a partir de 2014
+    resultados['contribuintes'] = total_contribuintes.loc[ano_estoque:]
+    resultados['beneficiarios'] = total_beneficiarios.loc[ano_estoque:]
+    
+    # Calcula a Razão de dependência previdenciária    
+    # OBS: No livro 2, o RDP considerava somente as aposentadorias
+    resultados['RDP'] = resultados['beneficiarios']/resultados['contribuintes']
+    
+    ###### Cálcula salário médio, valor médio dos benefícios e a taxa de reposição
+    
+    salario_medio = (salarios['SalMedSegUrbAcimPnadH'].mean() + salarios['SalMedSegUrbAcimPnadM'].mean() + salarios['salarioMinimo'])/3
+    soma_media_beneficios = 0
+    qtd_benef = 0
+    
+    # Calcula a média dos valores dos beneficios
+    for b in valMedBenef.keys():
+        # Pula a txReposicao - OBS: tirar essa variável daqui
+        if 'txRep' in b:
+            continue
+        
+        soma_media_beneficios +=  valMedBenef[b].mean()
+        qtd_benef += 1
+    # Soma com o salário mínimo
+    soma_media_beneficios +=  salarios['salarioMinimo']
+    qtd_benef += 1
+    
+    # Salva a partir de 2014
+    resultados['salario_medio'] = salario_medio.loc[ano_estoque:]
+    resultados['valor_medio_beneficios'] = soma_media_beneficios.loc[ano_estoque:]/qtd_benef
+    
+    # Calcula a Taxa de Reposição
+    resultados['taxa_reposicao'] = resultados['valor_medio_beneficios']/resultados['salario_medio']
+        
+    aliquota = parametros['aliquota_media']
+    ###### Cálcula Indicador sintético da sustentabilidade
+    resultados['ISS'] = (aliquota/100)/(resultados['taxa_reposicao'] * resultados['RDP'])
+    
     
     ###### Obtém resultados da LDO de 2018
-    
+        
     # Receita, despesa e PIB da LDO
     rec_ldo = dadosLDO['Tabela_6.2']['Receita']
     desp_ldo = dadosLDO['Tabela_6.2']['Despesa']
@@ -20,44 +93,29 @@ def calc_resultados(resultados, estoques, dadosLDO):
     rec_ldo_pib = dadosLDO['Tabela_6.2']['Receita / PIB'] * 100
     desp_ldo_pib = dadosLDO['Tabela_6.2']['Despesa / PIB'] * 100
     
-    resultados['Receitas/PIB LDO'] = rec_ldo_pib
-    resultados['Despesas/PIB LDO'] = desp_ldo_pib
-    
-    
-    ###### Calcula receita e despesa sobre o PIB
+    resultados['receitas_PIB_LDO'] = rec_ldo_pib
+    resultados['despesas_PIB_LDO'] = desp_ldo_pib
         
-    rec_pib = resultados['Receitas'] / resultados['PIB']
-    desp_pib = resultados['Despesas'] / resultados['PIB']
     
-    resultados['Receitas/PIB'] = rec_pib * 100
-    resultados['Despesas/PIB'] = desp_pib * 100
-    
-    ###### Calcula variação em relação a LDO
+    ###### Calcula variação em relação a LDO de 2018
     
     # Variação na despesa, receita e PIB com relação a LDO de 2018 em %
-    erro_receita = 100 * (resultados['Receitas'] - rec_ldo) / rec_ldo
-    erro_despesa = 100 * (resultados['Despesas'] - desp_ldo) / desp_ldo
+    erro_receita = 100 * (resultados['receitas'] - rec_ldo) / rec_ldo
+    erro_despesa = 100 * (resultados['despesas'] - desp_ldo) / desp_ldo
     erro_pib = 100 * (resultados['PIB'] - pib_ldo) / pib_ldo
     
     # Erro na despesa e receita sobre o PIB
-    erro_receita_pib = 100 * (resultados['Receitas/PIB'] - rec_ldo_pib) / rec_ldo_pib
-    erro_despesa_pib = 100 * (resultados['Despesas/PIB'] - desp_ldo_pib) / desp_ldo_pib
+    erro_receita_pib = 100 * (resultados['receitas_PIB'] - rec_ldo_pib) / rec_ldo_pib
+    erro_despesa_pib = 100 * (resultados['despesas_PIB'] - desp_ldo_pib) / desp_ldo_pib
 
-    resultados['Erro Receitas'] = erro_receita
-    resultados['Erro Despesas'] = erro_despesa
-    resultados['Erro PIB'] = erro_pib
-    resultados['Erro Receitas/PIB'] = erro_receita_pib
-    resultados['Erro Despesas/PIB'] = erro_despesa_pib
-    resultados['Receitas LDO'] = rec_ldo
-    resultados['Despesas LDO'] = desp_ldo
-        
-    ###### Cálcula necessidade de Financiamento
+    resultados['erro_receitas'] = erro_receita
+    resultados['erro_despesas'] = erro_despesa
+    resultados['erro_PIB'] = erro_pib
+    resultados['erro_receitas_PIB'] = erro_receita_pib
+    resultados['erro_despesas_PIB'] = erro_despesa_pib
+    resultados['receitas_LDO'] = rec_ldo
+    resultados['despesas_LDO'] = desp_ldo
     
-    necess_fin = resultados['Receitas'] - resultados['Despesas']
-    necess_fin_pib =  necess_fin / resultados['PIB']
-    
-    resultados['NecFinanc'] = necess_fin
-    resultados['NecFinanc/PIB'] = necess_fin_pib * 100
     
     ###### Comparação com os dados de 2014 e 2015 do AEPS
     
@@ -81,12 +139,21 @@ def calc_resultados(resultados, estoques, dadosLDO):
     
     erros_aeps['Aposentadorias'] = (est_apos_total.sum() / dadosLDO['Aposentadorias AEPS']) - 1
     erros_aeps['Pensões'] = (est_pens_total.sum() / dadosLDO['Pensões AEPS']) - 1
-    erros_aeps['Receitas'] = (resultados['Receitas'] / dadosLDO['Receitas AEPS']) - 1
-    erros_aeps['Despesas'] = (resultados['Despesas'] / dadosLDO['Despesas AEPS']) - 1
+    erros_aeps['Receitas'] = (resultados['receitas'] / dadosLDO['Receitas AEPS']) - 1
+    erros_aeps['Despesas'] = (resultados['despesas'] / dadosLDO['Despesas AEPS']) - 1
     
-    resultados['Erros AEPS'] = erros_aeps * 100
+    resultados['erros_AEPS'] = erros_aeps * 100
+    
+    ###### Exporta todos os resultados para arquivos CSV
+    
+    # Cria diretório caso não exista
+    result_dir = ('resultados')        
+    if not os.path.isdir(result_dir):
+        os.makedirs(result_dir)        
+    
+    for r in resultados.keys():
+        resultados[r].to_csv((result_dir + '\\' + r + '.csv'), sep=';', decimal=',')
         
-    
     return resultados
 
     
