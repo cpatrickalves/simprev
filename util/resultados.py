@@ -144,15 +144,33 @@ def calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dado
     
     resultados['erros_AEPS'] = erros_aeps * 100
     
-    ###### Exporta todos os resultados para arquivos CSV
+    ###### Exporta todos os resultados para um arquivo CSV
     
-    # Cria diretório caso não exista
+    
+    
+    # Cria o DataFrame que irá armazena cada resultado em uma coluna
+    todos_resultados = pd.DataFrame(index=range(ano_estoque,periodo[-1]+1))
+    todos_resultados.index.names = ['ANO']
+    
+    # Cria diretório caso não exista 
     result_dir = ('resultados')        
     if not os.path.isdir(result_dir):
         os.makedirs(result_dir)        
+   
+    lista_resultados = list(resultados.keys())
+    lista_resultados.remove('erros_AEPS')          # Remove o erro_AEPS pois já um DataFrame
+    lista_resultados.sort()                        # Ordena a lista
     
-    for r in resultados.keys():
-        resultados[r].to_csv((result_dir + '\\' + r + '.csv'), sep=';', decimal=',')
+    # Salva cada resultado como uma coluna do DataFrame
+    for r in lista_resultados:            
+        todos_resultados[r] = resultados[r]        
+    
+    # Salva o arquivo em formato CSV
+    try:            
+        todos_resultados.to_csv((result_dir + '\\resultados.csv'), sep=';', decimal=',')    
+    except:
+        print('--> Erro ao salvar arquivo {}'.format((result_dir + '\\resultados.csv')))
+    
         
     return resultados
 

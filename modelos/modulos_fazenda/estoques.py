@@ -57,7 +57,6 @@ def calc_estoq_apos(est, conc, prob, seg, periodo):
     return est
 
 
-
 # Projeta estoques para Auxílios Doença, Reclusão e Acidente - Equação 17 da LDO de 2018
 def calc_estoq_aux(est, prob, seg, periodo):
 
@@ -277,7 +276,7 @@ def calc_concessoes_pensao(populacao, concessoes, estoques, segurados, probabili
         id_mort_sex_op = 'Mort'+ sexo_oposto                          # ex: MortM
         # Sempre são usados os segurados do sexo masculino
         id_seg = dados.get_id_segurados(benef).replace(sexo, 'H')     # Obtem o Id do segurado trocando o sexo
-        clientela = dados.get_clientela(benef)
+        clientela = dados.get_clientela(benef)                        
         id_prob_entr = benef.replace(sexo, sexo_oposto)
 
         for ano in periodo:

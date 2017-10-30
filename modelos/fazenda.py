@@ -41,9 +41,16 @@ def calc_demografia(populacao, taxas):
     segurados.update(pocup_csm_ca)
     segurados.update(segurados_urb)
     segurados.update(segurados_rur)
+    
     # Os segurados rurais são toda a população rural
     segurados['PopRurH'] = pop_ur['PopRurH']
     segurados['PopRurM'] = pop_ur['PopRurM']
+    
+    # REVISAR TEMP
+    segurados['OcupUrbPisoH'] = segurados['CsmUrbH']
+    segurados['OcupUrbPisoM'] = segurados['CsmUrbM']
+    segurados['OcupUrbAcimH'] = segurados['CaUrbH']
+    segurados['OcupUrbAcimM'] = segurados['CaUrbM']
     
     return segurados    
 

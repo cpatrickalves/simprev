@@ -136,7 +136,7 @@ def calc_tx_segurados_urb(pop_pnad, parametros):
     periodo = parametros['periodo']
     
     # Taxa de formalização
-    formalizacao = parametros['formalizacao']    
+    formalizacao = (parametros['formalizacao']/100)    
     # Ano no qual a taxa de formalização para de ser aplicada
     limite_formalizacao = parametros['ano_limite_formalizacao']
         
@@ -178,7 +178,7 @@ def calc_tx_segurados_urb(pop_pnad, parametros):
             if ano < periodo[0] or ano > limite_formalizacao:  # 2015 ou ano limite
                 txcober[taxa][ano] = txcober[taxa][ano-1] 
             else:
-                txcober[taxa][ano] = txcober[taxa][ano-1] * (1 + formalizacao/100)
+                txcober[taxa][ano] = txcober[taxa][ano-1] * (1 + formalizacao)
                 
                 
     return txcober

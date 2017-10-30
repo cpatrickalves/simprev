@@ -52,7 +52,7 @@ ano_probabilidade = 2014
 produtividade = 1.7  # Pag 45 LDO 2018
 
 # Taxa de aumento na formalização anual em %
-formalizacao = 0
+formalizacao = 0.0
 # Ano no qual a taxa de aumento na formalização para de ser aplicada
 ano_limite_formalizacao = 2025
 
