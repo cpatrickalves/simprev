@@ -44,11 +44,13 @@ class DadosLDO():
         #self.reajuste_2015_2018 = [6.23, 11.28, 6.58, 4.62]
         #self.inflacao_2015_2018 = [6.23, 11.28, 6.58, 4.5]
         
+        INFLACAO = 4.5
+        
         # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 
-        self.ValoresTxReajusteBeneficios = self.reajuste_2015_2018 + ([4.5] * 42)   
+        self.ValoresTxReajusteBeneficios = self.reajuste_2015_2018 + ([INFLACAO] * 42)   
         
         # Taxa de Inflação em %  (2015-2060) 
-        self.TxInflacao = self.inflacao_2015_2018 + ([4.5] * 42)   
+        self.TxInflacao = self.inflacao_2015_2018 + ([INFLACAO] * 42)   
         #self.TxInflacao = self.inflacao_2015_2018 + ([0.0] * 42)   
         
         # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 

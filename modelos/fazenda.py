@@ -46,11 +46,11 @@ def calc_demografia(populacao, taxas):
     segurados['PopRurH'] = pop_ur['PopRurH']
     segurados['PopRurM'] = pop_ur['PopRurM']
     
-    # REVISAR TEMP
-    segurados['OcupUrbPisoH'] = segurados['CsmUrbH']
-    segurados['OcupUrbPisoM'] = segurados['CsmUrbM']
-    segurados['OcupUrbAcimH'] = segurados['CaUrbH']
-    segurados['OcupUrbAcimM'] = segurados['CaUrbM']
+    # REVISAR - Teste
+    #segurados['OcupUrbPisoH'] = segurados['CsmUrbH']
+    #segurados['OcupUrbPisoM'] = segurados['CsmUrbM']
+    #segurados['OcupUrbAcimH'] = segurados['CaUrbH']
+    #segurados['OcupUrbAcimM'] = segurados['CaUrbM']
     
     return segurados    
 

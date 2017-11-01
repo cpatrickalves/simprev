@@ -221,7 +221,7 @@ arq.close()
 # Transformar os dados da LDO e parâmetros de entrada (alterar parametros das funções)
 # Pendente:    
     # Calculo do número médio de parcelas pagas
-    # Verificar o uso da PopOcupada no calculo de concessoes
+    # Verificar o uso da PopOcupada no calculo de concessoes - CORRIGIR
         
 # Implementar pendências das planilhas (reduzir o erro) - Lembrando que existem calculos errados na planilha
     # Comparar valores médios benefícios

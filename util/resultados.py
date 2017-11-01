@@ -35,22 +35,34 @@ def calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dado
     
     total_contribuintes = segurados['CsmUrbH'].sum() + segurados['CaUrbH'].sum() + segurados['CaUrbM'].sum() + segurados['CsmUrbM'].sum()    
     total_beneficiarios = 0
+    total_aposentados = 0
     
-    # Soma os beneficiários de cada benefício
+    # Soma os beneficiários de cada benefício - Todos os benefícios
     for b in estoques.keys():
         # Pula os benefícios assistenciais e subtipos de pensões (tipo A e B)
         if 'Loas' in b or 'tipo' in b:
             continue
         
         total_beneficiarios +=  estoques[b].sum()
+
+    # Soma a quantidade de beneficiários de aposentadorias
+    tabelas = LerTabelas()
+    # Ids aposentadorias
+    ids_apos= ['Apin', 'Atcn', 'Apid', 'Atcp', 'Ainv', 'Atce', 'Atcd']
+    
+    for b in tabelas.get_id_beneficios(ids_apos):
+        # Verifica se o estoque para o benefício existe
+        if b in estoques.keys():
+            total_aposentados +=  estoques[b].sum()
     
     # Salva a partir de 2014
     resultados['contribuintes'] = total_contribuintes.loc[ano_estoque:]
     resultados['beneficiarios'] = total_beneficiarios.loc[ano_estoque:]
+    resultados['aposentados'] = total_aposentados.loc[ano_estoque:]
     
     # Calcula a Razão de dependência previdenciária    
     # OBS: No livro 2, o RDP considerava somente as aposentadorias
-    resultados['RDP'] = resultados['beneficiarios']/resultados['contribuintes']
+    resultados['RDP'] = resultados['aposentados']/resultados['contribuintes']
     
     ###### Cálcula salário médio, valor médio dos benefícios e a taxa de reposição
     
