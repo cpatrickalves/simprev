@@ -45,7 +45,7 @@ class DadosLDO():
         #self.inflacao_2015_2018 = [6.23, 11.28, 6.58, 4.5]
         
         INFLACAO = 4.5
-        
+        ALIQUOTA_MED = 26.8 #26.8
         # Taxa de Reajuste dos demais benefícios em %  (2015-2060) 
         self.ValoresTxReajusteBeneficios = self.reajuste_2015_2018 + ([INFLACAO] * 42)   
         
@@ -65,7 +65,7 @@ class DadosLDO():
         
         # Aliquotas médias de 2014 a 2060
         # aliqMed = receita/MassaSalarial        
-        self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0] + ([26.8] * 44)
+        self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0] + ([ALIQUOTA_MED] * 44)
         #self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0, 24.0, 24.3, 24.6, 24.9, 25.2, 25.5, 25.8] + ([26.1] * 37)
 
         # PIBs 2014-2016 (fonte: Planilhas do MF)

@@ -8,6 +8,7 @@ from util.dados import DadosLDO
 from util.busca_erros import corrige_erros_estoque, busca_erros_prob
 from util.resultados import calc_resultados
 from util.graficos import *
+from util.carrega_parametros import obter_parametros
 import modelos.fazenda as fz
 
 
@@ -38,26 +39,8 @@ if __name__ == "__main__":
 
 ###################### Parâmetros de simulação ###############################
 
-# dicionário que armazena os parâmetros (incompleto)
-parametros = {}
-
-# Período de projeção 
-ano_inicial = 2015
-ano_final = 2060
-
-# Ano de referência para cálculo das probabilidades
-ano_probabilidade = 2014
-
-# Taxa de crescimento de Produtividade em %
-produtividade = 1.7  # Pag 45 LDO 2018
-
-# Taxa de aumento na formalização anual em %
-formalizacao = 0.0
-# Ano no qual a taxa de aumento na formalização para de ser aplicada
-ano_limite_formalizacao = 2025
-
-# Salário Mínimo de 2014
-salMin = 724.00
+# dicionário que armazena os parâmetros obtidos do arquivo "parametros.txt"
+parametros = obter_parametros()
 
 # Teto do RGPS de 2014 a 2017
 tetoInicialRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
@@ -66,24 +49,27 @@ tetoInicialRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
 ldo = DadosLDO()
 dadosLDO2018 = ldo.get_tabelas()
 
-# Alíquota efetiva média de contribuição utilizada nas Planilhas
-aliquota = dadosLDO2018['AliqEfMed']
+#############################################################################
 
+# Cria uma lista com os anos a serem projetados
+ano_inicial = parametros['ano_inicial']
+ano_final = parametros['ano_final']
+periodo = list(range(ano_inicial, ano_final+1))
+
+# Alíquota efetiva média de contribuição utilizada nas Planilhas para os anos 2014-2016
+aliquota = dadosLDO2018['AliqEfMed']
 # PIBs 2014-2016 (fonte: Planilhas do MF)
 PIBs = dadosLDO2018['PIB Planilhas']
 
 
-#############################################################################
-
-# Cria uma lista com os anos a serem projetados
-periodo = list(range(ano_inicial, ano_final+1))
 
 # Salva os parâmetros de entrada no dicionário
-parametros['produtividade'] = produtividade
-parametros['formalizacao'] = formalizacao
 parametros['periodo'] = periodo
-parametros['ano_limite_formalizacao'] = ano_limite_formalizacao 
 parametros['aliquota_media'] = aliquota
+
+# Salva parâmetros em variáveis locais - CORRIGIR
+produtividade = parametros['produtividade']
+salMin = parametros['salario_minimo']
 
 # Dicionário que salva os resultados
 resultados = {}
