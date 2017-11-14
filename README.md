@@ -18,9 +18,11 @@ Os SimPrev pode ser executado de várias formas:
 
 ### Versão .exe para Windows
 
-Esta versão é exclusiva para o sistema operacional Windows.
+Esta versão é exclusiva para o sistema operacional Windows e não requer instalação.
 
-_Em desenvolvimento..._
+1. Faça o [Download](https://mega.nz/#!OYIVmSCQ) da última versão
+    * Link alternativo [aqui](https://drive.google.com/open?id=1ACAE3xe1zXy3OtNgJnxkMYQZ50IeRIHM)
+2. Descompacte o arquivo _zip_
 
 ### Utilizando a distribuição Python Anaconda
 
@@ -30,7 +32,6 @@ _Em desenvolvimento..._
 3. O simprev.py pode ser executado de duas formas:
 	* Linha de comando, ex: python simprev.py
 	* Através da IDE Spyder que vem junto com o Anaconda
-
 
 ### Utilizando o Python e pacotes necessários
 
