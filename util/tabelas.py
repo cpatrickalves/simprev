@@ -114,7 +114,7 @@ class LerTabelas():
         return lista_final
 
 
-    def get_tabelas(self, lista, info=False):
+    def get_tabelas(self, lista, logs, info=False):
         '''
         Função que extrai as tabelas do arquivo
         Recebe o arquivo (planilha) e a lista de tabelas a serem extraídas
@@ -173,10 +173,11 @@ class LerTabelas():
                 tabsInexistentes.append(sigla)
 
         if info:
-            print(self.get_significado_sigla(lista[0][0:2]))
-            print('Total de tabelas de carregadas: %s' % len(colecao_tabelas))
-            print('Total de tabelas inexistentes: %s' % len(tabsInexistentes))
-            print('Total de tabelas incompletas e removidas: %s \n' % len(tabsIncompletas))
+            logs.append('TABELAS CARREGADAS\n\n')
+            logs.append(self.get_significado_sigla(lista[0][0:2]))
+            logs.append('\nTotal de tabelas de carregadas: %s \n' % len(colecao_tabelas))
+            logs.append('Total de tabelas inexistentes: %s \n' % len(tabsInexistentes))
+            logs.append('Total de tabelas incompletas e removidas: %s \n\n' % len(tabsIncompletas))
 
         return colecao_tabelas
 
