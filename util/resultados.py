@@ -179,9 +179,9 @@ def calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dado
     
     # Salva o arquivo em formato CSV
     try:            
-        todos_resultados.to_csv((result_dir + '\\resultados.csv'), sep=';', decimal=',')    
+        todos_resultados.to_csv((os.path.join(result_dir, 'resultados.csv')), sep=';', decimal=',')    
     except:
-        print('--> Erro ao salvar arquivo {}'.format((result_dir + '\\resultados.csv')))
+        print('--> Erro ao salvar arquivo {}'.format((os.path.join(fig_dir,'resultados.csv'))))
     
         
     return resultados
