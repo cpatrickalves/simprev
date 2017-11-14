@@ -10,7 +10,7 @@ class DadosLDO():
         '''
         Abre o arquivo com os dados da LDO de 2018 
         '''
-        arquivo = 'util/TabelasLDO2018.xlsx'
+        arquivo = 'dados/TabelasLDO2018.xlsx'
         # Abre arquivo
         self.dados = pd.ExcelFile(arquivo)
         

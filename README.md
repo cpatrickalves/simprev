@@ -8,9 +8,10 @@ Na versão atual, o SimPrev implementa o 2º modelo atuarial de projecões a lon
 
 Os seguintes módulos estão em desenvolvimento:
 
-* Módulo de simulação de cenários de reforma na Previdência, semelhante a PEC 287.
-
-
+* Módulo para estimativa dos intervalos de confiança das projeções;
+* Módulo de simulação de cenários de reforma na Previdência, semelhante a PEC 287;
+* Implementação de outros modelos de projeção
+    
 ## Instalação
 
 Os SimPrev pode ser executado de várias formas:
@@ -36,6 +37,7 @@ _Em desenvolvimento..._
 1. Instale o [Python 3.x](https://www.python.org/downloads/)
 2. Faça o download do [SimPrev](https://github.com/cpatrickalves/simprev/archive/master.zip)
 3. Instale os pacotes descritos no arquivo _requirements.txt_
+    * pip install -r requirements.txt 
 4. Execute o arquivo principal _simprev.py_ 
 	* python simprev.py
 
@@ -47,7 +49,7 @@ O valores padrão do arquivo são os que foram utilizados na projeções da LDO 
 1. Abra o arquivo parametros.txt e edite os parâmetros de projeções
 	* Salve o arquivo com o mesmo nome
 	* Linhas que começam com "#" são comentários e são desconsideradas pelo SimPrev
-2. Execute o arquivo _simprev.py_
+2. Execute o arquivo _simprev.py_ ou _simprev.exe_
 3. Os resultados são salvos em arquivos _.csv_ na pasta _resultados_
 4. Os gráficos são salvos no formato PNG e salvos na pasta _resultados_
 

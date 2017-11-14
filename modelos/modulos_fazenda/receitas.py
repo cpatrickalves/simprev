@@ -6,8 +6,9 @@ import pandas as pd
 
 
 # Projeta a receita de acordo com a LDO de 2018
-def calc_receitas(salarios, aliquota, periodo):
+def calc_receitas(salarios, parametros, periodo):
 
+    aliquota = parametros['aliquota_media']
     # Dicionário que armazenas os resultados
     resultados = {}
     ano_inicial = periodo[0] - 1             # 2014

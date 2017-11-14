@@ -52,24 +52,25 @@ dadosLDO2018 = ldo.get_tabelas()
 #############################################################################
 
 # Cria uma lista com os anos a serem projetados
-ano_inicial = parametros['ano_inicial']
+ano_inicial = 2015
 ano_final = parametros['ano_final']
 periodo = list(range(ano_inicial, ano_final+1))
+parametros['periodo'] = periodo
 
 # Alíquota efetiva média de contribuição utilizada nas Planilhas para os anos 2014-2016
-aliquota = dadosLDO2018['AliqEfMed']
+aliquotas_serie = dadosLDO2018['AliqEfMed']
+# Alíquota do arquivo parametros.txt
+aliquotas_serie.loc[2017:] = parametros['aliquota_media'] 
+parametros['aliquota_media'] = aliquotas_serie
+
 # PIBs 2014-2016 (fonte: Planilhas do MF)
 PIBs = dadosLDO2018['PIB Planilhas']
 
-
-
-# Salva os parâmetros de entrada no dicionário
-parametros['periodo'] = periodo
-parametros['aliquota_media'] = aliquota
+### Salário Mínimo de inicial 
+salario_minimo = 724.00     # Valor de 2014
 
 # Salva parâmetros em variáveis locais - CORRIGIR
 produtividade = parametros['produtividade']
-salMin = parametros['salario_minimo']
 
 # Dicionário que salva os resultados
 resultados = {}
@@ -77,15 +78,37 @@ resultados = {}
 # Determina se os gráficos serão salvos em arquivos
 savefig = True
 
+# Determina se os gráficos serão exibidos no Prompt
+showfig = False
+
+mensagem_inicial = '''
+                                 SimPrev
+
+        Um Simulador de Receitas e Despesas para a Previdência Social
+        -------------------------------------------------------------
+                                Versão 1.0
+
+                           Autor: Patrick Alves                       
+              <cpatrickalves@gmail.com, patrickalves@ufpa.br>
+                  https://github.com/cpatrickalves/simprev
+                  
+                      Laboratório de Tecnologias Sociais
+                         Universidade Federal do Pará
+                    
+
+'''
+
 # Cria variável que armazena os logs
 logs = []
+logs.append(mensagem_inicial)
 
 # Arquivo que salva os logs
 log_file = 'logs.txt'
 
 #############################################################################
 
-print('\n----------- Iniciando projeção ----------- \n')
+print(mensagem_inicial)
+print('\n:::::::::::::::::::::::::::: Iniciando projeção :::::::::::::::::::::::::::: \n')
 print('Lendo arquivo de dados ... \n')
 
 #### Arquivo com os dados da Fazenda
@@ -106,14 +129,14 @@ ids_despesas = dados.get_id_beneficios([], 'ValEs')
 ids_valConcessoesBen = dados.get_id_beneficios([], 'ValCo')
 
 # Obtem as tabelas e armazena nos dicionários correspondentes
-estoques = dados.get_tabelas(ids_estoques, info=True)
-concessoes = dados.get_tabelas(ids_concessoes, info=True)
-cessacoes = dados.get_tabelas(ids_cessacoes, info=True)
-despesas = dados.get_tabelas(ids_despesas)
-populacao = dados.get_tabelas(dados.ids_pop_ibge)
-populacao_pnad = dados.get_tabelas(dados.ids_pop_pnad)
-salarios = dados.get_tabelas(dados.ids_salarios)
-valCoBen = dados.get_tabelas(ids_valConcessoesBen)
+estoques = dados.get_tabelas(ids_estoques, logs, info=True)
+concessoes = dados.get_tabelas(ids_concessoes, logs, info=True)
+cessacoes = dados.get_tabelas(ids_cessacoes, logs, info=True)
+despesas = dados.get_tabelas(ids_despesas, logs)
+populacao = dados.get_tabelas(dados.ids_pop_ibge, logs)
+populacao_pnad = dados.get_tabelas(dados.ids_pop_pnad, logs)
+salarios = dados.get_tabelas(dados.ids_salarios, logs)
+valCoBen = dados.get_tabelas(ids_valConcessoesBen, logs)
 
 # Calcula taxas de urbanização, participação e ocupação
 print('Calculando taxas ...\n')
@@ -142,13 +165,13 @@ estoques = fz.calc_estoques(estoques, concessoes, cessacoes, probabilidades,
 # Projeta Salarios
 print('Projetando Salários ...\n')
 salarios = fz.calc_salarios(salarios, populacao, segurados,
-                         produtividade, salMin, dadosLDO2018, tetoInicialRGPS,
+                         produtividade, salario_minimo, dadosLDO2018, tetoInicialRGPS,
                          periodo)
 
 # Projeta Massa Salarial
 print('Projetando Massa Salarial ...\n')
 salarios = fz.calc_MassaSalarial(salarios, populacao, segurados,
-                         produtividade, salMin, dadosLDO2018, tetoInicialRGPS,
+                         produtividade, salario_minimo, dadosLDO2018, tetoInicialRGPS,
                          periodo)
 
 # Projeta Valores médios dos benefícios
@@ -161,7 +184,7 @@ nparcelas = fz.calc_n_parcelas(estoques, despesas, valMedBenef, periodo)
 
 # Projeta receitas e respesas
 print('Projetando Receita e PIB ...\n')
-resultados = fz.calc_receitas(salarios, aliquota, periodo)
+resultados = fz.calc_receitas(salarios, parametros, periodo)
 resultados = fz.calc_pib_MF(resultados, salarios, PIBs, periodo)
 
 print('Projetando Despesas ...\n')
@@ -172,9 +195,11 @@ resultados = fz.calc_despesas(despesas, estoques, concessoes, valCoBen, salarios
 print('Calculando resultados finais ...\n')
 resultados = calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dadosLDO2018, parametros)
 
-plot_erros_LDO2018(resultados, savefig)
-plot_resultados(resultados, savefig)
+print('Gerando gráficos ...\n')
+plot_erros_LDO2018(resultados, savefig, showfig)
+plot_resultados(resultados, savefig, showfig)
 
+'''
 print('RESULTADOS: \n')
 print('Erro de Despesa em 2018 = {}'.format(resultados['erro_despesas'][2018]))
 print('Erro de Despesa em 2060 = {}'.format(resultados['erro_despesas'][2060]))
@@ -190,27 +215,16 @@ print('Erro de Receita/PIB em 2060 = {}'.format(resultados['erro_receitas_PIB'][
 print()
 print('Erro de Despesa/PIB em 2018 = {}'.format(resultados['erro_despesas_PIB'][2018]))
 print('Erro de Despesa/PIB em 2060 = {}'.format(resultados['erro_despesas_PIB'][2060]))
+'''
 
+print('\n:::::::::::::::::::::::::::: Fim da Projeção :::::::::::::::::::::::::::: \n')
 
-print('\n ----------- Fim da Projeção -----------')
-print('Para mais detalhes veja o arquivo de log (logs.txt)')
+print('Todos os resultados foram salvos nas pasta resultados/')
+print('Para mais detalhes veja o arquivo de log (logs.txt)\n')
 
 # Salva o arquivo do Log
 arq = open(log_file,'w')
 arq.writelines(logs)
 arq.close()
 
-# REVISAR:
-# Nos estoques aparecem aposentadorias com menos de 45 anos (corrigir)
-# Alterar as porcentagens 
-# Adicionar a opção de projetar com valores atuais (sem inflacao)
-# Transformar os dados da LDO e parâmetros de entrada (alterar parametros das funções)
-# Pendente:    
-    # Calculo do número médio de parcelas pagas
-    # Verificar o uso da PopOcupada no calculo de concessoes - CORRIGIR
-        
-# Implementar pendências das planilhas (reduzir o erro) - Lembrando que existem calculos errados na planilha
-    # Comparar valores médios benefícios
-    # Comparar probabilidades
-    # Comparar estoques
-    # Ver observações no evernote
+input("Tecle ENTER para finalizar")
