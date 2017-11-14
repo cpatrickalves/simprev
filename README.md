@@ -10,6 +10,7 @@ Os seguintes módulos estão em desenvolvimento:
 
 * Módulo para estimativa dos intervalos de confiança das projeções;
 * Módulo de simulação de cenários de reforma na Previdência, semelhante a PEC 287;
+* Versão Web do SimPrev: atualmente o SimPrev é executado localmente no computador do usuário, porém será desenvolvido _frontend_ Web que permitirá que o simulador seja executado como uma aplicação Web.
 * Implementação de outros modelos de projeção
     
 ## Instalação
@@ -20,7 +21,7 @@ Os SimPrev pode ser executado de várias formas:
 
 Esta versão é exclusiva para o sistema operacional Windows e não requer instalação.
 
-1. Faça o [Download](https://mega.nz/#!OYIVmSCQ) da última versão
+1. Faça o [download](https://mega.nz/#!OYIVmSCQ!PLJlAkDtPB7S7T14D_8JdPALGnzDEg9x7zaX19CMtBY) da última versão
     * Link alternativo [aqui](https://drive.google.com/open?id=1ACAE3xe1zXy3OtNgJnxkMYQZ50IeRIHM)
 2. Descompacte o arquivo _zip_
 
