@@ -39,8 +39,9 @@ Esta versão é exclusiva para o sistema operacional Windows e não requer insta
 1. Instale o [Python 3.x](https://www.python.org/downloads/)
 2. Faça o download do [SimPrev](https://github.com/cpatrickalves/simprev/archive/master.zip)
 3. Instale os pacotes descritos no arquivo _requirements.txt_
-    * pip install -r requirements.txt 
-4. Execute o arquivo principal _simprev.py_ 
+    * Abra o terminal/console/cmd 
+    * Digite: _pip install -r requirements.txt_
+4. Execute o arquivo principal _simprev.py_ no terminal/console/cmd
 	* python simprev.py
 
 ## Executando projeções
