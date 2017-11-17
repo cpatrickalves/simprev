@@ -8,8 +8,10 @@ import pandas as pd
 
 # Calcula despesas com benefícios
 # Baseado nas Equações da LDO de 2018 e Planilhas do MF
-def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBenef, probabilidades, dadosLDO, nparcelas, resultados, periodo):
+def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBenef, probabilidades, nparcelas, resultados, parametros):
 
+    periodo = parametros['periodo']
+    
     # Objeto criado para uso das funções da Classe LerTabelas
     dados = LerTabelas()
     ult_ano_estoq = periodo[0]-1 # 2014
@@ -154,7 +156,7 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
                             prob_morte = probabilidades['Mort'+sexo][ano][idade]
                             fam = probabilidades['fam'+beneficio][ano][idade]                            
                             # Nas planilhas usa-se o termo Atualização Monetária
-                            reajuste = dadosLDO['TxReajusteBeneficios'][ano] 
+                            reajuste = parametros['tx_reajuste_beneficios'][ano] 
                             novas_conc = concessoes[beneficio][ano][idade]
                             valor_med_conc = val_med_novos_ben[ano][idade]
                             

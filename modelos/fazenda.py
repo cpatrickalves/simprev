@@ -6,6 +6,7 @@ from modelos.modulos_fazenda.salarios import *
 from modelos.modulos_fazenda.receitas import *
 from modelos.modulos_fazenda.depesas import *
 from modelos.modulos_fazenda.valorBeneficios import *
+from modelos.modulos_fazenda.resultados import *
 
 
 # Calcula dados demográficos
@@ -56,6 +57,7 @@ def calc_demografia(populacao, taxas):
 
 
 def calc_estoques(estoques, concessoes, cessacoes, probabilidades, populacao, segurados, periodo):
+    
     calc_estoq_apos(estoques, concessoes, probabilidades, segurados, periodo)
     calc_estoq_pensoes(populacao, estoques, concessoes, cessacoes, probabilidades, segurados, periodo)
     calc_estoq_aux(estoques, probabilidades, segurados, periodo)

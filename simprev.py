@@ -6,7 +6,6 @@
 from util.tabelas import LerTabelas
 from util.dados import DadosLDO
 from util.busca_erros import corrige_erros_estoque, busca_erros_prob
-from util.resultados import calc_resultados
 from util.graficos import *
 from util.carrega_parametros import obter_parametros
 import modelos.fazenda as fz
@@ -71,6 +70,9 @@ salario_minimo = 724.00     # Valor de 2014
 
 # Salva parâmetros em variáveis locais - CORRIGIR
 produtividade = parametros['produtividade']
+
+# Taxas de reajustes 
+parametros['tx_reajuste_beneficios'] = dadosLDO2018['TxReajusteBeneficios']
 
 # Dicionário que salva os resultados
 resultados = {}
@@ -162,17 +164,13 @@ print('Projetando Estoques ...\n')
 estoques = fz.calc_estoques(estoques, concessoes, cessacoes, probabilidades,
                          populacao, segurados, periodo)
 
-# Projeta Salarios
 print('Projetando Salários ...\n')
-salarios = fz.calc_salarios(salarios, populacao, segurados,
-                         produtividade, salario_minimo, dadosLDO2018, tetoInicialRGPS,
-                         periodo)
+salarios = fz.calc_salarios(salarios, populacao, segurados, salario_minimo, 
+                            dadosLDO2018, tetoInicialRGPS, parametros)
 
 # Projeta Massa Salarial
 print('Projetando Massa Salarial ...\n')
-salarios = fz.calc_MassaSalarial(salarios, populacao, segurados,
-                         produtividade, salario_minimo, dadosLDO2018, tetoInicialRGPS,
-                         periodo)
+salarios = fz.calc_MassaSalarial(salarios, populacao, segurados)
 
 # Projeta Valores médios dos benefícios
 print('Projetando Valores dos benefícios ...\n')
@@ -189,11 +187,10 @@ resultados = fz.calc_pib_MF(resultados, salarios, PIBs, periodo)
 
 print('Projetando Despesas ...\n')
 resultados = fz.calc_despesas(despesas, estoques, concessoes, valCoBen, salarios,
-                            valMedBenef, probabilidades, dadosLDO2018, 
-                            nparcelas, resultados, periodo)
+                            valMedBenef, probabilidades, nparcelas, resultados, parametros)
 
 print('Calculando resultados finais ...\n')
-resultados = calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dadosLDO2018, parametros)
+resultados = fz.calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dadosLDO2018, parametros)
 
 print('Gerando gráficos ...\n')
 plot_erros_LDO2018(resultados, savefig, showfig)
