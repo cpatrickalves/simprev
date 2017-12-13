@@ -61,8 +61,7 @@ class DadosLDO():
                     
         # Aliquota média de 2014
         # Valores retirados da Planilha do MF
-        
-        
+                
         # Aliquotas médias de 2014 a 2060
         # aliqMed = receita/MassaSalarial        
         self.aliquotasPlanilhasMF = [28.3, 27.2, 25.0] + ([ALIQUOTA_MED] * 44)

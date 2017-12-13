@@ -9,7 +9,7 @@ import os
 ##### Modulo que cria gráficos com os resultados
 
 # Diretório onde as figuras serão salvas
-fig_dir = ('resultados')   
+fig_dir = os.path.join('resultados', 'figuras')   
 if not os.path.isdir(fig_dir):
     os.makedirs(fig_dir)
 

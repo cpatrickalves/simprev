@@ -205,28 +205,39 @@ def calc_despesas(despesas, estoques, concessoes, valCoBen, salarios, valMedBene
 
 
     ##### Calcula a despesa total #####
-    anos = [periodo[0]-1] + periodo             #2014-2060
-    desp_total = pd.Series(0.0, index=anos)     # Objeto do tipo Serie que armazena a despesa total
+    anos = [periodo[0]-1] + periodo                 #2014-2060
+    desp_total = pd.Series(0.0, index=anos)         # Objeto do tipo Serie que armazena a despesa total
+    desp_total_urb = pd.Series(0.0, index=anos)     # Despesa total Urbana
+    desp_total_rur = pd.Series(0.0, index=anos)     # Despesa total Rural
+    
     for ano in anos:
         for beneficio in despesas.keys():            
-            # Verifica se o benefício é do tipo Salário Maternidade
+            
             # O objeto que armazena as despesas com Salário Maternidade é diferente            
             if 'SalMat' in beneficio:                                
                 if ano in despesas[beneficio].index:      # verifica se existe projeção para esse ano                                                
-                    desp_total[ano] += despesas[beneficio][ano]                                    
+                    if 'Urb' in beneficio:                # Separa despesa Urbana e Rural
+                        desp_total_urb[ano] += despesas[beneficio][ano]                                    
+                    else:
+                        desp_total_rur[ano] += despesas[beneficio][ano]                                    
             else:
             # Calculo para os demais benefícios                
-                if ano in despesas[beneficio].columns:      # verifica se existe projeção para esse ano
-                    desp_total[ano] += despesas[beneficio][ano].sum()               
+                if ano in despesas[beneficio].columns:    # verifica se existe projeção para esse ano
+                    if 'Urb' in beneficio:                # Separa despesa Urbana e Rural
+                        desp_total_urb[ano] += despesas[beneficio][ano].sum()                                    
+                    else:
+                        desp_total_rur[ano] += despesas[beneficio][ano].sum()                                    
 
-
+    desp_total = desp_total_urb + desp_total_rur
+    
     # Calcula a taxa de crescimento da Despesa
     tx_cres_desp = pd.Series(0.0, index=periodo)
     for ano in periodo:  # pula o primeiro ano
         tx_cres_desp[ano] = desp_total[ano]/desp_total[ano-1] - 1
 
-
     resultados['despesas'] = desp_total    
+    resultados['despesas_urb'] = desp_total_urb    
+    resultados['despesas_rur'] = desp_total_rur    
     resultados['tx_cres_despesa'] = tx_cres_desp
     
     return resultados

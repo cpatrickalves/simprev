@@ -8,7 +8,7 @@ import pandas as pd
 import os
 
 
-def calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dadosLDO, parametros):
+def calc_resultados(resultados, despesas, estoques, segurados, salarios, valMedBenef, dadosLDO, parametros, mostrar=False):
     
     periodo = parametros['periodo']
     ano_estoque = periodo[0]
@@ -35,16 +35,22 @@ def calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dado
     
     total_contribuintes = segurados['CsmUrbH'].sum() + segurados['CaUrbH'].sum() + segurados['CaUrbM'].sum() + segurados['CsmUrbM'].sum()    
     total_beneficiarios = 0
+    total_beneficiarios_urb = 0
+    total_beneficiarios_rur = 0
     total_aposentados = 0
     
     # Soma os beneficiários de cada benefício - Todos os benefícios
     for b in estoques.keys():
         # Pula os benefícios assistenciais e subtipos de pensões (tipo A e B)
         if 'Loas' in b or 'tipo' in b:
-            continue
-        
-        total_beneficiarios +=  estoques[b].sum()
-
+            continue                                       
+        elif 'Urb' in b:
+            total_beneficiarios_urb +=  estoques[b].sum()
+        else:
+            total_beneficiarios_rur +=  estoques[b].sum()
+    
+    total_beneficiarios =  total_beneficiarios_urb + total_beneficiarios_rur
+    
     # Soma a quantidade de beneficiários de aposentadorias
     tabelas = LerTabelas()
     # Ids aposentadorias
@@ -58,6 +64,8 @@ def calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dado
     # Salva a partir de 2014
     resultados['contribuintes'] = total_contribuintes.loc[ano_estoque:]
     resultados['beneficiarios'] = total_beneficiarios.loc[ano_estoque:]
+    resultados['beneficiarios_urb'] = total_beneficiarios_urb.loc[ano_estoque:]
+    resultados['beneficiarios_rur'] = total_beneficiarios_rur.loc[ano_estoque:]
     resultados['aposentados'] = total_aposentados.loc[ano_estoque:]
     
     # Calcula a Razão de dependência previdenciária    
@@ -116,9 +124,9 @@ def calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dado
     erro_despesa = 100 * (resultados['despesas'] - desp_ldo) / desp_ldo
     erro_pib = 100 * (resultados['PIB'] - pib_ldo) / pib_ldo
     
-    # Erro na despesa e receita sobre o PIB
-    erro_receita_pib = 100 * (resultados['receitas_PIB'] - rec_ldo_pib) / rec_ldo_pib
-    erro_despesa_pib = 100 * (resultados['despesas_PIB'] - desp_ldo_pib) / desp_ldo_pib
+    # Diferença na despesa e receita sobre o PIB
+    erro_receita_pib =  resultados['receitas_PIB'] - rec_ldo_pib 
+    erro_despesa_pib =  resultados['despesas_PIB'] - desp_ldo_pib
 
     resultados['erro_receitas'] = erro_receita
     resultados['erro_despesas'] = erro_despesa
@@ -156,35 +164,96 @@ def calc_resultados(resultados, estoques, segurados, salarios, valMedBenef, dado
     
     resultados['erros_AEPS'] = erros_aeps * 100
     
-    ###### Exporta todos os resultados para um arquivo CSV
+    # Salva os resultados em arquivos CSV
+    save_results(resultados, despesas, estoques, segurados, salarios, valMedBenef, parametros)
+         
+    # Se mostrat = True os resultados serão exibidos no Prompt    
+    if mostrar:
+        print('RESULTADOS: \n')
+        
+        print('Receita em 2018 = {}'.format(resultados['receitas'][2018]))
+        print('Receita em 2060 = {}'.format(resultados['receitas'][2060]))
+        print('Receita/PIB em 2060 = {}'.format(resultados['receitas_PIB'][2060]))
+        print()
+        print('Despesa em 2018 = {}'.format(resultados['despesas'][2018]))
+        print('Despesa em 2060 = {}'.format(resultados['despesas'][2060]))
+        print('Despesa/PIB em 2060 = {}'.format(resultados['despesas_PIB'][2060]))
+        print()
+        print('Resultado Financeiro em 2018 = {}'.format(resultados['resultado_financeiro'][2018]))
+        print('Resultado Financeiro em 2060 = {}'.format(resultados['resultado_financeiro'][2060]))    
+        print('Resultado Financeiro/PIB em 2060 = {}'.format(resultados['resultado_financeiro_PIB'][2060]))    
+        print()
+        print('Erro de Despesa em 2018 = {}'.format(resultados['erro_despesas'][2018]))
+        print('Erro de Despesa em 2060 = {}'.format(resultados['erro_despesas'][2060]))
+        print()
+        print('Erro de Receita em 2018 = {}'.format(resultados['erro_receitas'][2018]))
+        print('Erro de Receita em 2060 = {}'.format(resultados['erro_receitas'][2060]))
+        print()
+        print('Erro no PIB em 2018 = {}'.format(resultados['erro_PIB'][2018]))
+        print('Erro no PIB em 2060 = {}'.format(resultados['erro_PIB'][2060]))
+        print()
+        print('Diferença na Receita/PIB em 2018 = {}'.format(resultados['erro_receitas_PIB'][2018]))
+        print('Diferença na Receita/PIB em 2060 = {}'.format(resultados['erro_receitas_PIB'][2060]))
+        print()
+        print('Diferença na Despesa/PIB em 2018 = {}'.format(resultados['erro_despesas_PIB'][2018]))
+        print('Diferença na Despesa/PIB em 2060 = {}'.format(resultados['erro_despesas_PIB'][2060]))        
+        print('\n')
+        
+    return resultados
+
+
+# Exporta todos os resultados para um arquivo CSV
+def save_results(resultados, despesas, estoques, segurados, salarios, valor_beneficio, parametros):
     
-    
+    periodo = parametros['periodo']
+    ano_estoque = periodo[0]
     
     # Cria o DataFrame que irá armazena cada resultado em uma coluna
     todos_resultados = pd.DataFrame(index=range(ano_estoque,periodo[-1]+1))
     todos_resultados.index.names = ['ANO']
     
-    # Cria diretório caso não exista 
-    result_dir = ('resultados')        
-    if not os.path.isdir(result_dir):
-        os.makedirs(result_dir)        
-   
-    lista_resultados = list(resultados.keys())
-    lista_resultados.remove('erros_AEPS')          # Remove o erro_AEPS pois já um DataFrame
-    lista_resultados.sort()                        # Ordena a lista
-    
+    # Salva os resultados gerais 
+    lista_resultados_gerais = list(resultados.keys())
+    lista_resultados_gerais.remove('erros_AEPS')          # Remove o erro_AEPS pois já um DataFrame
+    lista_resultados_gerais.sort()                        # Ordena a lista
+        
     # Salva cada resultado como uma coluna do DataFrame
-    for r in lista_resultados:            
-        todos_resultados[r] = resultados[r]        
+    for r in lista_resultados_gerais:            
+        todos_resultados[r] = resultados[r]       
     
+    # Cria diretório onde são salvos os resultados caso não exista
+    result_dir = 'resultados'
+    if not os.path.isdir(result_dir):
+            os.makedirs(result_dir)  
+            
     # Salva o arquivo em formato CSV
     try:            
-        todos_resultados.to_csv((os.path.join(result_dir, 'resultados.csv')), sep=';', decimal=',')    
+        todos_resultados.to_csv((os.path.join('resultados', 'resultados.csv')), sep=';', decimal=',')    
     except:
-        print('--> Erro ao salvar arquivo {}'.format((os.path.join(result_dir,'resultados.csv'))))
+        print('--> Erro ao salvar arquivo {}'.format((os.path.join('resultados','resultados.csv'))))
+    
+    # Dicionário com a lista dos objetos com os resultados
+    lista_resultados = {'despesas':despesas, 'estoques':estoques, 'segurados':segurados, 'salarios':salarios, 'valor_beneficio':valor_beneficio}
+    
+    # Cria os demais diretórios para os outros resultados    
+    for res in lista_resultados.keys():
+        diretorio = os.path.join(result_dir,res)
+        if not os.path.isdir(diretorio):
+            os.makedirs(diretorio)            
+    
+    # Salva os resultados de estoque
+        for item in lista_resultados[res].keys():
             
-    return resultados
-
-    
-    
-    
+            # pula taxa de reposição
+            if item == 'txReposicao':
+                continue
+            
+            # Salva o arquivo em formato CSV
+            arquivo = item+'.csv'                    
+            lista_resultados[res][item].index.name = 'Idade'    # Corrige o index para evitar erro no Excel
+            
+            # Salva o arquivo               
+            try:            
+                lista_resultados[res][item].to_csv((os.path.join(diretorio,arquivo)), sep=';', decimal=',')    
+            except:
+                print('--> Erro ao salvar arquivo {}'.format((os.path.join(diretorio,arquivo))))    
