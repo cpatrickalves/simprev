@@ -15,7 +15,7 @@ Os seguintes módulos estão em desenvolvimento:
     
 ## Instalação
 
-O SimPrev se encontra na versão 1.1, os detalhes de cada versão são descritas na [página de *releases* do projeto](https://github.com/cpatrickalves/simprev/releases).
+O SimPrev se encontra na versão 1.1, os detalhes de cada versão são descritas na página de [*releases* do projeto](https://github.com/cpatrickalves/simprev/releases).
 
 Os SimPrev pode ser executado de várias formas:
 
