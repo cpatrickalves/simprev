@@ -1,7 +1,18 @@
-from modelos.modulos_fazenda.probabilidades import *
+"""
+@author: Patrick Alves
+
+Modelo do Laboratório de Tecnologias Sociais (LTS) 
+ - Baseado no Modelo descrito na LDO de 2018 e planilhas oficiais do governo
+ - Foi alterado a estimativa de contribuintes e beneficiários
+
+"""
+# Modulos modificados
+from modelos.modulos_lts.probabilidades import *
+from modelos.modulos_lts.estoques import *
+
+# Modulos originais
 from modelos.modulos_fazenda.demografia import *
 from modelos.modulos_fazenda.taxas import *
-from modelos.modulos_fazenda.estoques import *
 from modelos.modulos_fazenda.salarios import *
 from modelos.modulos_fazenda.receitas import *
 from modelos.modulos_fazenda.depesas import *
@@ -43,10 +54,11 @@ def calc_demografia(populacao, taxas):
     segurados.update(segurados_urb)
     segurados.update(segurados_rur)
     
-    # Os segurados rurais são toda a população rural
-    segurados['PopRurH'] = pop_ur['PopRurH']
-    segurados['PopRurM'] = pop_ur['PopRurM']
-        
+    # Os segurados rurais são toda a população rural - TEMPORARIO
+    #segurados['RurH'] = pop_ur['PopRurH']
+    #segurados['RurM'] = pop_ur['PopRurM']
+    
+    
     return segurados    
 
 
@@ -67,15 +79,14 @@ def calc_probabilidades(populacao, segurados, estoques,
     probabilidades = {}
 
     prob_morte = calc_prob_morte(populacao)
-    fat_ajuste_mort = calc_fat_ajuste_mort_MF(estoques, cessacoes,
+    fat_ajuste_mort = calc_fat_ajuste_mort(estoques, cessacoes,
                                            prob_morte, periodo)
 
-    prob_entrada_apos = calc_prob_apos_MF(segurados, concessoes, periodo)
-    prob_entrada_aux = calc_prob_aux_MF(segurados, estoques, concessoes, periodo)
-    prob_entrada_pens = calc_prob_pensao_MF(concessoes, segurados, populacao, estoques, prob_morte, periodo)  
-    prob_assist = calc_prob_assist_MF(populacao, concessoes, periodo)
-    
-    
+    prob_entrada_apos = calc_prob_apos(segurados, concessoes, periodo)
+    prob_entrada_aux = calc_prob_aux(segurados, estoques, concessoes, periodo)
+    prob_entrada_pens = calc_prob_pensao(concessoes, segurados, populacao, estoques, prob_morte, periodo)  
+    prob_assist = calc_prob_assist(populacao, concessoes, periodo)
+        
     probabilidades.update(prob_morte)
     probabilidades.update(fat_ajuste_mort)
     probabilidades.update(prob_entrada_apos)
@@ -107,5 +118,3 @@ def calc_taxas(pop_pnad, parametros):
     taxas.update(txSegurados_rur)
 
     return taxas
-
-

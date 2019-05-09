@@ -15,14 +15,15 @@ Os seguintes módulos estão em desenvolvimento:
     
 ## Instalação
 
+O SimPrev se encontra na versão 1.1, os detalhes de cada versão são descritas na (página de *releases* do projeto)[https://github.com/cpatrickalves/simprev/releases].
+
 Os SimPrev pode ser executado de várias formas:
 
 ### Versão .exe para Windows
 
 Esta versão é exclusiva para o sistema operacional Windows e não requer instalação.
 
-1. Faça o [download](https://mega.nz/#!OYIVmSCQ!PLJlAkDtPB7S7T14D_8JdPALGnzDEg9x7zaX19CMtBY) da última versão
-    * Link alternativo [aqui](https://drive.google.com/open?id=1ACAE3xe1zXy3OtNgJnxkMYQZ50IeRIHM)
+1. Faça o [download](https://github.com/cpatrickalves/simprev/releases) da última versão.   
 2. Descompacte o arquivo _zip_
 
 ### Utilizando a distribuição Python Anaconda
@@ -49,7 +50,7 @@ Esta versão é exclusiva para o sistema operacional Windows e não requer insta
 O arquivo _parametros.txt_ possui todos os parâmetros de simulações que serão utilizados pelo SimPrev.
 O valores padrão do arquivo são os que foram utilizados na projeções da LDO de 2018.
 
-1. Abra o arquivo parametros.txt e edite os parâmetros de projeções
+1. Abra o arquivo parametros.txt e, se desejar, altere os parâmetros de projeções
 	* Salve o arquivo com o mesmo nome
 	* Linhas que começam com "#" são comentários e são desconsideradas pelo SimPrev
 2. Execute o arquivo _simprev.py_ ou _simprev.exe_

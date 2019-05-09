@@ -167,9 +167,9 @@ def calc_resultados(resultados, despesas, estoques, segurados, salarios, valMedB
     # Salva os resultados em arquivos CSV
     save_results(resultados, despesas, estoques, segurados, salarios, valMedBenef, parametros)
          
-    # Se mostrat = True os resultados serão exibidos no Prompt    
+    # Se mostrar = True os resultados serão exibidos no Prompt    
     if mostrar:
-        print('RESULTADOS: \n')
+        print('RESULTADOS DA PROJEÇÃO: \n')
         
         print('Receita em 2018 = {}'.format(resultados['receitas'][2018]))
         print('Receita em 2060 = {}'.format(resultados['receitas'][2060]))
@@ -182,15 +182,17 @@ def calc_resultados(resultados, despesas, estoques, segurados, salarios, valMedB
         print('Resultado Financeiro em 2018 = {}'.format(resultados['resultado_financeiro'][2018]))
         print('Resultado Financeiro em 2060 = {}'.format(resultados['resultado_financeiro'][2060]))    
         print('Resultado Financeiro/PIB em 2060 = {}'.format(resultados['resultado_financeiro_PIB'][2060]))    
+        
+        print("\VARIAÇÕES EM RELAÇÃO A LDO DE 2018:")
+
+        print('Variação da Despesa em 2018 (%) = {}'.format(round(resultados['erro_despesas'][2018], 2)))
+        print('Variação da Despesa em 2060 (%) = {}'.format(round(resultados['erro_despesas'][2060], 2)))
         print()
-        print('Erro de Despesa em 2018 = {}'.format(resultados['erro_despesas'][2018]))
-        print('Erro de Despesa em 2060 = {}'.format(resultados['erro_despesas'][2060]))
+        print('Variação da Receita em 2018 (%) = {}'.format(round(resultados['erro_receitas'][2018], 2)))
+        print('Variação da Receita em 2060 (%) = {}'.format(round(resultados['erro_receitas'][2060], 2)))
         print()
-        print('Erro de Receita em 2018 = {}'.format(resultados['erro_receitas'][2018]))
-        print('Erro de Receita em 2060 = {}'.format(resultados['erro_receitas'][2060]))
-        print()
-        print('Erro no PIB em 2018 = {}'.format(resultados['erro_PIB'][2018]))
-        print('Erro no PIB em 2060 = {}'.format(resultados['erro_PIB'][2060]))
+        print('Variação no PIB em 2018 (%) = {}'.format(round(resultados['erro_PIB'][2018], 2)))
+        print('Variação no PIB em 2060 (%) = {}'.format(round(resultados['erro_PIB'][2060], 2)))
         print()
         print('Diferença na Receita/PIB em 2018 = {}'.format(resultados['erro_receitas_PIB'][2018]))
         print('Diferença na Receita/PIB em 2060 = {}'.format(resultados['erro_receitas_PIB'][2060]))

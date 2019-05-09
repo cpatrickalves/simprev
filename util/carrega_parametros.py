@@ -22,10 +22,15 @@ def obter_parametros():
             variavel = linha.split('=')[0].replace(" ", "")
             # Pega a segunda string antes do = e remove os espaços em branco
             valor = linha.split('=')[1].replace(" ", "")
-        
-            try:
-                parametros[variavel] = int(valor)
-            except:
-                parametros[variavel] = float(valor)
+            
+            # Salva variáveis e parâmetros no dicionário
+            # a variável modelo é a única do tipo string, as demais são int ou float
+            if variavel == 'modelo':
+                parametros[variavel] = valor
+            else:
+                try:
+                    parametros[variavel] = int(valor)
+                except:
+                    parametros[variavel] = float(valor)
             
     return parametros

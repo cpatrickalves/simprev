@@ -1,0 +1,21 @@
+﻿###################################
+######## Notas das Versões ########
+###################################
+
+### v1.1 (09/05/2019)
+
+Melhorias no SimPrev:
+
+- Inserção do parâmetro de Inflação no parametros.txt
+- Gera arquivos CSV para as projeções de todos os benefícios
+
+
+### Versão 1.0
+
+Principais características:
+
+- Implementa o 2º modelo oficial de projeção do Governo descrito no Anexo IV da LDO de 2018
+- Adiciona o parâmetro de formalização no modelo
+- Implementa o cálculo de diversos indicadores de desempenho para sistemas previdenciários
+- Salva os resultados em um arquivo CSV e gera diversos gráficos
+- Permite a variação de alguns parâmetros de entrada, o que permite a realização de análises de sensibilidade
