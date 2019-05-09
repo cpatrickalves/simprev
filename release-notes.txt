@@ -6,7 +6,9 @@
 
 Melhorias no SimPrev:
 
-- Inserção do parâmetro de Inflação no parametros.txt
+- Permite seleção de modelos no arquivo de parametros (parametros.txt)
+- Permite escolher entre os modelos LDO2018 e LTS
+- Inserção do parâmetro de Inflação no arquivo de parametros
 - Gera arquivos CSV para as projeções de todos os benefícios
 
 
