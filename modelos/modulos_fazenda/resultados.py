@@ -183,7 +183,7 @@ def calc_resultados(resultados, despesas, estoques, segurados, salarios, valMedB
         print('Resultado Financeiro em 2060 = {}'.format(resultados['resultado_financeiro'][2060]))    
         print('Resultado Financeiro/PIB em 2060 = {}'.format(resultados['resultado_financeiro_PIB'][2060]))    
         
-        print("\VARIAÇÕES EM RELAÇÃO A LDO DE 2018:")
+        print("\nVARIAÇÕES EM RELAÇÃO A LDO DE 2018:")
 
         print('Variação da Despesa em 2018 (%) = {}'.format(round(resultados['erro_despesas'][2018], 2)))
         print('Variação da Despesa em 2060 (%) = {}'.format(round(resultados['erro_despesas'][2060], 2)))
