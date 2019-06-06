@@ -151,6 +151,17 @@ class LerTabelas():
             try:
                 colecao_tabelas[chave] = self.dados.parse(sigla, index_col=0)   # Converte a tabela para um DataFrame
                 colecao_tabelas[chave].drop('Total', inplace=True)              # Elimina a linha 'Total'
+
+                # Tenta remover outras linhas caso existam
+                try:    
+                    colecao_tabelas[chave].drop('Fonte: ', inplace=True)
+                    colecao_tabelas[chave].drop('Arquivo', inplace=True)
+                    colecao_tabelas[chave].drop('Aba', inplace=True)
+                    colecao_tabelas[chave].drop('Coluna inicial', inplace=True)
+                except:
+                    pass
+               
+
                 colecao_tabelas[chave].dropna(how='all', axis=1, inplace=True)  # Elimina colunas com dados ausentes
                 colecao_tabelas[chave].fillna(0, inplace=True)                  # Substitui os NaN por zeros
 
