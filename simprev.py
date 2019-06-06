@@ -55,7 +55,7 @@ tetoInicialRGPS = [4390.24, 4663.75, 5189.82, 5531.31]
 
 # Objeto que armazena dados da LDO de 2018
 ldo = DadosLDO()
-dadosLDO2018 = ldo.get_tabelas()
+dadosLDO2018 = ldo.get_parametros_ldo2018()
 
 # Cria uma lista com os anos a serem projetados
 ano_inicial = 2015  # valor fixo
