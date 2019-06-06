@@ -10,7 +10,7 @@ def obter_parametros():
     # Dicionário que armazena os parâmetros
     parametros = {}
     
-    with open(arquivo_parametros) as arquivo:
+    with open(arquivo_parametros, 'r' ,encoding='utf-8') as arquivo:
         for linha in arquivo:
             linha = linha.strip()                
             if not linha:  # pula linhas em branco
