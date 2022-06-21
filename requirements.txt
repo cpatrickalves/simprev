@@ -1,4 +1,4 @@
 xlrd==1.2.0
 matplotlib==3.0.3
-numpy==1.16.3
+numpy==1.22.0
 pandas==0.24.2
